@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
-const port = 8080;
+require('custom-env').env('staging');
+
 const express = require('express');
 
 const bodyParser = require('body-parser');
@@ -14,7 +15,7 @@ const nodemailer = require('nodemailer');
 const smtpTransport = require('nodemailer-smtp-transport');
 */
 
-global.urlBase = `http://localhost:${port}/`;
+global.urlBase = `http://localhost:${process.env.PORT}/`;
 /*global.notAuthorized = false;
 
 global.isLoggedIn = function (request, response, next) {
@@ -26,7 +27,6 @@ global.isLoggedIn = function (request, response, next) {
   }
 }*/
 
-require('custom-env').env('staging');
 
 app.use(validator());
 app.use(bodyParser.json({
@@ -72,9 +72,9 @@ app.use('/', require('./controllers/example.controller.js'));
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
-var server = app.listen(port, function () {
+var server = app.listen(process.env.PORT, function () {
   console.log(`worker ${process.pid}`);
-  console.log(`Listening at localhost:${port}`);
+  console.log(`Listening at ${global.urlBase}`);
 });
 
 

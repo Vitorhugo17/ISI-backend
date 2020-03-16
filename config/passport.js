@@ -1,12 +1,12 @@
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const FacebookStrategy = require('passport-facebook').Strategy;
+//const FacebookStrategy = require('passport-facebook').Strategy;
 const req = require("request");
 const bCrypt = require("bcryptjs");
 
-passport.use(new FacebookStrategy({
-        clientID: "215163316093635",
-        clientSecret: "0027e6c6493d9b7460120284e802b44f",
+/*passport.use(new FacebookStrategy({
+        clientID: "",
+        clientSecret: "",
         callbackURL: "http://localhost:3050/auth/facebook/callback",
         profileFields: ['id', 'displayName', 'photos', 'email']
     },
@@ -160,7 +160,7 @@ passport.use(new FacebookStrategy({
                 })
             }
         })
-    }))
+    }))*/
 
 passport.use(new LocalStrategy({
     usernameField: 'email'

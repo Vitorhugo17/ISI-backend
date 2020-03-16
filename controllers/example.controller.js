@@ -6,7 +6,7 @@ router.get("/", (request, response) => {
     response.set('Content-Type', 'text/html');
     response.render('./example', {
         message: "Hello World!",
-        title: "Example"
+        title: process.env.APP_NAME
     });
 })
 
