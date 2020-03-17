@@ -1,17 +1,31 @@
-const express = require('express');
-const router = express.Router();
 const bCrypt = require('bcryptjs');
 
-router.get("/", (request, response) => {
+function getHome(request, response) {
     response.set('Content-Type', 'text/html');
     response.render('./example', {
         message: "Hello World!",
+        hash: "",
+        compare1: "",
+        compare2: "",
         title: process.env.APP_NAME
     });
-})
+}
 
+function comparePass(request, response) {
+    const password = generatePass();
+    const pass = bCrypt.hashSync(password, bCrypt.genSaltSync(10));
+    
+    response.set('Content-Type', 'text/html');
+    response.render('./example', {
+        message: `Password: ${password}`,
+        hash: `Hash: ${pass}`,
+        compare1: `Compare pass (${password}): ${bCrypt.compareSync(password, pass)}`,
+        compare2: `Compare pass (pass12): ${bCrypt.compareSync("pass12", pass)}`,
+        title: process.env.APP_NAME
+    });
+}
 
-function generateLink() {
+function generatePass() {
     const length = 25,
         charSET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     let retVal = "";
@@ -21,4 +35,7 @@ function generateLink() {
     return retVal;
 }
 
-module.exports = router;
+module.exports = {
+    getHome: getHome,
+    comparePass: comparePass
+};

@@ -1,9 +1,8 @@
-module.exports = (app) => {
-    app.get('/authrequired', (req, res) => {
-        if (req.isAuthenticated()) {
-            res.send('you hit the authentication endpoint\n')
-        } else {
-            res.redirect('/');
-        }
-    })
-}
+const router = require('express').Router();
+
+const controllerExample = require('./../controllers/example.controller')
+
+router.get('/', controllerExample.getHome);
+router.get('/pass', controllerExample.comparePass);
+
+module.exports = router;
