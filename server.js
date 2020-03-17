@@ -1,9 +1,10 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
-require('custom-env').env('staging');
+require('dotenv').config();
 
 const express = require('express');
 
+const ip = require("ip");
 const bodyParser = require('body-parser');
 const app = express();
 const validator = require('express-validator');
@@ -15,7 +16,7 @@ const nodemailer = require('nodemailer');
 const smtpTransport = require('nodemailer-smtp-transport');
 */
 
-global.urlBase = `http://localhost:${process.env.PORT}/`;
+global.urlBase = `http://${ip.address()}:${process.env.PORT}/`;
 /*global.notAuthorized = false;
 
 global.isLoggedIn = function (request, response, next) {
@@ -30,8 +31,10 @@ global.isLoggedIn = function (request, response, next) {
 
 app.use(validator());
 app.use(bodyParser.json({
-  limit: '24mb'
+  limit: '50mb',
+  extended: true
 }), bodyParser.urlencoded({
+  limit: '50mb',
   extended: true
 }));
 
@@ -73,7 +76,6 @@ app.set('view engine', 'ejs');
 app.set('views', 'views');
 
 var server = app.listen(process.env.PORT, function () {
-  console.log(`worker ${process.pid}`);
   console.log(`Listening at ${global.urlBase}`);
 });
 
