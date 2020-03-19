@@ -1,0 +1,43 @@
+{
+  "name": "isi-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vitorhugo17/ISI-backend.git"
+  },
+  "keywords": [
+    "ISI",
+    "ISITravel",
+    "G202"
+  ],
+  "author": "ISI_G202",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Vitorhugo17/ISI-backend/issues"
+  },
+  "homepage": "https://github.com/Vitorhugo17/ISI-backend#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "connect-redis": "^4.0.4",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.0.1",
+    "express": "^4.17.1",
+    "express-sanitizer": "^1.0.5",
+    "express-session": "^1.17.0",
+    "express-validator": "^5.3.1",
+    "ip": "^1.1.5",
+    "nodemailer": "^6.4.5",
+    "nodemailer-smtp-transport": "^2.7.4",
+    "nodemon": "^2.0.2",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0",
+    "redis": "^3.0.2",
+    "uuid": "^7.0.2"
+  }
+}
