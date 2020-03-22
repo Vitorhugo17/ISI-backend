@@ -1,8 +1,7 @@
 const router = require('express').Router();
 
-const controllerExample = require('./../controllers/example.controller')
+const purchaseController = require('../controllers/purchase.controller')
 
-router.get('/', controllerExample.getHome);
-router.get('/pass', controllerExample.comparePass);
+router.get('/purchases', purchaseController.getPurchase);
 
 module.exports = router;
