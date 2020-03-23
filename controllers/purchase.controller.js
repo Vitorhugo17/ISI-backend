@@ -17,9 +17,6 @@ function getClient(user_id, callback) {
     req.get(options, (err, res) => {
         if (!err && res.statusCode == 200) {
             let user = JSON.parse(res.body);
-<<<<<<< HEAD
-            callback(user.properties);
-=======
             let data = user.properties;
             /*let result = "ID: " + data.hs_object_id.value + ";" +
                 " Email: " + data.email.value + ";" +
@@ -31,7 +28,6 @@ function getClient(user_id, callback) {
             const result = '{ "ID":"'+data.hs_object_id.value+'","Email":"'+data.email.value+'","Nome":"'+data.firstname.value+'","Apelido":"'+data.lastname.value+'","Número Mecanográfico":"'+data.no_mecanografico.value+'","Bilhetes Disponíveis":"'+data.bilhetes_disponiveis.value+'"}';
             let resultJSON = JSON.parse(result)
             callback(resultJSON);
->>>>>>> ac21e58f61271ee77dd794a1a378d5516a1d9bf1
         }
     })
 }
