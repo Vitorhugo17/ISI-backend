@@ -24,7 +24,7 @@ app.use(bodyParser.json({
     extended: true
 }));
 
-app.use(session({
+/*app.use(session({
     genid: (req) => {
         return uuid()
     },
@@ -41,7 +41,7 @@ app.use(session({
         maxAge: 1800000,
         httpOnly: true
     }
-}));
+}));*/
 
 app.use(passport.initialize());
 app.use(passport.session());
