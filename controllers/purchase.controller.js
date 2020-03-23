@@ -1,12 +1,13 @@
 const bCrypt = require('bcryptjs');
 const req = require('request');
+const connection = require('./../config/connection');
 
 function getPurchase(request, response) {
-    let user_id = 101;
+    let user_id = 151;
     let contacts = "";
 
     let options = {
-        url: `https://api.hubapi.com/contacts/v1/lists/all/contacts/all?hapikey=${process.env.HUBSPOT_KEY}`
+        url: `https://api.hubapi.com/contacts/v1/lists/all/contacts/all?hapikey=${connection.hubspot.key}`
     }
     req.get(options, (err, res) => {
         if (!err && res.statusCode == 200) {
