@@ -3,15 +3,33 @@ const req = require('request');
 const connection = require('./../config/connection');
 
 function getPurchase(request, response) {
-    let user_id = 151;
-    
+    let user_id = 201;
+
+    getClient(user_id, (res) => {
+        response.send(res);
+    });
+}
+
+function getClient(user_id, callback) {
     let options = {
         url: `https://api.hubapi.com/contacts/v1/contact/vid/${user_id}/profile?hapikey=${connection.hubspot.key}`
     }
     req.get(options, (err, res) => {
         if (!err && res.statusCode == 200) {
             let user = JSON.parse(res.body);
-            response.send(user.properties);
+            let data = user.properties;
+            /*let result = "ID: " + data.hs_object_id.value + ";" +
+                " Email: " + data.email.value + ";" +
+                " Nome: " + data.firstname.value + ";" +
+                " Apelido: " + data.lastname.value + ";" +
+                " Número Mecanográfico: " + data.no_mecanografico.value + ";" +
+                " Bilhetes Disponíveis: " + data.bilhetes_disponiveis.value; */
+
+            let email = data.email.value;
+
+            const result = '{ "ID":"'+data.hs_object_id.value+'","Email":"'+data.email.value+'","Nome":"'+data.firstname.value+'","Apelido":"'+data.lastname.value+'","Número Mecanográfico":"'+data.no_mecanografico.value+'","Bilhetes Disponíveis":"'+data.bilhetes_disponiveis.value+'"}';
+            let resultJSON = JSON.parse(result)
+            callback(resultJSON);
         }
     })
 }
