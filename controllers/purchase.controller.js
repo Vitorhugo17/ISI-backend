@@ -25,8 +25,6 @@ function getClient(user_id, callback) {
                 " Número Mecanográfico: " + data.no_mecanografico.value + ";" +
                 " Bilhetes Disponíveis: " + data.bilhetes_disponiveis.value; */
 
-            let email = data.email.value;
-
             const result = '{ "ID":"'+data.hs_object_id.value+'","Email":"'+data.email.value+'","Nome":"'+data.firstname.value+'","Apelido":"'+data.lastname.value+'","Número Mecanográfico":"'+data.no_mecanografico.value+'","Bilhetes Disponíveis":"'+data.bilhetes_disponiveis.value+'"}';
             let resultJSON = JSON.parse(result)
             callback(resultJSON);
