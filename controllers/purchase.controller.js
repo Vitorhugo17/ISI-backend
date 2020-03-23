@@ -25,7 +25,7 @@ function getClient(user_id, callback) {
                 " Número Mecanográfico: " + data.no_mecanografico.value + ";" +
                 " Bilhetes Disponíveis: " + data.bilhetes_disponiveis.value; */
 
-            const result = '{ "ID":"'+data.hs_object_id.value+'","Email":"'+data.email.value+'","Nome":"'+data.firstname.value+'","Apelido":"'+data.lastname.value+'","Número Mecanográfico":"'+data.no_mecanografico.value+'","Bilhetes Disponíveis":"'+data.bilhetes_disponiveis.value+'"}';
+            const result = '{ "id":"'+data.hs_object_id.value+'","email":"'+data.email.value+'","nome":"'+data.firstname.value+'","apelido":"'+data.lastname.value+'","número_mecanográfico":"'+data.no_mecanografico.value+'","bilhetes_disponíveis":"'+data.bilhetes_disponiveis.value+'"}';
             let resultJSON = JSON.parse(result)
             callback(resultJSON);
         }
