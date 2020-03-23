@@ -1,11 +1,17 @@
 {
+    "email": {
+        "username": "isitravel.isi.g202@gmail.com",
+        "password": "ISITravel1920"
+    },
     "hubspot": {
         "key": "de67ebd4-f9e7-4918-97ae-b4d8d469743e"
-    }, "moloni": {
+    },
+    "moloni": {
         "clientID": "isitravel",
         "secret": "f12b1763769aa815d0b601bea2a3e7ab0aac0a6e"
-    }, "jasmin" : {
+    },
+    "jasmin": {
         "clientID": "ISITRAVELAPP",
-        "secret":  "1ccc153-9d62-4ed1-b8b8-cd6661126bfc"
+        "secret": "1ccc153-9d62-4ed1-b8b8-cd6661126bfc"
     }
 }

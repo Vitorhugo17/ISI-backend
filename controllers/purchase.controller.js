@@ -5,16 +5,23 @@ const connection = require('./../config/connection');
 function getPurchase(request, response) {
     let user_id = 151;
     
+    getClient(user_id, (res) => {
+        response.send(res);
+    });
+}
+
+function getClient(user_id, callback) {
     let options = {
         url: `https://api.hubapi.com/contacts/v1/contact/vid/${user_id}/profile?hapikey=${connection.hubspot.key}`
     }
     req.get(options, (err, res) => {
         if (!err && res.statusCode == 200) {
             let user = JSON.parse(res.body);
-            response.send(user.properties);
+            callback(user.properties);
         }
     })
 }
+
 
 function generatePass() {
     const length = 25,
