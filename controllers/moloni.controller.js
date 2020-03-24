@@ -2,21 +2,6 @@ const querystring = require('querystring');
 const req = require('request');
 const connection = require('./../config/connection');
 
-function getP(request, response) {
-    getToken((res) => {
-        if (res.statusCode == 200) {
-            let access_token = res.body.access_token;
-            getCategories(access_token, (res) => {
-                getProducts(res.body[0].category_id, access_token, (res) => {
-                    response.status(res.statusCode).send(res.body);
-                })
-            })
-        } else {
-            response.status(res.statusCode).send(res.body);
-        }
-    })
-}
-
 function getProducts(categoryID, access_token, callback) {
     let json = querystring.stringify({
         company_id: 127251,
@@ -107,5 +92,7 @@ function generatePass() {
 }
 
 module.exports = {
-    getP: getP
+    getProducts: getProducts,
+    getCategories: getCategories,
+    getToken: getToken
 };
