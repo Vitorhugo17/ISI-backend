@@ -19,13 +19,16 @@ function getClient(user_id, callback) {
             let user = JSON.parse(res.body);
             let data = user.properties;
             /*let result = "ID: " + data.hs_object_id.value + ";" +
+                " Moloni ID: " + data.moloni_id.value + ";" +
+                " Jasmin ID: " + data.jasmin_id.value + ";" +
                 " Email: " + data.email.value + ";" +
                 " Nome: " + data.firstname.value + ";" +
                 " Apelido: " + data.lastname.value + ";" +
                 " Número Mecanográfico: " + data.no_mecanografico.value + ";" +
-                " Bilhetes Disponíveis: " + data.bilhetes_disponiveis.value; */
+                " Bilhetes Disponíveis (Barquense): " + data.bilhetes_disponiveis.value + ";" +
+                " Bilhetes Disponíveis (Trandev): " + data.bilhetes_disponiveis_transdev.value;*/
 
-            const result = '{ "ID":"'+data.hs_object_id.value+'","Email":"'+data.email.value+'","Nome":"'+data.firstname.value+'","Apelido":"'+data.lastname.value+'","Número Mecanográfico":"'+data.no_mecanografico.value+'","Bilhetes Disponíveis":"'+data.bilhetes_disponiveis.value+'"}';
+            const result = '{ "ID":"'+data.hs_object_id.value+'","ID do Moloni":"'+data.moloni_id.value+'","ID do Jasmin":"'+data.jasmin_id.value+'","Email":"'+data.email.value+'","Nome":"'+data.firstname.value+'","Apelido":"'+data.lastname.value+'","Número Mecanográfico":"'+data.no_mecanografico.value+'","Bilhetes Disponíveis (Barquense)":"'+data.bilhetes_disponiveis.value+'","Bilhetes Disponíveis (Trandev)":"'+data.bilhetes_disponiveis_transdev.value+'"}';
             let resultJSON = JSON.parse(result)
             callback(resultJSON);
         }
