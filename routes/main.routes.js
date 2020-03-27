@@ -1,9 +1,8 @@
 const router = require('express').Router();
 
-const purchaseController = require('../controllers/purchase.controller');
-const moloniController = require('../controllers/moloni.controller');
+const mainController = require('./../controllers/main.controller');
 
-router.get('/purchases', purchaseController.getPurchase);
-router.get('/', moloniController.getP);
+router.get('/products', mainController.getProducts);
+
 
 module.exports = router;
