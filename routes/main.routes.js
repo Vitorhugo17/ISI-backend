@@ -8,15 +8,7 @@ const hubspotController = require('./../controllers/hubspot.controller');
 router.post('/purchases', mainController.insertPurchase);
 
 
-router.get("/", (request, response) => {
-    jasminController.getInvoiceType((res) => {
-        if (res.invoiceType) {
-            response.status(200).send(res);
-        } else {
-            response.status(res.statusCode).send(res.body);
-        }
-    })
-})
+router.get("/", hubspotController.getPurchase)
 
 router.get('/products', mainController.getProducts);
 router.get('/categories', (request, response) => {
