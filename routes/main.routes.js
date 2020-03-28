@@ -1,9 +1,11 @@
 const router = require('express').Router();
 
-const purchaseController = require('../controllers/purchase.controller');
+const hubspotController = require('../controllers/hubspot.controller');
 const moloniController = require('../controllers/moloni.controller');
 
-router.get('/purchases', purchaseController.getPurchase);
-router.get('/', moloniController.getP);
+router.get('/hubspot', hubspotController.getHubspot);
+//router.get('/', moloniController.getP);
+
+router.post('/hubspot', hubspotController.updateTickets);
 
 module.exports = router;
