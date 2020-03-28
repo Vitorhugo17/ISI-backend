@@ -39,7 +39,7 @@ function getClient(user_id, callback) {
                 jasmin_id = "Não aplicável";
             }
 
-            const result = '{ "ID":"' + data.hs_object_id.value + '","ID do Moloni":"' + moloni_id + '","ID do Jasmin":"' + jasmin_id + '","Nome":"' + data.firstname.value + '","Apelido":"' + data.lastname.value + '","Email":"' + data.email.value + '","Número Mecanográfico":"' + data.no_mecanografico.value + '","Bilhetes Disponíveis (Barquense)":"' + data.bilhetes_disponiveis.value + '","Bilhetes Disponíveis (Trandev)":"' + data.bilhetes_disponiveis_transdev.value + '"}';
+            const result = '{ "ID":"'+data.hs_object_id.value+'","ID do Moloni":"'+moloni_id+'","ID do Jasmin":"'+jasmin_id+'","Nome":"'+data.firstname.value+'","Apelido":"'+data.lastname.value+'","Email":"'+data.email.value+'","Número Mecanográfico":"'+data.no_mecanografico.value+'","Bilhetes Disponíveis (Barquense)":"'+data.bilhetes_disponiveis_barquense.value+'","Bilhetes Disponíveis (Trandev)":"'+data.bilhetes_disponiveis_transdev.value+'"}';
             let resultJSON = JSON.parse(result)
             callback(resultJSON);
         }
