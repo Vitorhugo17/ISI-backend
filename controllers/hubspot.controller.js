@@ -2,7 +2,7 @@ const bCrypt = require('bcryptjs');
 const req = require('request');
 const connection = require('./../config/connection');
 
-function getPurchase(request, response) {
+function getHubspot(request, response) {
     let user_id = 201;
 
     getClient(user_id, (res) => {
@@ -27,13 +27,13 @@ function getClient(user_id, callback) {
 
             let moloni_id;
             let jasmin_id;
-            if (data.moloni_id.value){
+            if (data.moloni_id.value) {
                 moloni_id = data.moloni_id.value;
             } else {
                 moloni_id = "Não aplicável";
             }
 
-            if (data.jasmin_id.value){
+            if (data.jasmin_id.value) {
                 jasmin_id = data.jasmin_id.value;
             } else {
                 jasmin_id = "Não aplicável";
@@ -44,6 +44,30 @@ function getClient(user_id, callback) {
             callback(resultJSON);
         }
     })
+}
+
+function updateTickets(user_id) {
+
+    var options = {
+        method: 'POST',
+        url: `https://api.hubapi.com/contacts/v1/contact/vid/${user_id}/profile?hapikey=${connection.hubspot.key}`,
+        headers: {
+            'Content-Type': 'application/json'
+       },
+        body: {
+            properties: [{
+                property: 'bilhetes_disponiveis',
+                value: 22
+            }]
+        },
+        json: true
+    };
+
+    req(options, function (error, response, body) {
+        if (error) throw new Error(error);
+
+        console.log(response.statusCode);
+    });
 }
 
 
@@ -58,5 +82,6 @@ function generatePass() {
 }
 
 module.exports = {
-    getPurchase: getPurchase
+    getHubspot: getHubspot,
+    updateTickets: updateTickets
 };
