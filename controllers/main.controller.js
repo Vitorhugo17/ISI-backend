@@ -3,12 +3,12 @@ const moloniController = require('./moloni.controller');
 const jasminController = require('./jasmin.controller');
 
 function insertPurchase(request, response) {
-    const customer_id = request.sanitize(request.body.customer_id);
-    const product_id = request.sanitize(request.body.product_id);
-    const quantity = request.sanitize(request.body.quantity);
-    const status = request.sanitize(request.body.status);
-    const customer_name = request.sanitize(request.body.customer_name);
-    const company = request.sanitize(request.body.company);
+    const customer_id = request.sanitize('customer_id').escape();
+    const product_id = request.sanitize('product_id').escape();
+    const quantity = request.sanitize('quantity').escape();
+    const status = request.sanitize('status').escape();
+    const customer_name = request.sanitize('customer_name').escape();
+    const company = request.sanitize('company').escape();
 
     if (company == "Barquense") {
         moloniController.insertPurchase(customer_id, product_id, quantity, status, (res) => {

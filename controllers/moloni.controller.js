@@ -112,7 +112,7 @@ function insertPurchase(customer_id, product_id, quantity,status, callback) {
 
                 let options = {
                     headers: {
-                        'Content-Length': json.length,
+                        'Content-Length': JSON.stringify(json).length,
                         'Content-Type': 'application/json'
                     },
                     url: `https://api.moloni.pt/v1/invoiceReceipts/insert/?access_token=${access_token}&json=true`,

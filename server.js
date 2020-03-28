@@ -17,13 +17,13 @@ const smtpTransport = require('nodemailer-smtp-transport');
 global.urlBase = `http://${ip.address()}:${process.env.PORT}/`;
 global.jasminUrl = `https://my.jasminsoftware.com/api/233711/233711-0001/`;
 
-app.use(validator());
-app.use(sanitizer());
 app.use(bodyParser.json({
     limit: '50mb'
 }), bodyParser.urlencoded({
     extended: true
 }));
+app.use(sanitizer());
+app.use(validator());
 
 /*app.use(session({
     genid: (req) => {
@@ -57,10 +57,6 @@ app.use(function (request, response, next) {
     };
     next();
 });
-
-app.use(express.static(__dirname + '/public', {
-    maxAge: 604800000
-}));
 
 var server = app.listen(process.env.PORT, function () {
     console.log(`Listening at ${global.urlBase}`);

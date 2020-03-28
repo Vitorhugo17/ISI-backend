@@ -76,7 +76,7 @@ function insertPurchase(customer_id, customer_name, product_id, quantity, callba
                             headers: {
                                 'Authorization': `Bearer ${access_token}`,
                                 'Content-Type': 'application/json',
-                                'Content-Length': json.length
+                                'Content-Length': JSON.stringify(json).length
                             },
                             url: `${global.jasminUrl}billing/invoices`,
                             body: JSON.stringify(json)
