@@ -57,7 +57,9 @@ function getClient(user_id, callback) {
 
 function updateClient(user_id, properties, callback) {
     let json = {
-        "properties": properties
+        "properties": [
+           properties
+        ]
     }
     let options = {
         headers: {

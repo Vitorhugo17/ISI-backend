@@ -8,9 +8,9 @@ const hubspotController = require('./../controllers/hubspot.controller');
 router.post('/purchases', mainController.insertPurchase);
 router.post('/hubspot/:user_id', (request, response) => {
     const user_id = request.sanitize("user_id").escape();
-    const ticket_number = 2;
+    const data =  { "property": 'bilhetes_disponiveis_transdev', "value": 4 } ;
 
-    hubspotController.updateClient(user_id, ticket_number, (res) => {
+    hubspotController.updateClient(user_id, data, (res) => {
         response.status(res.statusCode).send(res.body);
     })
 });
