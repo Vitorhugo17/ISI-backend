@@ -36,17 +36,27 @@ function getClient(user_id, callback) {
             if (data.jasmin_id.value) {
                 jasmin_id = data.jasmin_id.value;
             } else {
-                jasmin_id = "Não aplicável";
+                jasmin_id = "Not available";
             }
 
-            const result = '{ "ID":"'+data.hs_object_id.value+'","ID do Moloni":"'+moloni_id+'","ID do Jasmin":"'+jasmin_id+'","Nome":"'+data.firstname.value+'","Apelido":"'+data.lastname.value+'","Email":"'+data.email.value+'","Número Mecanográfico":"'+data.no_mecanografico.value+'","Bilhetes Disponíveis (Barquense)":"'+data.bilhetes_disponiveis_barquense.value+'","Bilhetes Disponíveis (Trandev)":"'+data.bilhetes_disponiveis_transdev.value+'"}';
-            let resultJSON = JSON.parse(result)
-            callback(resultJSON);
+            //const result = '{ "ID":"'+data.hs_object_id.value+'","ID do Moloni":"'+moloni_id+'","ID do Jasmin":"'+jasmin_id+'", "Nome":"'+data.firstname.value+'","Apelido":"'+data.lastname.value+'","Email":"'+data.email.value+'", "Número Mecanográfico":"'+data.no_mecanografico.value+'","Bilhetes Disponíveis (Barquense)":"'+data.bilhetes_disponiveis_barquense.value+'","Bilhetes Disponíveis (Trandev)":"'+data.bilhetes_disponiveis_transdev.value+'"}';
+            const result = {
+                "id": data.hs_object_id.value,
+                "id_moloni": moloni_id,
+                "id_jasmin": jasmin_id,
+                "firstname": data.firstname.value,
+                "lastname": data.lastname.value,
+                "email": data.email.value,
+                "student_number": data.no_mecanografico.value,
+                "tickets_available_barquense": data.bilhetes_disponiveis_barquense.value,
+                "tickets_available_transdev": data.bilhetes_disponiveis_transdev.value
+            }
+            callback(result);
         }
     })
 }
 
-function updateTickets(user_id, properties, callback) {
+function updateClient(user_id, properties, callback) {
     let json = {
         "properties": properties
     }
@@ -90,5 +100,5 @@ function generatePass() {
 
 module.exports = {
     getHubspot: getHubspot,
-    updateTickets: updateTickets
+    updateClient: updateClient
 };
