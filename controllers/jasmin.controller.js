@@ -82,9 +82,9 @@ function insertPurchase(customer_id, customer_name, product_id, quantity, callba
                         }
 
                         req.post(options, (err, res) => {
-                            if (!err && res.statusCode == 200) {
+                            if (!err && res.statusCode == 201) {
                                 callback({
-                                    "statusCode": res.statusCode,
+                                    "statusCode": 200,
                                     "body": {
                                         "message": "Purchase inserted with success"
                                     }
