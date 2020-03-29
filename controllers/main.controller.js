@@ -114,7 +114,7 @@ function calculateOrderAmount(quantity, product_id, company, callback) {
             }
         })
     } else if (company == "Transdev") {
-        jasmin.getProducts((res) => {
+        jasminController.getProducts((res) => {
             if (res.products) {
                 let amount = 0;
                 const products = res.products;
