@@ -29,13 +29,13 @@ router.post("/pay", (request, response) => {
 
     mainController.calculateOrderAmount(parseInt(quantity), product_id, company, async (res) => {
         if (res.orderAmount) {
-            const orderAmount = res.orderAmount;
+            const orderAmount = res.orderAmount.toFixed(2);
 
             try {
                 let intent;
                 if (paymentMethodId) {
                     intent = await stripe.paymentIntents.create({
-                        amount: orderAmount*100,
+                        amount: parseInt(orderAmount*100),
                         currency: "eur",
                         payment_method: paymentMethodId,
                         confirmation_method: "manual",

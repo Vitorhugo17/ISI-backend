@@ -2,14 +2,6 @@ const bCrypt = require('bcryptjs');
 const req = require('request');
 const connection = require('./../config/connection');
 
-function getHubspot(request, response) {
-    let user_id = 201;
-
-    getClient(user_id, (res) => {
-        response.send(res);
-    });
-}
-
 /* 
 Função que permite ir buscar os dados do cliente 
 Necessita do id do cliente (no hubspot)
@@ -63,7 +55,7 @@ function getClient(user_id, callback) {
     })
 }
 
-function updateTickets(user_id, properties, callback) {
+function updateClient(user_id, properties, callback) {
     let json = {
         "properties": properties
     }
@@ -106,6 +98,6 @@ function generatePass() {
 }
 
 module.exports = {
-    getHubspot: getHubspot,
-    updateTickets: updateTickets
+    getClient: getClient,
+    updateClient: updateClient
 };

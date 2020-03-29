@@ -13,7 +13,6 @@ function insertPurchase(customer_id, customer_name, product_id, quantity, callba
 
                     let product = {};
                     for (let i = 0; i < products.length; i++) {
-                        console.log(product_id, products[i].itemKey);
                         if (products[i].itemKey == parseInt(product_id)) {
                             product = {
                                 "itemKey": products[i].itemKey,
