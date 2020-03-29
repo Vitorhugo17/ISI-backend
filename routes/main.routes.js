@@ -6,9 +6,9 @@ const jasminController = require('./../controllers/jasmin.controller');
 const hubspotController = require('./../controllers/hubspot.controller');
 
 router.post('/purchases', mainController.insertPurchase);
+router.post('/hubspot', hubspotController.updateTickets);
 
-
-router.get("/", hubspotController.getPurchase)
+router.get('/', hubspotController.getHubspot);
 
 router.get('/products', mainController.getProducts);
 router.get('/categories', (request, response) => {

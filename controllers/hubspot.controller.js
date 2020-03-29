@@ -46,28 +46,35 @@ function getClient(user_id, callback) {
     })
 }
 
-function updateTickets(user_id) {
-
-    var options = {
-        method: 'POST',
-        url: `https://api.hubapi.com/contacts/v1/contact/vid/${user_id}/profile?hapikey=${connection.hubspot.key}`,
+function updateTickets(user_id, tickets_number, callback) {
+    let json = {
+        "bilhetes_disponiveis_barquense": tickets_number
+    }
+    let options = {
         headers: {
+            'Content-Length': JSON.stringify(json).length,
             'Content-Type': 'application/json'
-       },
-        body: {
-            properties: [{
-                property: 'bilhetes_disponiveis',
-                value: 22
-            }]
         },
-        json: true
-    };
+        url: `https://api.hubapi.com/contacts/v1/contact/vid/${user_id}/profile?hapikey=${connection.hubspot.key}`,
+        
+        body: JSON.stringify(json)
+    }
 
-    req(options, function (error, response, body) {
-        if (error) throw new Error(error);
-
-        console.log(response.statusCode);
-    });
+    req.post(options, (err, res) => {
+        if (!err && res.statusCode == 200){
+            callback({
+                "statusCode": res.statusCode,
+                "body": {
+                    "message": "Updated with sucess"
+                }
+            })
+        } else {
+            callback({
+                "statusCode": res.statusCode,
+                "body": JSON.parse(res.body)
+            })
+        }
+    })
 }
 
 
