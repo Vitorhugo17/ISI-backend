@@ -39,9 +39,26 @@ function getClient(user_id, callback) {
                 jasmin_id = "Não aplicável";
             }
 
-            const result = '{ "ID":"'+data.hs_object_id.value+'","ID do Moloni":"'+moloni_id+'","ID do Jasmin":"'+jasmin_id+'","Nome":"'+data.firstname.value+'","Apelido":"'+data.lastname.value+'","Email":"'+data.email.value+'","Número Mecanográfico":"'+data.no_mecanografico.value+'","Bilhetes Disponíveis (Barquense)":"'+data.bilhetes_disponiveis_barquense.value+'","Bilhetes Disponíveis (Trandev)":"'+data.bilhetes_disponiveis_transdev.value+'"}';
-            let resultJSON = JSON.parse(result)
-            callback(resultJSON);
+
+            const result = {
+                "user_id": data.hs_object_id.value,
+                "moloni_id": moloni_id,
+                "jasmin_id": jasmin_id,
+                "nome": data.firstname.value,
+                "apelido": data.lastname.value,
+                "email": data.email.value,
+                "numero_mecanografico": data.no_mecanografico.value,
+                "bilhetes_disponiveis_barquense": data.bilhetes_disponiveis_barquense.value,
+                "bilhetes_disponiveis_transdev": data.bilhetes_disponiveis_transdev.value
+            }
+            callback({
+                "user": result
+            });
+        } else {
+            callback({
+                "statusCode": res.statusCode,
+                "body": JSON.parse(res.body)
+            })
         }
     })
 }
@@ -56,12 +73,12 @@ function updateTickets(user_id, properties, callback) {
             'Content-Type': 'application/json'
         },
         url: `https://api.hubapi.com/contacts/v1/contact/vid/${user_id}/profile?hapikey=${connection.hubspot.key}`,
-        
+
         body: JSON.stringify(json)
     }
 
     req.post(options, (err, res) => {
-        if (!err && res.statusCode == 204){
+        if (!err && res.statusCode == 204) {
             callback({
                 "statusCode": 200,
                 "body": {

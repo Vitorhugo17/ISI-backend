@@ -3,26 +3,33 @@ const moloniController = require('./moloni.controller');
 const jasminController = require('./jasmin.controller');
 
 function insertPurchase(request, response) {
-    const customer_id = request.sanitize('customer_id').escape();
+    const user_id = request.sanitize('user_id').escape();
     const product_id = request.sanitize('product_id').escape();
     const quantity = request.sanitize('quantity').escape();
     const status = request.sanitize('status').escape();
     const customer_name = request.sanitize('customer_name').escape();
     const company = request.sanitize('company').escape();
 
-    if (company == "Barquense") {
-        moloniController.insertPurchase(customer_id, product_id, quantity, status, (res) => {
-            response.status(res.statusCode).send(res.body)
-        })
-    } else if (company == "Transdev") {
-        jasminController.insertPurchase(customer_id, customer_name, product_id, quantity, (res) => {
-            response.status(res.statusCode).send(res.body)
-        })
-    } else {
-        response.status(400).send({
-            "message": "Company doesn't exists"
-        });
-    }
+    hubspotController.getClient(user_id, (res) => {
+        if (res.user) {
+            const user = res.user;
+            if (company == "Barquense") {
+                moloniController.insertPurchase(user.moloni_id, product_id, quantity, status, (res) => {
+                    response.status(res.statusCode).send(res.body);
+                })
+            } else if (company == "Transdev") {
+                jasminController.insertPurchase(user.jasmin_id, customer_name, product_id, quantity, (res) => {
+                    response.status(res.statusCode).send(res.body);
+                })
+            } else {
+                response.status(400).send({
+                    "message": "Company doesn't exists"
+                });
+            }
+        } else {
+            response.status(res.statusCode).send(res.body);
+        }
+    })
 }
 
 function getProducts(request, response) {
