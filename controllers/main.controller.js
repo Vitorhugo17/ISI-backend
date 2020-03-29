@@ -119,8 +119,8 @@ function calculateOrderAmount(quantity, product_id, company, callback) {
                 let amount = 0;
                 const products = res.products;
                 for (let i = 0; i < products.length; i++) {
-                    if (products[i].id == product_id) {
-                        amount = (products[i].price + products[i].taxes[0].value).toFixed(2) * quantity;
+                    if (products[i].itemKey == product_id) {
+                        amount = products[i].priceListLines[0].priceAmount.amount.toFixed(2) * quantity;
                     }
                 }
                 if (amount != 0) {
