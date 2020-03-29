@@ -26,7 +26,6 @@
     "body-parser": "^1.19.0",
     "connect-redis": "^4.0.4",
     "dotenv": "^8.2.0",
-    "ejs": "^3.0.1",
     "express": "^4.17.1",
     "express-sanitizer": "^1.0.5",
     "express-session": "^1.17.0",
@@ -41,6 +40,7 @@
     "querystring": "^0.2.0",
     "redis": "^3.0.2",
     "request": "^2.88.2",
+    "stripe": "^8.38.0",
     "uuid": "^7.0.2"
   }
 }

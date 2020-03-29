@@ -85,7 +85,70 @@ function getProducts(request, response) {
     })
 }
 
+function calculateOrderAmount(quantity, product_id, company, callback) {
+    if (company == "Barquense") {
+        moloniController.getProducts((res) => {
+            if (res.products) {
+                let amount = 0;
+                const products = res.products;
+                for (let i = 0; i < products.length; i++) {
+                    if (products[i].product_id == product_id) {
+                        amount = (products[i].price + products[i].taxes[0].value).toFixed(2) * quantity;
+                    }
+                }
+                if (amount != 0) {
+                    callback({
+                        "orderAmount": amount
+                    })
+                } else {
+                    callback({
+                        "statusCode": 404,
+                        "body": {
+                            "message": "Product not found"
+                        }
+                    });
+                }
+            } else {
+                callback({
+                    "statusCode": res.statusCode,
+                    "body": JSON.parse(res.body)
+                });
+            }
+        })
+    } else if (company == "Transdev") {
+        jasmin.getProducts((res) => {
+            if (res.products) {
+                let amount = 0;
+                const products = res.products;
+                for (let i = 0; i < products.length; i++) {
+                    if (products[i].id == product_id) {
+                        amount = products[i].price * quantity;
+                    }
+                }
+                if (amount != 0) {
+                    callback({
+                        "orderAmount": amount
+                    })
+                } else {
+                    callback({
+                        "statusCode": 404,
+                        "body": {
+                            "message": "Product not found"
+                        }
+                    });
+                }
+            } else {
+                callback({
+                    "statusCode": res.statusCode,
+                    "body": JSON.parse(res.body)
+                });
+            }
+        })
+    }
+}
+
 module.exports = {
     getProducts: getProducts,
-    insertPurchase: insertPurchase
+    insertPurchase: insertPurchase,
+    calculateOrderAmount: calculateOrderAmount
 }
