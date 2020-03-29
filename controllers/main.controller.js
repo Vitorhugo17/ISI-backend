@@ -20,7 +20,7 @@ function insertPurchase(request, response) {
         })
     } else {
         response.status(400).send({
-            "message": "Company not exists"
+            "message": "Company doesn't exists"
         });
     }
 }

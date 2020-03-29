@@ -6,7 +6,14 @@ const jasminController = require('./../controllers/jasmin.controller');
 const hubspotController = require('./../controllers/hubspot.controller');
 
 router.post('/purchases', mainController.insertPurchase);
-router.post('/hubspot', hubspotController.updateTickets);
+router.post('/hubspot/:user_id', (request, response) => {
+    const user_id = request.sanitize("user_id").escape();
+    const ticket_number = 3;
+
+    hubspotController.updateTickets(user_id, ticket_number, (res) => {
+        response.status(res.statusCode).send(res.body);
+    })
+});
 
 router.get('/', hubspotController.getHubspot);
 

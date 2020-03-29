@@ -46,9 +46,9 @@ function getClient(user_id, callback) {
     })
 }
 
-function updateTickets(user_id, tickets_number, callback) {
+function updateTickets(user_id, properties, callback) {
     let json = {
-        "bilhetes_disponiveis_barquense": tickets_number
+        "properties": properties
     }
     let options = {
         headers: {
@@ -61,9 +61,9 @@ function updateTickets(user_id, tickets_number, callback) {
     }
 
     req.post(options, (err, res) => {
-        if (!err && res.statusCode == 200){
+        if (!err && res.statusCode == 204){
             callback({
-                "statusCode": res.statusCode,
+                "statusCode": 200,
                 "body": {
                     "message": "Updated with sucess"
                 }
