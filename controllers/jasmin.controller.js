@@ -86,7 +86,9 @@ function insertPurchase(customer_id, customer_name, product_id, quantity, callba
                             if (!err && res.statusCode == 200) {
                                 callback({
                                     "statusCode": res.statusCode,
-                                    "body": res.body
+                                    "body": {
+                                        "message": "Purchase inserted with success"
+                                    }
                                 });
                             } else {
                                 callback({

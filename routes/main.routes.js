@@ -1,13 +1,19 @@
 const router = require('express').Router();
-const { resolve } = require("path");
 
 const mainController = require('./../controllers/main.controller');
 const moloniController = require('./../controllers/moloni.controller');
 const jasminController = require('./../controllers/jasmin.controller');
 const hubspotController = require('./../controllers/hubspot.controller');
 
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
+router.use(function(request, response, next) {
+    response.header("Access-Control-Allow-Origin", "*");
+    response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+  });
+
 router.get("/stripe-key", (request, response) => {
-    response.setHeader("Access-Control-Allow-Origin", "*");
     response.send({
         publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
     });
@@ -21,7 +27,7 @@ router.post("/pay", (request, response) => {
     const company = request.sanitize("company").escape();
     const useStripeSdk = request.sanitize("useStripeSdk").escape();
 
-    mainController.calculateOrderAmount(quantity, product_id, company, async (res) => {
+    mainController.calculateOrderAmount(parseInt(quantity), product_id, company, async (res) => {
         if (res.orderAmount) {
             const orderAmount = res.orderAmount;
 
@@ -29,7 +35,7 @@ router.post("/pay", (request, response) => {
                 let intent;
                 if (paymentMethodId) {
                     intent = await stripe.paymentIntents.create({
-                        amount: orderAmount,
+                        amount: orderAmount*100,
                         currency: "eur",
                         payment_method: paymentMethodId,
                         confirmation_method: "manual",
@@ -71,7 +77,7 @@ router.post("/pay", (request, response) => {
                 }
             } catch (e) {
                 response.status(400).send({
-                    "message": e.message
+                    error: e.message
                 });
             }
         } else {
@@ -79,60 +85,6 @@ router.post("/pay", (request, response) => {
         }
     })
 })
-
-
-router.post('/pay', async (request, response) => {
-    try {
-        let intent;
-        if (request.body.payment_method_id) {
-            // Create the PaymentIntent
-            intent = await stripe.paymentIntents.create({
-                payment_method: request.body.payment_method_id,
-                amount: 1099,
-                currency: 'eur',
-                confirmation_method: 'manual',
-                confirm: true
-            });
-        } else if (request.body.payment_intent_id) {
-            intent = await stripe.paymentIntents.confirm(
-                request.body.payment_intent_id
-            );
-        }
-        // Send the response to the client
-        response.send(generateResponse(intent));
-    } catch (e) {
-        // Display error on client
-        return response.send({
-            error: e.message
-        });
-    }
-});
-
-const generateResponse = (intent) => {
-    // Note that if your API version is before 2019-02-11, 'requires_action'
-    // appears as 'requires_source_action'.
-    if (
-        intent.status === 'requires_action' &&
-        intent.next_action.type === 'use_stripe_sdk'
-    ) {
-        // Tell the client to handle the action
-        return {
-            requires_action: true,
-            payment_intent_client_secret: intent.client_secret
-        };
-    } else if (intent.status === 'succeeded') {
-        // The payment didn’t need any additional actions and completed!
-        // Handle post-payment fulfillment
-        return {
-            success: true
-        };
-    } else {
-        // Invalid status
-        return {
-            error: 'Invalid PaymentIntent status'
-        }
-    }
-};
 
 router.post('/purchases', mainController.insertPurchase);
 router.post('/hubspot/:user_id', (request, response) => {
