@@ -11,12 +11,30 @@ function insertPurchase(request, response) {
     hubspotController.getClient(user_id, (res) => {
         if (res.user) {
             const user = res.user;
+            const transdev_ticket = user.bilhetes_disponiveis_transdev;
+            const barquense_ticket = user.bilhetes_disponiveis_barquense;
             if (company == "Barquense") {
                 moloniController.insertPurchase(user.moloni_id, product_id, quantity, 1, (res) => {
                     response.status(res.statusCode).send(res.body);
                 })
+                let total = barquense_ticket + quantity;
+                const updatedData = {
+                    "property": 'bilhetes_disponiveis_barquense',
+                    "value": total
+                };
+                hubspotController.updateClient(user_id, updatedData, (res) => {
+                    response.status(res.statusCode).send(res.body);
+                })
             } else if (company == "Transdev") {
                 jasminController.insertPurchase(user.jasmin_id, (user.firstname + " " + user.lastname), user.nif, product_id, quantity, (res) => {
+                    response.status(res.statusCode).send(res.body);
+                })
+                let total = transdev_ticket + quantity;
+                const updatedData = {
+                    "property": 'bilhetes_disponiveis_transdev',
+                    "value": total
+                };
+                hubspotController.updateClient(user_id, updatedData, (res) => {
                     response.status(res.statusCode).send(res.body);
                 })
             } else {
