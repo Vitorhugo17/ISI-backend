@@ -41,7 +41,8 @@ function getClient(user_id, callback) {
                 "email": data.email.value,
                 "numero_mecanografico": data.no_mecanografico.value,
                 "bilhetes_disponiveis_barquense": data.bilhetes_disponiveis_barquense.value,
-                "bilhetes_disponiveis_transdev": data.bilhetes_disponiveis_transdev.value
+                "bilhetes_disponiveis_transdev": data.bilhetes_disponiveis_transdev.value,
+                "nif": data.nif.value
             }
             callback({
                 "user": result

@@ -16,7 +16,7 @@ function insertPurchase(request, response) {
                     response.status(res.statusCode).send(res.body);
                 })
             } else if (company == "Transdev") {
-                jasminController.insertPurchase(user.jasmin_id, (user.firstname + " " + user.lastname), product_id, quantity, (res) => {
+                jasminController.insertPurchase(user.jasmin_id, (user.firstname + " " + user.lastname), user.nif, product_id, quantity, (res) => {
                     response.status(res.statusCode).send(res.body);
                 })
             } else {
@@ -57,14 +57,14 @@ function getProducts(request, response) {
 
                     let productsTransdev = [];
                     for (let i = 0; i < respJasmin.length; i++) {
-                        if (respJasmin[i].itemKey != "PORTES") {
+                        if (respJasmin[i].itemTypeDescription == "Item") {
                             let json = {};
                             json.id = respJasmin[i].itemKey;
                             json.name = respJasmin[i].description;
                             json.price = respJasmin[i].priceListLines[0].priceAmount.amount.toFixed(2);
                             json.measure = respJasmin[i].unitDescription;
                             json.company = "Transdev";
-                            json.quantity = 1;
+                            json.quantity = parseInt(respJasmin[i].complementaryDescription);
                             productsTransdev.push(json);
                         }
                     }

@@ -2,7 +2,7 @@ const querystring = require('querystring');
 const req = require('request');
 const connection = require('./../config/connection');
 
-function insertPurchase(customer_id, customer_name, product_id, quantity, callback) {
+function insertPurchase(customer_id, customer_name, customer_nif, product_id, quantity, callback) {
     getInvoiceType((res) => {
         if (res.invoiceType) {
             const access_token = res.access_token;
@@ -37,6 +37,7 @@ function insertPurchase(customer_id, customer_name, product_id, quantity, callba
                             "postingDate": new Date().toISOString(),
                             "buyerCustomerParty": customer_id,
                             "buyerCustomerPartyName": customer_name,
+                            "buyerCustomerPartyTaxId": customer_nif,
                             "exchangeRate": 1,
                             "discount": 0,
                             "loadingCountry": "PT",
