@@ -2,7 +2,7 @@ const querystring = require('querystring');
 const req = require('request');
 const connection = require('./../config/connection');
 
-function insertPurchase(customer_id, customer_name, product_id, quantity, callback) {
+function insertPurchase(customer_id, customer_name, customer_nif, product_id, quantity, callback) {
     getInvoiceType((res) => {
         if (res.invoiceType) {
             const access_token = res.access_token;
@@ -13,7 +13,6 @@ function insertPurchase(customer_id, customer_name, product_id, quantity, callba
 
                     let product = {};
                     for (let i = 0; i < products.length; i++) {
-                        console.log(product_id, products[i].itemKey);
                         if (products[i].itemKey == parseInt(product_id)) {
                             product = {
                                 "itemKey": products[i].itemKey,
@@ -38,6 +37,7 @@ function insertPurchase(customer_id, customer_name, product_id, quantity, callba
                             "postingDate": new Date().toISOString(),
                             "buyerCustomerParty": customer_id,
                             "buyerCustomerPartyName": customer_name,
+                            "buyerCustomerPartyTaxId": customer_nif,
                             "exchangeRate": 1,
                             "discount": 0,
                             "loadingCountry": "PT",
@@ -83,10 +83,12 @@ function insertPurchase(customer_id, customer_name, product_id, quantity, callba
                         }
 
                         req.post(options, (err, res) => {
-                            if (!err && res.statusCode == 200) {
+                            if (!err && res.statusCode == 201) {
                                 callback({
-                                    "statusCode": res.statusCode,
-                                    "body": res.body
+                                    "statusCode": 200,
+                                    "body": {
+                                        "message": "Purchase inserted with success"
+                                    }
                                 });
                             } else {
                                 callback({

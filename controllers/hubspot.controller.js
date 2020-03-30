@@ -2,14 +2,6 @@ const bCrypt = require('bcryptjs');
 const req = require('request');
 const connection = require('./../config/connection');
 
-function getHubspot(request, response) {
-    let user_id = 201;
-
-    getClient(user_id, (res) => {
-        response.send(res);
-    });
-}
-
 /* 
 Função que permite ir buscar os dados do cliente 
 Necessita do id do cliente (no hubspot)
@@ -39,18 +31,27 @@ function getClient(user_id, callback) {
                 jasmin_id = "Not available";
             }
 
+
             const result = {
-                "id": data.hs_object_id.value,
-                "id_moloni": moloni_id,
-                "id_jasmin": jasmin_id,
-                "firstname": data.firstname.value,
-                "lastname": data.lastname.value,
+                "user_id": data.hs_object_id.value,
+                "moloni_id": moloni_id,
+                "jasmin_id": jasmin_id,
+                "nome": data.firstname.value,
+                "apelido": data.lastname.value,
                 "email": data.email.value,
-                "student_number": data.no_mecanografico.value,
-                "tickets_available_barquense": data.bilhetes_disponiveis_barquense.value,
-                "tickets_available_transdev": data.bilhetes_disponiveis_transdev.value
+                "numero_mecanografico": data.no_mecanografico.value,
+                "bilhetes_disponiveis_barquense": data.bilhetes_disponiveis_barquense.value,
+                "bilhetes_disponiveis_transdev": data.bilhetes_disponiveis_transdev.value,
+                "nif": data.nif.value
             }
-            callback(result);
+            callback({
+                "user": result
+            });
+        } else {
+            callback({
+                "statusCode": res.statusCode,
+                "body": JSON.parse(res.body)
+            })
         }
     })
 }
@@ -67,12 +68,12 @@ function updateClient(user_id, properties, callback) {
             'Content-Type': 'application/json'
         },
         url: `https://api.hubapi.com/contacts/v1/contact/vid/${user_id}/profile?hapikey=${connection.hubspot.key}`,
-        
+
         body: JSON.stringify(json)
     }
 
     req.post(options, (err, res) => {
-        if (!err && res.statusCode == 204){
+        if (!err && res.statusCode == 204) {
             callback({
                 "statusCode": 200,
                 "body": {

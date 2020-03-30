@@ -112,7 +112,6 @@ function insertPurchase(customer_id, product_id, quantity,status, callback) {
 
                 let options = {
                     headers: {
-                        'Content-Length': JSON.stringify(json).length,
                         'Content-Type': 'application/json'
                     },
                     url: `https://api.moloni.pt/v1/invoiceReceipts/insert/?access_token=${access_token}&json=true`,
@@ -122,7 +121,9 @@ function insertPurchase(customer_id, product_id, quantity,status, callback) {
                     if (!err && res.statusCode == 200) {
                         callback({
                             "statusCode": res.statusCode,
-                            "body": res.body
+                            "body": {
+                                "message": "Purchase inserted with success"
+                            }
                         });
                     } else {
                         callback({

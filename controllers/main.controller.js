@@ -3,26 +3,31 @@ const moloniController = require('./moloni.controller');
 const jasminController = require('./jasmin.controller');
 
 function insertPurchase(request, response) {
-    const customer_id = request.sanitize('customer_id').escape();
+    const user_id = request.sanitize('user_id').escape();
     const product_id = request.sanitize('product_id').escape();
     const quantity = request.sanitize('quantity').escape();
-    const status = request.sanitize('status').escape();
-    const customer_name = request.sanitize('customer_name').escape();
     const company = request.sanitize('company').escape();
 
-    if (company == "Barquense") {
-        moloniController.insertPurchase(customer_id, product_id, quantity, status, (res) => {
-            response.status(res.statusCode).send(res.body)
-        })
-    } else if (company == "Transdev") {
-        jasminController.insertPurchase(customer_id, customer_name, product_id, quantity, (res) => {
-            response.status(res.statusCode).send(res.body)
-        })
-    } else {
-        response.status(400).send({
-            "message": "Company doesn't exists"
-        });
-    }
+    hubspotController.getClient(user_id, (res) => {
+        if (res.user) {
+            const user = res.user;
+            if (company == "Barquense") {
+                moloniController.insertPurchase(user.moloni_id, product_id, quantity, 1, (res) => {
+                    response.status(res.statusCode).send(res.body);
+                })
+            } else if (company == "Transdev") {
+                jasminController.insertPurchase(user.jasmin_id, (user.firstname + " " + user.lastname), user.nif, product_id, quantity, (res) => {
+                    response.status(res.statusCode).send(res.body);
+                })
+            } else {
+                response.status(400).send({
+                    "message": "Company doesn't exists"
+                });
+            }
+        } else {
+            response.status(res.statusCode).send(res.body);
+        }
+    })
 }
 
 function getProducts(request, response) {
@@ -52,14 +57,14 @@ function getProducts(request, response) {
 
                     let productsTransdev = [];
                     for (let i = 0; i < respJasmin.length; i++) {
-                        if (respJasmin[i].itemKey != "PORTES") {
+                        if (respJasmin[i].itemTypeDescription == "Item") {
                             let json = {};
                             json.id = respJasmin[i].itemKey;
                             json.name = respJasmin[i].description;
                             json.price = respJasmin[i].priceListLines[0].priceAmount.amount.toFixed(2);
                             json.measure = respJasmin[i].unitDescription;
                             json.company = "Transdev";
-                            json.quantity = 1;
+                            json.quantity = parseInt(respJasmin[i].complementaryDescription);
                             productsTransdev.push(json);
                         }
                     }
@@ -78,7 +83,70 @@ function getProducts(request, response) {
     })
 }
 
+function calculateOrderAmount(quantity, product_id, company, callback) {
+    if (company == "Barquense") {
+        moloniController.getProducts((res) => {
+            if (res.products) {
+                let amount = 0;
+                const products = res.products;
+                for (let i = 0; i < products.length; i++) {
+                    if (products[i].product_id == product_id) {
+                        amount = (products[i].price + products[i].taxes[0].value).toFixed(2) * quantity;
+                    }
+                }
+                if (amount != 0) {
+                    callback({
+                        "orderAmount": amount
+                    })
+                } else {
+                    callback({
+                        "statusCode": 404,
+                        "body": {
+                            "message": "Product not found"
+                        }
+                    });
+                }
+            } else {
+                callback({
+                    "statusCode": res.statusCode,
+                    "body": res.body
+                });
+            }
+        })
+    } else if (company == "Transdev") {
+        jasminController.getProducts((res) => {
+            if (res.products) {
+                let amount = 0;
+                const products = res.products;
+                for (let i = 0; i < products.length; i++) {
+                    if (products[i].itemKey == product_id) {
+                        amount = products[i].priceListLines[0].priceAmount.amount.toFixed(2) * quantity;
+                    }
+                }
+                if (amount != 0) {
+                    callback({
+                        "orderAmount": amount
+                    })
+                } else {
+                    callback({
+                        "statusCode": 404,
+                        "body": {
+                            "message": "Product not found"
+                        }
+                    });
+                }
+            } else {
+                callback({
+                    "statusCode": res.statusCode,
+                    "body": res.body
+                });
+            }
+        })
+    }
+}
+
 module.exports = {
     getProducts: getProducts,
-    insertPurchase: insertPurchase
+    insertPurchase: insertPurchase,
+    calculateOrderAmount: calculateOrderAmount
 }
