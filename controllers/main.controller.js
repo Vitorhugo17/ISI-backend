@@ -1,6 +1,7 @@
 const hubspotController = require('./hubspot.controller');
 const moloniController = require('./moloni.controller');
 const jasminController = require('./jasmin.controller');
+const req = require('request');
 
 function insertPurchase(request, response) {
     const user_id = request.sanitize('user_id').escape();
@@ -11,37 +12,80 @@ function insertPurchase(request, response) {
     hubspotController.getClient(user_id, (res) => {
         if (res.user) {
             const user = res.user;
-            const transdev_ticket = user.bilhetes_disponiveis_transdev;
-            const barquense_ticket = user.bilhetes_disponiveis_barquense;
-            if (company == "Barquense") {
-                moloniController.insertPurchase(user.moloni_id, product_id, quantity, 1, (res) => {
+            let options = {
+                url: `${global.urlBase}/products`
+            };
+            req.get(options, (err, res) => {
+                if (!err && res.statusCode == 200) {
+                    const products = JSON.parse(res.body).products;
+                    let product = "";
+                    for (let i = 0; i < products.length; i++) {
+                        if (products[i].id == product_id) {
+                            product = products[i];
+                        }
+                    }
+
+                    if (product != "") {
+                        const transdev_ticket = user.bilhetes_disponiveis_transdev;
+                        const barquense_ticket = user.bilhetes_disponiveis_barquense;
+                        if (company == "Barquense") {
+                            moloniController.insertPurchase(user.moloni_id, product_id, quantity, 1, (res) => {
+                                if (res.statusCode == 200) {
+                                    let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
+                                    console.log(barquense_ticket, (quantity * product.quantity), total);
+                                    const updatedData = {
+                                        "property": 'bilhetes_disponiveis_barquense',
+                                        "value": total
+                                    };
+                                    hubspotController.updateClient(user_id, updatedData, (res) => {
+                                        if (res.statusCode == 200) {
+                                            response.status(200).send({
+                                                "message": "Purchase inserted with success"
+                                            })
+                                        } else {
+                                            response.status(res.statusCode).send(res.body);
+                                        }
+                                    })
+                                } else {
+                                    response.status(res.statusCode).send(res.body);
+                                }
+                            })
+                        } else if (company == "Transdev") {
+                            jasminController.insertPurchase(user.jasmin_id, (user.firstname + " " + user.lastname), user.nif, product_id, quantity, (res) => {
+                                if (res.statusCode == 200) {
+                                    let total = parseInt(transdev_ticket) + parseInt(quantity * product.quantity);
+                                    console.log(transdev_ticket, (quantity * product.quantity), total);
+                                    const updatedData = {
+                                        "property": 'bilhetes_disponiveis_transdev',
+                                        "value": total
+                                    };
+                                    hubspotController.updateClient(user_id, updatedData, (res) => {
+                                        if (res.statusCode == 200) {
+                                            response.status(200).send({
+                                                "message": "Purchase inserted with success"
+                                            })
+                                        } else {
+                                            response.status(res.statusCode).send(res.body);
+                                        }
+                                    })
+                                } else {
+                                    response.status(res.statusCode).send(res.body);
+                                }
+                            })
+                        } else {
+                            response.status(400).send({
+                                "message": "Company doesn't exists"
+                            });
+                        }
+                    } else {
+                        response.status(400).send({
+                            "message": "Product doesn't exists"
+                        });
+                    }
+                } else {
                     response.status(res.statusCode).send(res.body);
-                })
-                let total = barquense_ticket + quantity;
-                const updatedData = {
-                    "property": 'bilhetes_disponiveis_barquense',
-                    "value": total
-                };
-                hubspotController.updateClient(user_id, updatedData, (res) => {
-                    response.status(res.statusCode).send(res.body);
-                })
-            } else if (company == "Transdev") {
-                jasminController.insertPurchase(user.jasmin_id, (user.firstname + " " + user.lastname), user.nif, product_id, quantity, (res) => {
-                    response.status(res.statusCode).send(res.body);
-                })
-                let total = transdev_ticket + quantity;
-                const updatedData = {
-                    "property": 'bilhetes_disponiveis_transdev',
-                    "value": total
-                };
-                hubspotController.updateClient(user_id, updatedData, (res) => {
-                    response.status(res.statusCode).send(res.body);
-                })
-            } else {
-                response.status(400).send({
-                    "message": "Company doesn't exists"
-                });
-            }
+                }
+            })
         } else {
             response.status(res.statusCode).send(res.body);
         }
@@ -75,7 +119,7 @@ function getProducts(request, response) {
 
                     let productsTransdev = [];
                     for (let i = 0; i < respJasmin.length; i++) {
-                        if (respJasmin[i].itemTypeDescription == "Item") {
+                        if (respJasmin[i].itemTypeDescription == "Service" && respJasmin[i].itemKey != "PORTES") {
                             let json = {};
                             json.id = respJasmin[i].itemKey;
                             json.name = respJasmin[i].description;

@@ -101,6 +101,6 @@ function generatePass() {
 }
 
 module.exports = {
-    getHubspot: getHubspot,
+    getClient: getClient,
     updateClient: updateClient
 };

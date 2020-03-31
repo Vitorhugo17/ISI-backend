@@ -14,7 +14,7 @@ const passport = require('./config/passport');
 const nodemailer = require('nodemailer');
 const smtpTransport = require('nodemailer-smtp-transport');
 
-global.urlBase = `http://${ip.address()}:${process.env.PORT}/`;
+global.urlBase = `http://${ip.address()}:${process.env.PORT}`;
 global.jasminUrl = `https://my.jasminsoftware.com/api/233711/233711-0001/`;
 
 app.use(bodyParser.json({
