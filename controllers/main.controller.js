@@ -32,7 +32,6 @@ function insertPurchase(request, response) {
                             moloniController.insertPurchase(user.moloni_id, product_id, quantity, 1, (res) => {
                                 if (res.statusCode == 200) {
                                     let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
-                                    console.log(barquense_ticket, (quantity * product.quantity), total);
                                     const updatedData = {
                                         "property": 'bilhetes_disponiveis_barquense',
                                         "value": total
@@ -54,7 +53,6 @@ function insertPurchase(request, response) {
                             jasminController.insertPurchase(user.jasmin_id, (user.firstname + " " + user.lastname), user.nif, product_id, quantity, (res) => {
                                 if (res.statusCode == 200) {
                                     let total = parseInt(transdev_ticket) + parseInt(quantity * product.quantity);
-                                    console.log(transdev_ticket, (quantity * product.quantity), total);
                                     const updatedData = {
                                         "property": 'bilhetes_disponiveis_transdev',
                                         "value": total
