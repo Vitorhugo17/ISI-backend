@@ -2,6 +2,7 @@ const passport = require('passport');
 const connect = require('./connectBD');
 const LocalStrategy = require('passport-local').Strategy;
 const bCrypt = require("bcryptjs");
+const hubspotController = require('./../controllers/hubspot.controller');
 
 passport.use(new LocalStrategy({
     usernameField: 'email'
@@ -11,12 +12,24 @@ passport.use(new LocalStrategy({
             if (rows.length != 0) {
                 const user = rows[0];
                 if (isValidPassword(user.password, password)) {
-
-                    let userF = {
-                        user_id: user.idUtilizador,
-                        email: user.email
-                    }
-                    return done(null, userF);
+                    hubspotController.getClient(user.idUtilizador, (res) => {
+                        if (res.user) {
+                            let userF = {
+                                user_id: user.idUtilizador,
+                                email: user.email,
+                                nome: res.user.nome + " " + res.user.apelido,
+                                data_nascimento: res.user.data_nascimento,
+                                numero_telefone: res.user.numero_telefone,
+                                numero_mecanografico: res.user.numero_mecanografico,
+                                nif: res.user.nif
+                            }
+                            return done(null, userF);
+                        } else {
+                            done(null, false, {
+                                message: `user not found`
+                            })
+                        }
+                    })
                 } else {
                     done(null, false, {
                         message: `password invalid`
@@ -36,7 +49,7 @@ passport.use(new LocalStrategy({
 }))
 
 passport.serializeUser((user, done) => {
-    done(null, user.idUtilizador);
+    done(null, user.user_id);
 })
 
 passport.deserializeUser((id, done) => {
@@ -44,7 +57,24 @@ passport.deserializeUser((id, done) => {
         if (!err) {
             if (rows.length != 0) {
                 const user = rows[0];
-                return done(null, userF);
+                hubspotController.getClient(user.idUtilizador, (res) => {
+                    if (res.user) {
+                        let userF = {
+                            user_id: user.idUtilizador,
+                            email: user.email,
+                            nome: res.user.nome + " " + res.user.apelido,
+                            data_nascimento: res.user.data_nascimento,
+                            numero_telefone: res.user.numero_telefone,
+                            numero_mecanografico: res.user.numero_mecanografico,
+                            nif: res.user.nif
+                        }
+                        return done(null, userF);
+                    } else {
+                        done(null, false, {
+                            message: `user not found`
+                        })
+                    }
+                })
             } else {
                 done(null, false, {
                     message: `user not found`

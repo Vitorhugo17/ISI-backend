@@ -107,5 +107,9 @@ router.get('/categories', (request, response) => {
 
     })
 });
+router.get('/', (request, response) => {
+    console.log(request.user);
+    response.status(200).send("OLA");
+});
 
 module.exports = router;

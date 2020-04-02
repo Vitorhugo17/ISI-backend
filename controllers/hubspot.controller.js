@@ -39,6 +39,8 @@ function getClient(user_id, callback) {
                 "nome": data.firstname.value,
                 "apelido": data.lastname.value,
                 "email": data.email.value,
+                "data_nascimento": data.date_of_birth.value,
+                "numero_telefone": data.phone.value,
                 "numero_mecanografico": data.no_mecanografico.value,
                 "bilhetes_disponiveis_barquense": data.bilhetes_disponiveis_barquense.value,
                 "bilhetes_disponiveis_transdev": data.bilhetes_disponiveis_transdev.value,

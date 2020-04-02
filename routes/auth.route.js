@@ -21,9 +21,7 @@ module.exports = function (app, passport) {
                 })
             }
             if (user) {
-                console.log("1");
                 req.login(user, (err) => {
-                    console.log(err);
                     return res.status(200).send(req.user);
                 })
             } else {
