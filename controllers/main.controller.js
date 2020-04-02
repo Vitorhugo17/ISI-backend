@@ -103,7 +103,7 @@ function insertPurchase(request, response) {
                                 moloniController.insertClient(user.nif, (user.nome + " " + user.apelido), user.email, (res) => {
                                     if (res.statusCode == 200) {
                                         moloni_id = res.body.customer_id;
-                                        
+
                                         moloniController.insertPurchase(moloni_id, product_id, quantity, 1, (res) => {
                                             if (res.statusCode == 200) {
                                                 let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
@@ -154,26 +154,50 @@ function insertPurchase(request, response) {
                                 })
                             }
                         } else if (company == "Transdev") {
-                            jasminController.insertPurchase(user.jasmin_id, (user.firstname + " " + user.lastname), user.nif, product_id, quantity, (res) => {
-                                if (res.statusCode == 200) {
-                                    let total = parseInt(transdev_ticket) + parseInt(quantity * product.quantity);
-                                    const updatedData = {
-                                        "property": 'bilhetes_disponiveis_transdev',
-                                        "value": total
-                                    };
-                                    hubspotController.updateClient(user_id, updatedData, (res) => {
-                                        if (res.statusCode == 200) {
-                                            response.status(200).send({
-                                                "message": "Purchase inserted with success"
-                                            })
-                                        } else {
-                                            response.status(res.statusCode).send(res.body);
-                                        }
-                                    })
-                                } else {
-                                    response.status(res.statusCode).send(res.body);
-                                }
-                            })
+                            let jasmin_id = user.jasmin_id;
+                            if (jasmin_id == -1) {
+                                jasminController.insertPurchase(jasmin_id, (user.firstname + " " + user.lastname), user.nif, product_id, quantity, (res) => {
+                                    if (res.statusCode == 200) {
+                                        let total = parseInt(transdev_ticket) + parseInt(quantity * product.quantity);
+                                        const updatedData = [{
+                                            "property": 'bilhetes_disponiveis_transdev',
+                                            "value": total
+                                        }];
+                                        hubspotController.updateClient(user_id, updatedData, (res) => {
+                                            if (res.statusCode == 200) {
+                                                response.status(200).send({
+                                                    "message": "Purchase inserted with success"
+                                                })
+                                            } else {
+                                                response.status(res.statusCode).send(res.body);
+                                            }
+                                        })
+                                    } else {
+                                        response.status(res.statusCode).send(res.body);
+                                    }
+                                })
+                            } else {
+                                jasminController.insertPurchase(jasmin_id, (user.firstname + " " + user.lastname), user.nif, product_id, quantity, (res) => {
+                                    if (res.statusCode == 200) {
+                                        let total = parseInt(transdev_ticket) + parseInt(quantity * product.quantity);
+                                        const updatedData = [{
+                                            "property": 'bilhetes_disponiveis_transdev',
+                                            "value": total
+                                        }];
+                                        hubspotController.updateClient(user_id, updatedData, (res) => {
+                                            if (res.statusCode == 200) {
+                                                response.status(200).send({
+                                                    "message": "Purchase inserted with success"
+                                                })
+                                            } else {
+                                                response.status(res.statusCode).send(res.body);
+                                            }
+                                        })
+                                    } else {
+                                        response.status(res.statusCode).send(res.body);
+                                    }
+                                })
+                            }
                         } else {
                             response.status(400).send({
                                 "message": "Company doesn't exists"
