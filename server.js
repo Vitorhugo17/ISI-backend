@@ -10,7 +10,6 @@ const sanitizer = require('express-sanitizer');
 const session = require('express-session');
 const uuid = require('uuid/v4');
 const RedisStore = require('connect-redis')(session);
-var FileStore = require('session-file-store')(session);
 const passport = require('./config/passport');
 const nodemailer = require('nodemailer');
 const smtpTransport = require('nodemailer-smtp-transport');
