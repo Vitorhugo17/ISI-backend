@@ -1,71 +1,35 @@
 const passport = require('passport');
+const connect = require('./connectBD');
 const LocalStrategy = require('passport-local').Strategy;
-/*const bCrypt = require("bcryptjs");
+const bCrypt = require("bcryptjs");
 
 passport.use(new LocalStrategy({
     usernameField: 'email'
 }, (email, password, done) => {
-    let options = {
-        url: `${urlBaseGo}users`
-    }
-    req.get(options, (err, res) => {
-        if (!err && res.statusCode == 200) {
-            const users = JSON.parse(res.body);
-            let user = "";
-            for (let i = 0; i < users.length; i++) {
-                if (users[i].email == email && users[i].tipoLogin == "local") {
-                    user = users[i];
-                }
-            }
-
-            if (user != "") {
+    connect.query(`SELECT * FROM utilizador WHERE email="${email}"`, (err, rows, fields) => {
+        if (!err) {
+            if (rows.length != 0) {
+                const user = rows[0];
                 if (isValidPassword(user.password, password)) {
-                    if (user.confirmado == "0") {
-                        let options1 = {
-                            url: `${urlBaseGo}people/${user.idPessoa}`
-                        }
-                        req.get(options1, (err1, res1) => {
-                            if (!err1 && res1.statusCode == 200) {
-                                let person = JSON.parse(res1.body)[0];
-                                let userF = {
-                                    nomePessoa: person.nome,
-                                    idGrupo: person.idGrupo,
-                                    idUtilizador: user.idUtilizador,
-                                    email: user.email,
-                                    fotoPessoa: person.fotoPessoa,
-                                    idPessoa: user.idPessoa
-                                }
-                                if (user.tipo == 1) {
-                                    userF.tipo = "user";
-                                } else {
-                                    userF.tipo = "admin";
-                                }
-                                return done(null, userF);
-                            } else {
-                                return done(null, false, {
-                                    message: `user not found`
-                                })
-                            }
-                        })
-                    } else {
-                        return done(null, false, {
-                            message: "Activate your account"
-                        })
+
+                    let userF = {
+                        user_id: user.idUtilizador,
+                        email: user.email
                     }
+                    return done(null, userF);
                 } else {
-                    return done(null, false, {
-                        message: "Incorrect Password"
+                    done(null, false, {
+                        message: `password invalid`
                     })
                 }
-
             } else {
-                return done(null, false, {
-                    message: "Incorrect email"
+                done(null, false, {
+                    message: `user not found`
                 })
             }
         } else {
-            return done(null, false, {
-                message: `user not found`
+            done(null, false, {
+                message: err.message
             })
         }
     })
@@ -76,48 +40,24 @@ passport.serializeUser((user, done) => {
 })
 
 passport.deserializeUser((id, done) => {
-    let options = {
-        url: `${urlBaseGo}users/${id}`
-    }
-
-    req.get(options, (err, res) => {
-        if (!err && res.statusCode == 200) {
-            const user = JSON.parse(res.body)[0];
-
-            let options1 = {
-                url: `${urlBaseGo}people/${user.idPessoa}`
+    connect.query(`SELECT * FROM utilizador WHERE idUtilizador=${id}`, (err, rows, fields) => {
+        if (!err) {
+            if (rows.length != 0) {
+                const user = rows[0];
+                return done(null, userF);
+            } else {
+                done(null, false, {
+                    message: `user not found`
+                })
             }
-
-            req.get(options1, (err1, res1) => {
-                if (!err1 && res1.statusCode == 200) {
-                    let person = JSON.parse(res1.body)[0];
-                    let userF = {
-                        nomePessoa: person.nome,
-                        idGrupo: person.idGrupo,
-                        idUtilizador: user.idUtilizador,
-                        email: user.email,
-                        fotoPessoa: person.fotoPessoa,
-                        idPessoa: user.idPessoa
-                    }
-                    if (user.tipo == 1) {
-                        userF.tipo = "user";
-                    } else {
-                        userF.tipo = "admin";
-                    }
-                    return done(null, userF);
-                } else {
-                    done(null, false, {
-                        message: `user not found`
-                    })
-                }
-            })
         } else {
             done(null, false, {
-                message: `user not found`
+                message: err.message
             })
         }
     })
-});*/
+
+});
 
 const isValidPassword = function (userpass, password) {
     return bCrypt.compareSync(password, userpass);

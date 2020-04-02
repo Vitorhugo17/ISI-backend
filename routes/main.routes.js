@@ -108,6 +108,4 @@ router.get('/categories', (request, response) => {
     })
 });
 
-
-
 module.exports = router;

@@ -21,24 +21,14 @@ module.exports = function (app, passport) {
                 })
             }
             if (user) {
+                console.log("1");
                 req.login(user, (err) => {
+                    console.log(err);
                     return res.status(200).send(req.user);
                 })
+            } else {
+                return res.status(400).json(info);
             }
-            return res.status(400).json(info);
         })(req, res, next);
     })
-    app.get('/auth/facebook',
-        passport.authenticate('facebook', { scope: ['email'] }));
-
-    app.get('/auth/facebook/callback',
-        passport.authenticate('facebook',{
-            failureRedirect: '/'
-        }),
-        function (req, res) {
-            // Successful authentication, redirect home.
-            console.log(req.user)
-            res.redirect('/dashboard');
-        }
-    );
 };

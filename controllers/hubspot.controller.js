@@ -89,17 +89,6 @@ function updateClient(user_id, properties, callback) {
     })
 }
 
-
-function generatePass() {
-    const length = 25,
-        charSET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let retVal = "";
-    for (let i = 0; i < length; ++i) {
-        retVal += charSET.charAt(Math.floor(Math.random() * charSET.length));
-    }
-    return retVal;
-}
-
 module.exports = {
     getClient: getClient,
     updateClient: updateClient
