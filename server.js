@@ -10,6 +10,7 @@ const sanitizer = require('express-sanitizer');
 const session = require('express-session');
 const uuid = require('uuid/v4');
 const RedisStore = require('connect-redis')(session);
+var FileStore = require('session-file-store')(session);
 const passport = require('./config/passport');
 const nodemailer = require('nodemailer');
 const smtpTransport = require('nodemailer-smtp-transport');
@@ -26,7 +27,7 @@ app.use(sanitizer());
 app.use(validator());
 
 app.use(session({
-    genid: (req) => {
+    /*genid: (req) => {
         return uuid()
     },
     store: new RedisStore({
@@ -34,7 +35,7 @@ app.use(session({
             host: process.env.REDIS_HOST || '127.0.0.1',
             port: process.env.REDIS_PORT || 6379
         }),
-    }),
+    }),*/
     secret: 'keyboard cat',
     resave: true,
     saveUninitialized: false,

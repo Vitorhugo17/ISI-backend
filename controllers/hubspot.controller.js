@@ -31,7 +31,6 @@ function getClient(user_id, callback) {
                 jasmin_id = "Not available";
             }
 
-
             const result = {
                 "user_id": data.hs_object_id.value,
                 "moloni_id": moloni_id,
@@ -39,8 +38,8 @@ function getClient(user_id, callback) {
                 "nome": data.firstname.value,
                 "apelido": data.lastname.value,
                 "email": data.email.value,
-                "data_nascimento": data.date_of_birth.value,
-                "numero_telefone": data.phone.value,
+                "data_nascimento": (data.date_of_birth ? data.date_of_birth.value: null),
+                "numero_telefone": (data.phone ? data.phone.value: null),
                 "numero_mecanografico": data.no_mecanografico.value,
                 "bilhetes_disponiveis_barquense": data.bilhetes_disponiveis_barquense.value,
                 "bilhetes_disponiveis_transdev": data.bilhetes_disponiveis_transdev.value,

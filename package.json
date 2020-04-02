@@ -41,6 +41,7 @@
     "querystring": "^0.2.0",
     "redis": "^3.0.2",
     "request": "^2.88.2",
+    "session-file-store": "^1.4.0",
     "stripe": "^8.38.0",
     "uuid": "^7.0.2"
   }
