@@ -19,16 +19,16 @@ function getClient(user_id, callback) {
 
             let moloni_id;
             let jasmin_id;
-            if (data.moloni_id.value) {
+            if (data.moloni_id) {
                 moloni_id = data.moloni_id.value;
             } else {
-                moloni_id = "Não aplicável";
+                moloni_id = -1;
             }
 
-            if (data.jasmin_id.value) {
+            if (data.jasmin_id) {
                 jasmin_id = data.jasmin_id.value;
             } else {
-                jasmin_id = "Not available";
+                jasmin_id = -1;
             }
 
             const result = {
@@ -38,8 +38,8 @@ function getClient(user_id, callback) {
                 "nome": data.firstname.value,
                 "apelido": data.lastname.value,
                 "email": data.email.value,
-                "data_nascimento": (data.date_of_birth ? data.date_of_birth.value: null),
-                "numero_telefone": (data.phone ? data.phone.value: null),
+                "data_nascimento": (data.date_of_birth ? data.date_of_birth.value : null),
+                "numero_telefone": (data.phone ? data.phone.value : null),
                 "numero_mecanografico": data.no_mecanografico.value,
                 "bilhetes_disponiveis_barquense": data.bilhetes_disponiveis_barquense.value,
                 "bilhetes_disponiveis_transdev": data.bilhetes_disponiveis_transdev.value,
@@ -57,11 +57,39 @@ function getClient(user_id, callback) {
     })
 }
 
+function createClient(properties, callback) {
+    let json = JSON.stringify({
+        "properties": properties
+    });
+
+    let options = {
+        headers: {
+            'Content-Length': json.length,
+            'Content-Type': 'application/json'
+        },
+        url: `https://api.hubapi.com/contacts/v1/contact/?hapikey=${connection.hubspot.key}`,
+        body: json
+    }
+    req.post(options, (err, res) => {
+        if (!err && res.statusCode == 200) {
+            callback({
+                statusCode: 200,
+                body: {
+                    "user_id": JSON.parse(res.body).vid          
+                }
+            })
+        } else {
+            callback({
+                "statusCode": res.statusCode,
+                "body": JSON.parse(res.body)
+            })
+        }
+    })
+}
+
 function updateClient(user_id, properties, callback) {
     let json = {
-        "properties": [
-           properties
-        ]
+        "properties": properties
     }
     let options = {
         headers: {
@@ -69,7 +97,6 @@ function updateClient(user_id, properties, callback) {
             'Content-Type': 'application/json'
         },
         url: `https://api.hubapi.com/contacts/v1/contact/vid/${user_id}/profile?hapikey=${connection.hubspot.key}`,
-
         body: JSON.stringify(json)
     }
 
@@ -92,5 +119,6 @@ function updateClient(user_id, properties, callback) {
 
 module.exports = {
     getClient: getClient,
+    createClient: createClient,
     updateClient: updateClient
 };

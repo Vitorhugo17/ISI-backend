@@ -1,7 +1,75 @@
+const req = require('request');
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const bCrypt = require('bcryptjs');
+const connect = require('./../config/connectBD')
+
 const hubspotController = require('./hubspot.controller');
 const moloniController = require('./moloni.controller');
 const jasminController = require('./jasmin.controller');
-const req = require('request');
+
+function insertUser(request, response) {
+    const nome = request.sanitize('nome').escape();
+    const apelido = request.sanitize('apelido').escape();
+    const email = request.sanitize('email').escape();
+    const nif = request.sanitize('nif').escape();
+    const password = request.sanitize('password').escape();
+    const numero_mecanografico = request.sanitize('numero_mecanografico').escape();
+
+    const pass = bCrypt.hashSync(password, bCrypt.genSaltSync(10));
+
+    const properties = [{
+        property: "firstname",
+        value: nome
+    }, {
+        property: "lastname",
+        value: apelido
+    }, {
+        property: "email",
+        value: email
+    }, {
+        property: "no_mecanografico",
+        value: numero_mecanografico
+    }, {
+        property: "bilhetes_disponiveis_barquense",
+        value: 0
+    }, {
+        property: "bilhetes_disponiveis_transdev",
+        value: 0
+    }];
+    if (nif != "") {
+        properties.push({
+            property: "nif",
+            value: nif
+        })
+    }
+
+    hubspotController.createClient(properties, (res) => {
+        if (res.statusCode == 200) {
+            const post = {
+                idUtilizador: res.body.user_id,
+                email: email,
+                password: pass
+            }
+
+            connect.query('INSERT INTO utilizador SET ?', post, (err, rows, fields) => {
+                if (!err) {
+                    response.location(res.body.user_id).status(200).send({
+                        "msg": "User inserted with success"
+                    });
+                } else {
+                    response.status(400).send({
+                        message: err.code
+                    })
+                }
+            })
+        } else {
+            response.status(res.statusCode).send(res.body);
+        }
+    });
+}
+
+
+
 
 function insertPurchase(request, response) {
     const user_id = request.sanitize('user_id').escape();
@@ -29,26 +97,62 @@ function insertPurchase(request, response) {
                         const transdev_ticket = user.bilhetes_disponiveis_transdev;
                         const barquense_ticket = user.bilhetes_disponiveis_barquense;
                         if (company == "Barquense") {
-                            moloniController.insertPurchase(user.moloni_id, product_id, quantity, 1, (res) => {
-                                if (res.statusCode == 200) {
-                                    let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
-                                    const updatedData = {
-                                        "property": 'bilhetes_disponiveis_barquense',
-                                        "value": total
-                                    };
-                                    hubspotController.updateClient(user_id, updatedData, (res) => {
-                                        if (res.statusCode == 200) {
-                                            response.status(200).send({
-                                                "message": "Purchase inserted with success"
-                                            })
-                                        } else {
-                                            response.status(res.statusCode).send(res.body);
-                                        }
-                                    })
-                                } else {
-                                    response.status(res.statusCode).send(res.body);
-                                }
-                            })
+                            let moloni_id = user.moloni_id;
+
+                            if (moloni_id == -1) {
+                                moloniController.insertClient(user.nif, (user.nome + " " + user.apelido), user.email, (res) => {
+                                    if (res.statusCode == 200) {
+                                        moloni_id = res.body.customer_id;
+                                        
+                                        moloniController.insertPurchase(moloni_id, product_id, quantity, 1, (res) => {
+                                            if (res.statusCode == 200) {
+                                                let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
+                                                const updatedData = [{
+                                                    "property": 'bilhetes_disponiveis_barquense',
+                                                    "value": total
+                                                }, {
+                                                    "property": 'moloni_id',
+                                                    "value": moloni_id
+                                                }];
+                                                hubspotController.updateClient(user_id, updatedData, (res) => {
+                                                    if (res.statusCode == 200) {
+                                                        response.status(200).send({
+                                                            "message": "Purchase inserted with success"
+                                                        })
+                                                    } else {
+                                                        response.status(res.statusCode).send(res.body);
+                                                    }
+                                                })
+                                            } else {
+                                                response.status(res.statusCode).send(res.body);
+                                            }
+                                        })
+                                    } else {
+                                        response.status(res.statusCode).send(res.body);
+                                    }
+                                })
+                            } else {
+                                moloniController.insertPurchase(moloni_id, product_id, quantity, 1, (res) => {
+                                    if (res.statusCode == 200) {
+                                        let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
+                                        const updatedData = [{
+                                            "property": 'bilhetes_disponiveis_barquense',
+                                            "value": total
+                                        }];
+                                        hubspotController.updateClient(user_id, updatedData, (res) => {
+                                            if (res.statusCode == 200) {
+                                                response.status(200).send({
+                                                    "message": "Purchase inserted with success"
+                                                })
+                                            } else {
+                                                response.status(res.statusCode).send(res.body);
+                                            }
+                                        })
+                                    } else {
+                                        response.status(res.statusCode).send(res.body);
+                                    }
+                                })
+                            }
                         } else if (company == "Transdev") {
                             jasminController.insertPurchase(user.jasmin_id, (user.firstname + " " + user.lastname), user.nif, product_id, quantity, (res) => {
                                 if (res.statusCode == 200) {
@@ -143,6 +247,79 @@ function getProducts(request, response) {
     })
 }
 
+function getStripeKey(request, response) {
+    response.status(200).send({
+        publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
+    });
+}
+
+function pay(request, response) {
+    const paymentMethodId = request.sanitize("paymentMethodId").escape();
+    const paymentIntentId = request.sanitize("paymentIntentId").escape();
+    const quantity = request.sanitize("quantity").escape();
+    const product_id = request.sanitize("product_id").escape();
+    const company = request.sanitize("company").escape();
+    const useStripeSdk = request.sanitize("useStripeSdk").escape();
+
+    calculateOrderAmount(parseInt(quantity), product_id, company, async (res) => {
+        if (res.orderAmount) {
+            const orderAmount = res.orderAmount.toFixed(2);
+
+            try {
+                let intent;
+                if (paymentMethodId) {
+                    intent = await stripe.paymentIntents.create({
+                        amount: parseInt(orderAmount * 100),
+                        currency: "eur",
+                        payment_method: paymentMethodId,
+                        confirmation_method: "manual",
+                        confirm: true,
+                        use_stripe_sdk: useStripeSdk,
+                    });
+                    // After create, if the PaymentIntent's status is succeeded, fulfill the order.
+                } else if (paymentIntentId) {
+                    // Confirm the PaymentIntent to finalize payment after handling a required action
+                    // on the client.
+                    intent = await stripe.paymentIntents.confirm(paymentIntentId);
+                    // After confirm, if the PaymentIntent's status is succeeded, fulfill the order.
+                }
+
+                let status;
+                switch (intent.status) {
+                    case "requires_action":
+                    case "requires_source_action":
+                        // Card requires authentication
+                        status = {
+                            requiresAction: true,
+                            clientSecret: intent.client_secret
+                        };
+                    case "requires_payment_method":
+                    case "requires_source":
+                        // Card was not properly authenticated, suggest a new payment method
+                        status = {
+                            error: "Your card was denied, please provide a new payment method"
+                        };
+                    case "succeeded":
+                        status = {
+                            clientSecret: intent.client_secret
+                        };
+                }
+                if (status.error) {
+                    response.status(400).send(status);
+                } else {
+                    response.status(200).send(status);
+                }
+            } catch (e) {
+                response.status(400).send({
+                    error: e.message
+                });
+            }
+        } else {
+            response.status(res.statusCode).send(res.body);
+        }
+    })
+}
+
 function calculateOrderAmount(quantity, product_id, company, callback) {
     if (company == "Barquense") {
         moloniController.getProducts((res) => {
@@ -208,5 +385,7 @@ function calculateOrderAmount(quantity, product_id, company, callback) {
 module.exports = {
     getProducts: getProducts,
     insertPurchase: insertPurchase,
-    calculateOrderAmount: calculateOrderAmount
+    insertUser: insertUser,
+    getStripeKey: getStripeKey,
+    pay: pay
 }

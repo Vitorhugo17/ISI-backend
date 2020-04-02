@@ -17,7 +17,8 @@ passport.use(new LocalStrategy({
                             let userF = {
                                 user_id: user.idUtilizador,
                                 email: user.email,
-                                nome: res.user.nome + " " + res.user.apelido,
+                                nome: res.user.nome,
+                                apelido: res.user.apelido,
                                 data_nascimento: res.user.data_nascimento,
                                 numero_telefone: res.user.numero_telefone,
                                 numero_mecanografico: res.user.numero_mecanografico,
@@ -42,7 +43,7 @@ passport.use(new LocalStrategy({
             }
         } else {
             done(null, false, {
-                message: err.message
+                message: err.code
             })
         }
     })
@@ -62,7 +63,8 @@ passport.deserializeUser((id, done) => {
                         let userF = {
                             user_id: user.idUtilizador,
                             email: user.email,
-                            nome: res.user.nome + " " + res.user.apelido,
+                            nome: res.user.nome,
+                            apelido: res.user.apelido,
                             data_nascimento: res.user.data_nascimento,
                             numero_telefone: res.user.numero_telefone,
                             numero_mecanografico: res.user.numero_mecanografico,
@@ -82,7 +84,7 @@ passport.deserializeUser((id, done) => {
             }
         } else {
             done(null, false, {
-                message: err.message
+                message: err.code
             })
         }
     })
