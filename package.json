@@ -38,6 +38,7 @@
     "passport": "^0.4.1",
     "passport-facebook": "^3.0.0",
     "passport-local": "^1.0.0",
+    "qrcode": "^1.4.4",
     "querystring": "^0.2.0",
     "redis": "^3.0.2",
     "request": "^2.88.2",

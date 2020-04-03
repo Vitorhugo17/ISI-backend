@@ -18,5 +18,4 @@ router.post("/pay", mainController.pay);
 router.post('/purchases', mainController.insertPurchase);
 router.post('/users', mainController.insertUser);
 
-
 module.exports = router;
