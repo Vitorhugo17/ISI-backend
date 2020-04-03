@@ -13,7 +13,6 @@ function insertUser(request, response) {
     const email = request.sanitize('email').escape();
     const nif = request.sanitize('nif').escape();
     const password = request.sanitize('password').escape();
-    const numero_mecanografico = request.sanitize('numero_mecanografico').escape();
 
     const pass = bCrypt.hashSync(password, bCrypt.genSaltSync(10));
 
@@ -26,9 +25,6 @@ function insertUser(request, response) {
     }, {
         property: "email",
         value: email
-    }, {
-        property: "no_mecanografico",
-        value: numero_mecanografico
     }, {
         property: "bilhetes_disponiveis_barquense",
         value: 0
@@ -53,7 +49,7 @@ function insertUser(request, response) {
 
             connect.query('INSERT INTO utilizador SET ?', post, (err, rows, fields) => {
                 if (!err) {
-                    response.location(res.body.user_id).status(200).send({
+                    response.status(200).send({
                         "msg": "User inserted with success"
                     });
                 } else {
@@ -104,7 +100,7 @@ function insertPurchase(request, response) {
                                     if (res.statusCode == 200) {
                                         moloni_id = res.body.customer_id;
 
-                                        moloniController.insertPurchase(moloni_id, product_id, quantity, 1, (res) => {
+                                        moloniController.insertPurchase(moloni_id, product_id, parseInt(quantity), 1, (res) => {
                                             if (res.statusCode == 200) {
                                                 let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
                                                 const updatedData = [{
@@ -132,7 +128,7 @@ function insertPurchase(request, response) {
                                     }
                                 })
                             } else {
-                                moloniController.insertPurchase(moloni_id, product_id, quantity, 1, (res) => {
+                                moloniController.insertPurchase(moloni_id, product_id, parseInt(quantity), 1, (res) => {
                                     if (res.statusCode == 200) {
                                         let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
                                         const updatedData = [{
@@ -156,28 +152,37 @@ function insertPurchase(request, response) {
                         } else if (company == "Transdev") {
                             let jasmin_id = user.jasmin_id;
                             if (jasmin_id == -1) {
-                                jasminController.insertPurchase(jasmin_id, (user.firstname + " " + user.lastname), user.nif, product_id, quantity, (res) => {
+                                jasminController.insertClient((user.nome + " " + user.apelido), (res) => {
                                     if (res.statusCode == 200) {
-                                        let total = parseInt(transdev_ticket) + parseInt(quantity * product.quantity);
-                                        const updatedData = [{
-                                            "property": 'bilhetes_disponiveis_transdev',
-                                            "value": total
-                                        }];
-                                        hubspotController.updateClient(user_id, updatedData, (res) => {
+                                        jasmin_id = res.body.customer_id;
+
+                                        jasminController.insertPurchase(jasmin_id, (user.firstname + " " + user.lastname), user.nif, product_id, parseInt(quantity), (res) => {
                                             if (res.statusCode == 200) {
-                                                response.status(200).send({
-                                                    "message": "Purchase inserted with success"
+                                                let total = parseInt(transdev_ticket) + parseInt(quantity * product.quantity);
+                                                const updatedData = [{
+                                                    "property": 'bilhetes_disponiveis_transdev',
+                                                    "value": total
+                                                }, {
+                                                    "property": 'jasmin_id',
+                                                    "value": jasmin_id
+                                                }];
+                                                hubspotController.updateClient(user_id, updatedData, (res) => {
+                                                    if (res.statusCode == 200) {
+                                                        response.status(200).send({
+                                                            "message": "Purchase inserted with success"
+                                                        })
+                                                    } else {
+                                                        response.status(res.statusCode).send(res.body);
+                                                    }
                                                 })
                                             } else {
                                                 response.status(res.statusCode).send(res.body);
                                             }
                                         })
-                                    } else {
-                                        response.status(res.statusCode).send(res.body);
                                     }
                                 })
                             } else {
-                                jasminController.insertPurchase(jasmin_id, (user.firstname + " " + user.lastname), user.nif, product_id, quantity, (res) => {
+                                jasminController.insertPurchase(jasmin_id, (user.firstname + " " + user.lastname), user.nif, product_id, parseInt(quantity), (res) => {
                                     if (res.statusCode == 200) {
                                         let total = parseInt(transdev_ticket) + parseInt(quantity * product.quantity);
                                         const updatedData = [{

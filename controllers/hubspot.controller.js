@@ -17,30 +17,16 @@ function getClient(user_id, callback) {
             let user = JSON.parse(res.body);
             let data = user.properties;
 
-            let moloni_id;
-            let jasmin_id;
-            if (data.moloni_id) {
-                moloni_id = data.moloni_id.value;
-            } else {
-                moloni_id = -1;
-            }
-
-            if (data.jasmin_id) {
-                jasmin_id = data.jasmin_id.value;
-            } else {
-                jasmin_id = -1;
-            }
-
             const result = {
                 "user_id": data.hs_object_id.value,
-                "moloni_id": moloni_id,
-                "jasmin_id": jasmin_id,
+                "moloni_id": (data.moloni_id ? data.moloni_id.value : -1),
+                "jasmin_id": (data.jasmin_id ? data.jasmin_id.value : -1),
                 "nome": data.firstname.value,
                 "apelido": data.lastname.value,
                 "email": data.email.value,
                 "data_nascimento": (data.date_of_birth ? data.date_of_birth.value : null),
                 "numero_telefone": (data.phone ? data.phone.value : null),
-                "numero_mecanografico": data.no_mecanografico.value,
+                "numero_mecanografico": (data.no_mecanografico ? data.no_mecanografico.value : null),
                 "bilhetes_disponiveis_barquense": data.bilhetes_disponiveis_barquense.value,
                 "bilhetes_disponiveis_transdev": data.bilhetes_disponiveis_transdev.value,
                 "nif": data.nif.value

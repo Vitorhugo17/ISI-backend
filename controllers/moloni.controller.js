@@ -130,31 +130,74 @@ function insertPurchase(customer_id, product_id, quantity, status, callback) {
             const products = res.products;
             const company_id = res.company_id;
             const access_token = res.access_token;
-            let product = {};
+
+            let productsF = [];
             for (let i = 0; i < products.length; i++) {
-                if (products[i].product_id == product_id) {
-                    product = products[i];
-                    product = {
-                        "product_id": product.product_id,
-                        "name": product.name,
-                        "summary": product.summary,
-                        "qty": quantity,
-                        "price": product.price,
-                        "discount": 0,
-                        "deduction_id": 0,
-                        "order": 0,
-                        "exemption_reason": "",
-                        "taxes": [{
-                            "tax_id": product.taxes[0].tax_id,
-                            "value": product.taxes[0].value,
-                            "order": product.taxes[0].order,
-                            "cumulative": product.taxes[0].cumulative
-                        }]
-                    };
-                    break;
+                if (quantity >= 5) {
+                    if (quantity % 5 != 0) {
+                        if (products[i].product_id == product_id) {
+                            productsF.push({
+                                "product_id": products[i].product_id,
+                                "name": products[i].name,
+                                "summary": products[i].summary,
+                                "qty": (quantity % 5),
+                                "price": products[i].price,
+                                "discount": 0,
+                                "deduction_id": 0,
+                                "order": 0,
+                                "exemption_reason": "",
+                                "taxes": [{
+                                    "tax_id": products[i].taxes[0].tax_id,
+                                    "value": products[i].taxes[0].value,
+                                    "order": products[i].taxes[0].order,
+                                    "cumulative": products[i].taxes[0].cumulative
+                                }]
+                            });
+                        }
+                    }
+                    if (products[i].name.includes("Pack")) {
+                        productsF.push({
+                            "product_id": products[i].product_id,
+                            "name": products[i].name,
+                            "summary": products[i].summary,
+                            "qty": Math.floor(quantity / 5),
+                            "price": products[i].price,
+                            "discount": 0,
+                            "deduction_id": 0,
+                            "order": 0,
+                            "exemption_reason": "",
+                            "taxes": [{
+                                "tax_id": products[i].taxes[0].tax_id,
+                                "value": products[i].taxes[0].value,
+                                "order": products[i].taxes[0].order,
+                                "cumulative": products[i].taxes[0].cumulative
+                            }]
+                        });
+                    }
+                } else {
+                    if (products[i].product_id == product_id) {
+                        productsF.push({
+                            "product_id": products[i].product_id,
+                            "name": products[i].name,
+                            "summary": products[i].summary,
+                            "qty": quantity,
+                            "price": products[i].price,
+                            "discount": 0,
+                            "deduction_id": 0,
+                            "order": 0,
+                            "exemption_reason": "",
+                            "taxes": [{
+                                "tax_id": products[i].taxes[0].tax_id,
+                                "value": products[i].taxes[0].value,
+                                "order": products[i].taxes[0].order,
+                                "cumulative": products[i].taxes[0].cumulative
+                            }]
+                        });
+                        break;
+                    }
                 }
             }
-            if (product.product_id) {
+            if (productsF.length != 0) {
                 let json = {
                     "company_id": company_id,
                     "date": new Date().toISOString(),
@@ -175,13 +218,17 @@ function insertPurchase(customer_id, product_id, quantity, status, callback) {
                     "notes": "",
                     "status": status,
                     "net_value": 0,
-                    "products": [product]
+                    "products": productsF
                 };
                 if (json.status == 1) {
+                    let total = 0;
+                    for (let i = 0; i < productsF.length; i++) {
+                        total += (productsF[i].qty * (productsF[i].price + products[i].taxes[0].value)).toFixed(2);
+                    }
                     json.payments = [{
                         "payment_method_id": 820244,
                         "date": new Date().toISOString(),
-                        "value": (quantity * (product.price + product.taxes[0].value)).toFixed(2)
+                        "value": total
                     }]
                 }
 
@@ -194,6 +241,7 @@ function insertPurchase(customer_id, product_id, quantity, status, callback) {
                 }
                 req.post(options, (err, res) => {
                     if (!err && res.statusCode == 200) {
+                        console.log(res.body);
                         callback({
                             "statusCode": res.statusCode,
                             "body": {
