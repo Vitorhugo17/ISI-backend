@@ -28,7 +28,9 @@ function getClient(user_id, callback) {
                 "numero_telefone": (data.phone ? data.phone.value : null),
                 "numero_mecanografico": (data.no_mecanografico ? data.no_mecanografico.value : null),
                 "bilhetes_disponiveis_barquense": data.bilhetes_disponiveis_barquense.value,
+                "bilhetes_ida_e_volta_barquense": data.bilhetes_ida_e_volta_barquense.value,
                 "bilhetes_disponiveis_transdev": data.bilhetes_disponiveis_transdev.value,
+                "bilhetes_ida_e_volta_transdev": data.bilhetes_ida_e_volta_transdev.value,
                 "nif": data.nif.value
             }
             callback({

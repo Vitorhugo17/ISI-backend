@@ -29,7 +29,13 @@ function insertUser(request, response) {
         property: "bilhetes_disponiveis_barquense",
         value: 0
     }, {
+        property: "bilhetes_ida_e_volta_barquense",
+        value: 0
+    }, {
         property: "bilhetes_disponiveis_transdev",
+        value: 0
+    }, {
+        property: "bilhetes_ida_e_volta_transdev",
         value: 0
     }];
     if (nif != "") {
