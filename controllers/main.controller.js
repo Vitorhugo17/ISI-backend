@@ -225,54 +225,53 @@ function insertPurchase(request, response) {
 
 function getProducts(request, response) {
     moloniController.getProducts((resMoloni) => {
-        if (resMoloni.products) {
-            const respMoloni = resMoloni.products;
+        jasminController.getProducts((resJasmin) => {
+            let products = [];
+            if (resMoloni.products) {
+                const respMoloni = resMoloni.products;
 
-            let productsBarquense = [];
-            for (let i = 0; i < respMoloni.length; i++) {
-                let json = {};
-                json.id = respMoloni[i].product_id;
-                json.name = respMoloni[i].name;
-                json.price = (respMoloni[i].price + respMoloni[i].taxes[0].value).toFixed(2);
-                json.measure = respMoloni[i].measurement_unit.name;
-                json.company = "Barquense";
-                if (respMoloni[i].child_products[0]) {
-                    json.quantity = respMoloni[i].child_products[0].qty;
-                } else {
-                    json.quantity = 1;
+                for (let i = 0; i < respMoloni.length; i++) {
+                    let json = {};
+                    json.id = respMoloni[i].product_id;
+                    json.name = respMoloni[i].name;
+                    json.price = (respMoloni[i].price + respMoloni[i].taxes[0].value).toFixed(2);
+                    json.measure = respMoloni[i].measurement_unit.name;
+                    json.company = "Barquense";
+                    if (respMoloni[i].child_products[0]) {
+                        json.quantity = respMoloni[i].child_products[0].qty;
+                    } else {
+                        json.quantity = 1;
+                    }
+                    products.push(json);
                 }
-                productsBarquense.push(json);
+            }
+            if (resJasmin.products) {
+                const respJasmin = resJasmin.products;
+
+                for (let i = 0; i < respJasmin.length; i++) {
+                    if (respJasmin[i].itemTypeDescription == "Service" && respJasmin[i].itemKey != "PORTES") {
+                        let json = {};
+                        json.id = respJasmin[i].itemKey;
+                        json.name = respJasmin[i].description;
+                        json.price = respJasmin[i].priceListLines[0].priceAmount.amount.toFixed(2);
+                        json.measure = respJasmin[i].unitDescription;
+                        json.company = "Transdev";
+                        json.quantity = parseInt(respJasmin[i].complementaryDescription);
+                        products.push(json);
+                    }
+                }
             }
 
-            jasminController.getProducts((resJasmin) => {
-                if (resJasmin.products) {
-                    const respJasmin = resJasmin.products;
-
-                    let productsTransdev = [];
-                    for (let i = 0; i < respJasmin.length; i++) {
-                        if (respJasmin[i].itemTypeDescription == "Service" && respJasmin[i].itemKey != "PORTES") {
-                            let json = {};
-                            json.id = respJasmin[i].itemKey;
-                            json.name = respJasmin[i].description;
-                            json.price = respJasmin[i].priceListLines[0].priceAmount.amount.toFixed(2);
-                            json.measure = respJasmin[i].unitDescription;
-                            json.company = "Transdev";
-                            json.quantity = parseInt(respJasmin[i].complementaryDescription);
-                            productsTransdev.push(json);
-                        }
-                    }
-
-                    const products = productsBarquense.concat(productsTransdev);
-                    response.status(200).send({
-                        "products": products
-                    });
-                } else {
-                    response.status(resJasmin.statusCode).send(resJasmin.body);
-                }
-            })
-        } else {
-            response.status(resMoloni.statusCode).send(resMoloni.body);
-        }
+            if (products.length != 0) {
+                response.status(200).send({
+                    "products": products
+                });
+            } else {
+                response.status(404).send({
+                    "message": "Products not found"
+                })
+            }
+        })
     })
 }
 
