@@ -11,11 +11,10 @@ router.use(function (request, response, next) {
     next();
 });
 
-router.get("/stripe-key", mainController.getStripeKey);
-router.get('/products', mainController.getProducts);
+router.get("/stripe-key", isLoggedIn, mainController.getStripeKey);
+router.get('/products', isLoggedIn, mainController.getProducts);
 
-router.post("/pay", mainController.pay);
-router.post('/purchases', mainController.insertPurchase);
-router.post('/users', mainController.insertUser);
+router.post("/pay", isLoggedIn, mainController.pay);
+router.post('/purchases', isLoggedIn, mainController.insertPurchase);
 
 module.exports = router;

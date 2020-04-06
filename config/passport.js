@@ -12,25 +12,36 @@ passport.use(new LocalStrategy({
             if (rows.length != 0) {
                 const user = rows[0];
                 if (isValidPassword(user.password, password)) {
-                    hubspotController.getClient(user.idUtilizador, (res) => {
-                        if (res.user) {
-                            let userF = {
-                                user_id: user.idUtilizador,
-                                email: user.email,
-                                nome: res.user.nome,
-                                apelido: res.user.apelido,
-                                data_nascimento: res.user.data_nascimento,
-                                numero_telefone: res.user.numero_telefone,
-                                numero_mecanografico: res.user.numero_mecanografico,
-                                nif: res.user.nif
-                            }
-                            return done(null, userF);
-                        } else {
-                            done(null, false, {
-                                message: `user not found`
-                            })
+                    if (user.isEmpresa) {
+                        let userF = {
+                            user_id: user.idUtilizador,
+                            email: user.email,
+                            nome: user.nome,
+                            isEmpresa: true
                         }
-                    })
+                        return done(null, userF);
+                    } else {
+                        hubspotController.getClient(user.idUtilizador, (res) => {
+                            if (res.user) {
+                                let userF = {
+                                    user_id: user.idUtilizador,
+                                    email: user.email,
+                                    nome: res.user.nome,
+                                    apelido: res.user.apelido,
+                                    data_nascimento: res.user.data_nascimento,
+                                    numero_telefone: res.user.numero_telefone,
+                                    numero_mecanografico: res.user.numero_mecanografico,
+                                    nif: res.user.nif,
+                                    isEmpresa: false
+                                }
+                                return done(null, userF);
+                            } else {
+                                done(null, false, {
+                                    message: `user not found`
+                                })
+                            }
+                        })
+                    }
                 } else {
                     done(null, false, {
                         message: `password invalid`
@@ -58,25 +69,36 @@ passport.deserializeUser((id, done) => {
         if (!err) {
             if (rows.length != 0) {
                 const user = rows[0];
-                hubspotController.getClient(user.idUtilizador, (res) => {
-                    if (res.user) {
-                        let userF = {
-                            user_id: user.idUtilizador,
-                            email: user.email,
-                            nome: res.user.nome,
-                            apelido: res.user.apelido,
-                            data_nascimento: res.user.data_nascimento,
-                            numero_telefone: res.user.numero_telefone,
-                            numero_mecanografico: res.user.numero_mecanografico,
-                            nif: res.user.nif
-                        }
-                        return done(null, userF);
-                    } else {
-                        done(null, false, {
-                            message: `user not found`
-                        })
+                if (user.isEmprsa) {
+                    let userF = {
+                        user_id: user.idUtilizador,
+                        email: user.email,
+                        nome: user.nome,
+                        isEmpresa: true
                     }
-                })
+                    return done(null, userF);
+                } else {
+                    hubspotController.getClient(user.idUtilizador, (res) => {
+                        if (res.user) {
+                            let userF = {
+                                user_id: user.idUtilizador,
+                                email: user.email,
+                                nome: res.user.nome,
+                                apelido: res.user.apelido,
+                                data_nascimento: res.user.data_nascimento,
+                                numero_telefone: res.user.numero_telefone,
+                                numero_mecanografico: res.user.numero_mecanografico,
+                                nif: res.user.nif,
+                                isEmpresa: false
+                            }
+                            return done(null, userF);
+                        } else {
+                            done(null, false, {
+                                message: `user not found`
+                            })
+                        }
+                    })
+                }
             } else {
                 done(null, false, {
                     message: `user not found`

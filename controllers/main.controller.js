@@ -50,17 +50,18 @@ function insertUser(request, response) {
             const post = {
                 idUtilizador: res.body.user_id,
                 email: email,
-                password: pass
+                password: pass,
+                isEmpresa: false
             }
 
             connect.query('INSERT INTO utilizador SET ?', post, (err, rows, fields) => {
                 if (!err) {
                     response.status(200).send({
-                        "msg": "User inserted with success"
+                        "message": "User inserted with success"
                     });
                 } else {
                     response.status(400).send({
-                        message: err.code
+                        "message": err.code
                     })
                 }
             })
@@ -74,7 +75,7 @@ function insertUser(request, response) {
 
 
 function insertPurchase(request, response) {
-    const user_id = request.sanitize('user_id').escape();
+    const user_id = request.user.user_id;
     const product_id = request.sanitize('product_id').escape();
     const quantity = request.sanitize('quantity').escape();
     const company = request.sanitize('company').escape();
@@ -308,7 +309,7 @@ function pay(request, response) {
                         payment_method: paymentMethodId,
                         confirmation_method: "manual",
                         confirm: true,
-                        use_stripe_sdk: useStripeSdk,
+                        use_stripe_sdk: useStripeSdk
                     });
                     // After create, if the PaymentIntent's status is succeeded, fulfill the order.
                 } else if (paymentIntentId) {

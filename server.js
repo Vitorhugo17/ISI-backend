@@ -17,6 +17,16 @@ const smtpTransport = require('nodemailer-smtp-transport');
 global.urlBase = `http://${ip.address()}:${process.env.PORT}`;
 global.jasminUrl = `https://my.jasminsoftware.com/api/233711/233711-0001/`;
 
+global.isLoggedIn = (request, response, next) => {
+    if (request.isAuthenticated()) {
+        next();
+    } else {
+        response.status(403).send({
+            "message": "Não está autorizado a aceder a este conteudo"
+        })
+    }
+}
+
 app.use(bodyParser.json({
     limit: '50mb'
 }), bodyParser.urlencoded({
