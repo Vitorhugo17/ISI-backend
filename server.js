@@ -57,6 +57,13 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+//CORS
+app.use(function (request, response, next) {
+    response.header("Access-Control-Allow-Origin", "*");
+    response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 require('./routes/auth.route')(app, passport);
 app.use('/', require('./routes/main.routes'));
 
