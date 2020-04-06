@@ -45,7 +45,7 @@ function insertUser(request, response) {
                     value: nif
                 })
             }
-        
+
             hubspotController.createClient(properties, (res) => {
                 if (res.statusCode == 200) {
                     const post = {
@@ -54,7 +54,7 @@ function insertUser(request, response) {
                         password: pass,
                         isEmpresa: false
                     }
-        
+
                     connect.query('INSERT INTO utilizador SET ?', post, (err, rows, fields) => {
                         if (!err) {
                             response.status(200).send({
@@ -80,7 +80,7 @@ function insertUser(request, response) {
             })
         }
     });
-    
+
 }
 
 
@@ -111,6 +111,8 @@ function insertPurchase(request, response) {
                     if (product != "") {
                         const transdev_ticket = user.bilhetes_disponiveis_transdev;
                         const barquense_ticket = user.bilhetes_disponiveis_barquense;
+                        const transdev_ida_volta = user.bilhetes_ida_e_volta_transdev;
+                        const barquense_ida_volta = user.bilhetes_ida_e_volta_barquense;
                         if (company == "Barquense") {
                             let moloni_id = user.moloni_id;
 
@@ -121,14 +123,26 @@ function insertPurchase(request, response) {
 
                                         moloniController.insertPurchase(moloni_id, product_id, parseInt(quantity), 1, (res) => {
                                             if (res.statusCode == 200) {
-                                                let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
-                                                const updatedData = [{
-                                                    "property": 'bilhetes_disponiveis_barquense',
-                                                    "value": total
-                                                }, {
-                                                    "property": 'moloni_id',
-                                                    "value": moloni_id
-                                                }];
+                                                let updatedData = {};
+                                                if (product.name.toLowerCase().includes("ida e volta")) {
+                                                    let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
+                                                    updatedData = [{
+                                                        "property": 'bilhetes_ida_e_volta_barquense',
+                                                        "value": total
+                                                    }, {
+                                                        "property": 'moloni_id',
+                                                        "value": moloni_id
+                                                    }];
+                                                } else {
+                                                    let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
+                                                    updatedData = [{
+                                                        "property": 'bilhetes_disponiveis_barquense',
+                                                        "value": total
+                                                    }, {
+                                                        "property": 'moloni_id',
+                                                        "value": moloni_id
+                                                    }];
+                                                }
                                                 hubspotController.updateClient(user_id, updatedData, (res) => {
                                                     if (res.statusCode == 200) {
                                                         response.status(200).send({
@@ -149,11 +163,20 @@ function insertPurchase(request, response) {
                             } else {
                                 moloniController.insertPurchase(moloni_id, product_id, parseInt(quantity), 1, (res) => {
                                     if (res.statusCode == 200) {
-                                        let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
-                                        const updatedData = [{
-                                            "property": 'bilhetes_disponiveis_barquense',
-                                            "value": total
-                                        }];
+                                        let updatedData = {};
+                                        if (product.name.toLowerCase().includes("ida e volta")) {
+                                            let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
+                                            updatedData = [{
+                                                "property": 'bilhetes_ida_e_volta_barquense',
+                                                "value": total
+                                            }];
+                                        } else {
+                                            let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
+                                            updatedData = [{
+                                                "property": 'bilhetes_disponiveis_barquense',
+                                                "value": total
+                                            }];
+                                        }
                                         hubspotController.updateClient(user_id, updatedData, (res) => {
                                             if (res.statusCode == 200) {
                                                 response.status(200).send({
@@ -177,14 +200,25 @@ function insertPurchase(request, response) {
 
                                         jasminController.insertPurchase(jasmin_id, (user.firstname + " " + user.lastname), user.nif, product_id, parseInt(quantity), (res) => {
                                             if (res.statusCode == 200) {
-                                                let total = parseInt(transdev_ticket) + parseInt(quantity * product.quantity);
-                                                const updatedData = [{
-                                                    "property": 'bilhetes_disponiveis_transdev',
-                                                    "value": total
-                                                }, {
-                                                    "property": 'jasmin_id',
-                                                    "value": jasmin_id
-                                                }];
+                                                if (product.name.toLowerCase().includes("ida e volta")) {
+                                                    let total = parseInt(transdev_ticket) + parseInt(quantity * product.quantity);
+                                                    updatedData = [{
+                                                        "property": 'bilhetes_ida_e_volta_transdev',
+                                                        "value": total
+                                                    }, {
+                                                        "property": 'jasmin_id',
+                                                        "value": jasmin_id
+                                                    }];
+                                                } else {
+                                                    let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
+                                                    updatedData = [{
+                                                        "property": 'bilhetes_disponiveis_transdev',
+                                                        "value": total
+                                                    }, {
+                                                        "property": 'jasmin_id',
+                                                        "value": jasmin_id
+                                                    }];
+                                                }
                                                 hubspotController.updateClient(user_id, updatedData, (res) => {
                                                     if (res.statusCode == 200) {
                                                         response.status(200).send({
@@ -203,11 +237,19 @@ function insertPurchase(request, response) {
                             } else {
                                 jasminController.insertPurchase(jasmin_id, (user.firstname + " " + user.lastname), user.nif, product_id, parseInt(quantity), (res) => {
                                     if (res.statusCode == 200) {
-                                        let total = parseInt(transdev_ticket) + parseInt(quantity * product.quantity);
-                                        const updatedData = [{
-                                            "property": 'bilhetes_disponiveis_transdev',
-                                            "value": total
-                                        }];
+                                        if (product.name.toLowerCase().includes("ida e volta")) {
+                                            let total = parseInt(transdev_ticket) + parseInt(quantity * product.quantity);
+                                            updatedData = [{
+                                                "property": 'bilhetes_ida_e_volta_transdev',
+                                                "value": total
+                                            }];
+                                        } else {
+                                            let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
+                                            updatedData = [{
+                                                "property": 'bilhetes_disponiveis_transdev',
+                                                "value": total
+                                            }];
+                                        }
                                         hubspotController.updateClient(user_id, updatedData, (res) => {
                                             if (res.statusCode == 200) {
                                                 response.status(200).send({
