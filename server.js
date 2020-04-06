@@ -79,3 +79,4 @@ var server = app.listen(process.env.PORT, function () {
     console.log(`Listening at ${global.urlBase}`);
 });
 
+server.timeout = 100000;
