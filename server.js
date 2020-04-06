@@ -3,6 +3,8 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 
+
+const cors = require("cors");
 const ip = require("ip");
 const bodyParser = require('body-parser');
 const validator = require('express-validator');
@@ -58,9 +60,12 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //CORS
+app.use(cors());
 app.use(function (request, response, next) {
-    response.header("Access-Control-Allow-Origin", "*");
-    response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    console.log(response.cookie().session);
+    response.setHeader("Access-Control-Allow-Origin", "https://test-isicampus.herokuapp.com");
+    response.setHeader("Access-Control-Allow-Credentials", true);
+    response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
 
@@ -74,6 +79,7 @@ app.use(function (request, response, next) {
     };
     next();
 });
+
 
 var server = app.listen(process.env.PORT, function () {
     console.log(`Listening at ${global.urlBase}`);
