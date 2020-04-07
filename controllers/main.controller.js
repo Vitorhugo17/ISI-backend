@@ -1,11 +1,73 @@
 const req = require('request');
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const bCrypt = require('bcryptjs');
-const connect = require('./../config/connectBD')
+const connect = require('./../config/connectBD');
+const connection = require('./../config/connection');
+const nodemailer = require('nodemailer');
+const smtpTransport = require('nodemailer-smtp-transport');
 
 const hubspotController = require('./hubspot.controller');
 const moloniController = require('./moloni.controller');
 const jasminController = require('./jasmin.controller');
+
+function recoverPass(request, response) {
+    const email = request.sanitize('email').escape();
+    connect.query(`SELECT * FROM utilizador WHERE email="${email}"`, (err, rows, fields) => {
+        if (rows.length != 0) {
+            hubspotController.getClient(rows[0].idUtilizador, (res) => {
+                if (res.user) {
+                    const url = urlFront + "/";
+                    let bodycontent = `Olá ${res.user.nome} ${res.user.apelido}, <br> <br>
+                                       Acabámos de receber um pedido para recuperar a sua conta. <br>
+                                       Se pretende avançar com o pedido clique no botão em baixo para definir uma nova palavra-passe. <br><br>
+                                       <center><a href="${url}"><button type="button">Recuperar Conta</button></a></center><br><br>
+                                       Se não conseguir clicar no botão utilize o seguinte link: ${url}<br><br>
+                                       Obrigado, <br>
+                                       Equipa ISICampus`;
+                    const transporter = nodemailer.createTransport(smtpTransport({
+                        service: 'Gmail',
+                        auth: {
+                            user: connection.email.username,
+                            pass: connection.email.password
+                        }
+                    }));
+                    transporter.verify(function (error, success) {
+                        if (error) {
+                            console.log(error);
+                            response.status(400).send("Can't send email");
+                        } else {
+                            const mailOptions = {
+                                FROM: connection.email.username,
+                                to: email,
+                                subject: 'ISICampus: Recuperar conta',
+                                html: bodycontent
+                            };
+                            transporter.sendMail(mailOptions, function (error, info) {
+                                if (error) {
+                                    console.log(error);
+                                    response.status(400).send("Can't send email");
+                                } else {
+                                    response.status(200).send({
+                                        "message": "mail sent"
+                                    });
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    response.status(400).send({
+                        "message": "User not found"
+                    });
+                }
+            })
+        } else {
+            response.status(400).send({
+                "message": "User not found"
+            });
+        }
+    })
+
+}
 
 function insertUser(request, response) {
     const nome = request.sanitize('nome').escape();
@@ -476,5 +538,6 @@ module.exports = {
     insertPurchase: insertPurchase,
     insertUser: insertUser,
     getStripeKey: getStripeKey,
-    pay: pay
+    pay: pay,
+    recoverPass: recoverPass
 }

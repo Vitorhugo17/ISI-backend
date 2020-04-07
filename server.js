@@ -13,11 +13,10 @@ const session = require('express-session');
 const uuid = require('uuid/v4');
 const RedisStore = require('connect-redis')(session);
 const passport = require('./config/passport');
-const nodemailer = require('nodemailer');
-const smtpTransport = require('nodemailer-smtp-transport');
 
 global.urlBase = `http://${ip.address()}:${process.env.PORT}`;
 global.jasminUrl = `https://my.jasminsoftware.com/api/233711/233711-0001/`;
+global.urlFront = `http://${ip.address()}:4242`
 
 global.isLoggedIn = (request, response, next) => {
     if (request.isAuthenticated()) {
