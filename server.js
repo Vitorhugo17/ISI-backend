@@ -3,7 +3,6 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 
-
 const ip = require("ip");
 const bodyParser = require('body-parser');
 const validator = require('express-validator');
