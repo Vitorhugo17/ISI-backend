@@ -10,6 +10,7 @@ router.get('/products', isLoggedIn, mainController.getProducts);
 
 router.post("/pay", isLoggedIn, mainController.pay);
 router.post('/purchases', isLoggedIn, mainController.insertPurchase);
-router.post('/recoverPass', mainController.recoverPass);
+router.post('/password/recover', mainController.recoverPass);
+router.put('/password/update', mainController.updatePass);
 
 module.exports = router;

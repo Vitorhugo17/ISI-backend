@@ -10,10 +10,32 @@ const hubspotController = require('./hubspot.controller');
 const moloniController = require('./moloni.controller');
 const jasminController = require('./jasmin.controller');
 
+function updatePass(request, response) {
+    let user_id = "";
+    if (request.isAuthenticated()) {
+        user_id = request.user.user_id;
+    } else {
+        user_id = request.sanitize('user_id').escape();
+    }
+    const password = bCrypt.hashSync(request.sanitize('password').escape(), bCrypt.genSaltSync(10));
+    const update = [password, user_id];
+    connect.query('UPDATE utilizador SET password=? WHERE idUtilizador=?', update, (err, rows, fields) => {
+        if (!err) {
+            response.status(200).send({
+                "message": "password updated with success"
+            })
+        } else {
+            response.status(400).send({
+                "message": "Can't update password"
+            });
+        }
+    })
+}
+
 function recoverPass(request, response) {
     const email = request.sanitize('email').escape();
     connect.query(`SELECT * FROM utilizador WHERE email="${email}"`, (err, rows, fields) => {
-        if (rows.length != 0) {
+        if (!err && rows.length != 0) {
             hubspotController.getClient(rows[0].idUtilizador, (res) => {
                 if (res.user) {
                     const url = urlFront + "/recoverPass/" + res.user.user_id;
@@ -74,8 +96,7 @@ function insertUser(request, response) {
     const apelido = request.sanitize('apelido').escape();
     const email = request.sanitize('email').escape();
     const nif = request.sanitize('nif').escape();
-    const password = request.sanitize('password').escape();
-    const pass = bCrypt.hashSync(password, bCrypt.genSaltSync(10));
+    const pass = bCrypt.hashSync(request.sanitize('password').escape(), bCrypt.genSaltSync(10));
 
     connect.query(`SELECT* FROM utilizador WHERE email="${email}"`, (err, rows, fields) => {
         if (!err && rows.length == 0) {
@@ -539,5 +560,6 @@ module.exports = {
     insertUser: insertUser,
     getStripeKey: getStripeKey,
     pay: pay,
-    recoverPass: recoverPass
+    recoverPass: recoverPass,
+    updatePass: updatePass
 }
