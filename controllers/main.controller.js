@@ -22,7 +22,7 @@ function updatePass(request, response) {
     connect.query('UPDATE utilizador SET password=? WHERE idUtilizador=?', update, (err, rows, fields) => {
         if (!err) {
             response.status(200).send({
-                "message": "password updated with success"
+                "message": "Password updated with success"
             })
         } else {
             response.status(400).send({
