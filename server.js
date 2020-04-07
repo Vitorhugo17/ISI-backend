@@ -4,7 +4,6 @@ const express = require('express');
 const app = express();
 
 
-const cors = require("cors");
 const ip = require("ip");
 const bodyParser = require('body-parser');
 const validator = require('express-validator');

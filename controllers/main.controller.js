@@ -16,7 +16,7 @@ function recoverPass(request, response) {
         if (rows.length != 0) {
             hubspotController.getClient(rows[0].idUtilizador, (res) => {
                 if (res.user) {
-                    const url = urlFront + "/";
+                    const url = urlFront + "/recoverPass/" + res.user.user_id;
                     let bodycontent = `Olá ${res.user.nome} ${res.user.apelido}, <br> <br>
                                        Acabámos de receber um pedido para recuperar a sua conta. <br>
                                        Se pretende avançar com o pedido clique no botão em baixo para definir uma nova palavra-passe. <br><br>
