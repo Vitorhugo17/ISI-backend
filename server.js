@@ -69,15 +69,6 @@ app.use('/', function (request, response, next) {
 require('./routes/auth.route')(app, passport);
 app.use('/', require('./routes/main.routes'));
 
-app.use(function (request, response, next) {
-    response.locals = {
-        user: request.user,
-        ver: 1.0
-    };
-    next();
-});
-
-
 var server = app.listen(process.env.PORT, function () {
     console.log(`Listening at ${global.urlBase}`);
 });
