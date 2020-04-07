@@ -61,6 +61,7 @@ app.use(passport.session());
 app.use('/', function (request, response, next) {
     response.header("Access-Control-Allow-Origin", "http://localhost:4242");
     response.header("Access-Control-Allow-Credentials", true);
+    response.header("Access-Control-Allow-Methods", "PUT, POST, OPTIONS, GET");
     response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
