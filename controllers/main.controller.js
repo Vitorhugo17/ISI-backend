@@ -10,6 +10,30 @@ const hubspotController = require('./hubspot.controller');
 const moloniController = require('./moloni.controller');
 const jasminController = require('./jasmin.controller');
 
+function getInfoUser(request, response) {
+    const user_id = request.user.user_id;
+    hubspotController.getClient(user_id, (res) => {
+        if (res.user) {
+            const result = {
+                "nome": res.user.nome,
+                "apelido": res.user.apelido,
+                "email": res.user.email,
+                "data_nascimento": res.user.data_nascimento,
+                "numero_telefone": res.user.numero_telefone,
+                "numero_mecanografico": res.user.numero_mecanografico,
+                "nif": res.user.nif
+            }
+            response.status(200).send({
+                "user": result
+            })
+        } else {
+            response.status(400).send({
+                "message": "User not found"
+            });
+        }
+    })
+}
+
 function updatePass(request, response) {
     let user_id = "";
     if (request.isAuthenticated()) {
@@ -561,5 +585,6 @@ module.exports = {
     getStripeKey: getStripeKey,
     pay: pay,
     recoverPass: recoverPass,
-    updatePass: updatePass
+    updatePass: updatePass,
+    getInfoUser: getInfoUser
 }

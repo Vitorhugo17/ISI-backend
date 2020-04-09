@@ -7,6 +7,7 @@ const hubspotController = require('./../controllers/hubspot.controller');
 
 router.get("/stripe-key", isLoggedIn, mainController.getStripeKey);
 router.get('/products', isLoggedIn, mainController.getProducts);
+router.get('/profile', isLoggedIn, mainController.getInfoUser);
 
 router.post("/pay", isLoggedIn, mainController.pay);
 router.post('/purchases', isLoggedIn, mainController.insertPurchase);
