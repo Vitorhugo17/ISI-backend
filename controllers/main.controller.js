@@ -35,25 +35,62 @@ function getInfoUser(request, response) {
 }
 
 function updatePass(request, response) {
-    let user_id = "";
-    if (request.isAuthenticated()) {
-        user_id = request.user.user_id;
-    } else {
-        user_id = request.sanitize('user_id').escape();
-    }
+    const type = request.sanitize('type').escape();
     const password = bCrypt.hashSync(request.sanitize('password').escape(), bCrypt.genSaltSync(10));
-    const update = [password, user_id];
-    connect.query('UPDATE utilizador SET password=? WHERE idUtilizador=?', update, (err, rows, fields) => {
-        if (!err) {
-            response.status(200).send({
-                "message": "Password updated with success"
-            })
-        } else {
-            response.status(400).send({
-                "message": "Can't update password"
-            });
-        }
-    })
+    if (type == 'recover') {
+        let now = new Date();
+        now = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+        const link = request.sanitize("user_id").escape();
+        connect.query(`SELECT * FROM link_rec_passe WHERE validade>"${now}" AND link="${link}"`, (err, rows, fields) => {
+            if (!err && rows.length != 0) {
+                let user_id = rows[0].idUtilizador;
+                const update = [password, user_id];
+                connect.query('UPDATE utilizador SET password=? WHERE idUtilizador=?', update, (err, rows, fields) => {
+                    if (!err) {
+                        const post = [user_id, link];
+                        connect.query('DELETE FROM link_rec_passe WHERE idUtilizador=? AND link=?', post, (err, rows, fields) => {
+                            if (!err) {
+                                response.status(200).send({
+                                    "message": "Password updated with success"
+                                })
+                            } else {
+                                response.status(200).send({
+                                    "message": "Password updated with success"
+                                })
+
+                            }
+                        })
+                    } else {
+                        response.status(400).send({
+                            "message": "Can't update password"
+                        })
+                    }
+                })
+            } else {
+                response.status(400).send({
+                    "message": "Can't update password"
+                })
+            }
+        })
+    } else if (request.isAuthenticated()) {
+        const update = [password, request.user.user_id];
+        connect.query('UPDATE utilizador SET password=? WHERE idUtilizador=?', update, (err, rows, fields) => {
+            if (!err) {
+                response.status(200).send({
+                    "message": "Password updated with success"
+                })
+            } else {
+                response.status(400).send({
+                    "message": "Can't update password"
+                })
+            }
+        })
+    } else {
+        response.status(400).send({
+            "message": "Can't update password"
+        })
+    }
+
 }
 
 function recoverPass(request, response) {
@@ -62,44 +99,60 @@ function recoverPass(request, response) {
         if (!err && rows.length != 0) {
             hubspotController.getClient(rows[0].idUtilizador, (res) => {
                 if (res.user) {
-                    const url = urlFront + "/recoverPass/" + res.user.user_id;
-                    let bodycontent = `Olá ${res.user.nome} ${res.user.apelido}, <br> <br>
+                    const link = generateLink();
+                    let validade = new Date();
+                    validade.setMinutes(validade.getMinutes() + 15);
+                    const post = {
+                        idUtilizador: res.user.user_id,
+                        link: link,
+                        validade: validade
+                    }
+                    connect.query('INSERT INTO link_rec_passe SET ?', post, (err, rows, fields) => {
+                        if (!err) {
+                            const url = urlFront + "/recoverPass/" + link;
+                            let bodycontent = `Olá ${res.user.nome} ${res.user.apelido}, <br> <br>
                                        Acabámos de receber um pedido para recuperar a sua conta. <br>
                                        Se pretende avançar com o pedido clique no botão em baixo para definir uma nova palavra-passe. <br><br>
                                        <center><a href="${url}"><button type="button">Recuperar Conta</button></a></center><br><br>
                                        Se não conseguir clicar no botão utilize o seguinte link: ${url}<br><br>
                                        Obrigado, <br>
                                        Equipa ISICampus`;
-                    const transporter = nodemailer.createTransport(smtpTransport({
-                        service: 'Gmail',
-                        auth: {
-                            user: connection.email.username,
-                            pass: connection.email.password
-                        }
-                    }));
-                    transporter.verify(function (error, success) {
-                        if (error) {
-                            console.log(error);
-                            response.status(400).send("Can't send email");
-                        } else {
-                            const mailOptions = {
-                                FROM: connection.email.username,
-                                to: email,
-                                subject: 'ISICampus: Recuperar conta',
-                                html: bodycontent
-                            };
-                            transporter.sendMail(mailOptions, function (error, info) {
+                            const transporter = nodemailer.createTransport(smtpTransport({
+                                service: 'Gmail',
+                                auth: {
+                                    user: connection.email.username,
+                                    pass: connection.email.password
+                                }
+                            }));
+                            transporter.verify(function (error, success) {
                                 if (error) {
                                     console.log(error);
                                     response.status(400).send("Can't send email");
                                 } else {
-                                    response.status(200).send({
-                                        "message": "mail sent"
+                                    const mailOptions = {
+                                        FROM: connection.email.username,
+                                        to: email,
+                                        subject: 'ISICampus: Recuperar conta',
+                                        html: bodycontent
+                                    };
+                                    transporter.sendMail(mailOptions, function (error, info) {
+                                        if (error) {
+                                            console.log(error);
+                                            response.status(400).send("Can't send email");
+                                        } else {
+                                            response.status(200).send({
+                                                "message": "mail sent"
+                                            });
+                                        }
                                     });
                                 }
                             });
+                        } else {
+                            response.status(400).send({
+                                "message": "User not found"
+                            });
                         }
-                    });
+                    })
                 } else {
                     response.status(400).send({
                         "message": "User not found"
@@ -576,6 +629,16 @@ function calculateOrderAmount(quantity, product_id, company, callback) {
             }
         })
     }
+}
+
+function generateLink() {
+    const caracteres = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const length = 25;
+    let result = "";
+    for (let i = 0; i < length; i++) {
+        result += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+    }
+    return result;
 }
 
 module.exports = {
