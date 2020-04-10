@@ -5,6 +5,12 @@ const moloniController = require('./../controllers/moloni.controller');
 const jasminController = require('./../controllers/jasmin.controller');
 const hubspotController = require('./../controllers/hubspot.controller');
 
+router.get("/authenticated", (request, response) => {
+    response.status(200).send({
+        "isAuthenticated": request.isAuthenticated()
+    })
+})
+
 router.get("/stripe-key", isLoggedIn, mainController.getStripeKey);
 router.get('/products', isLoggedIn, mainController.getProducts);
 router.get('/profile', isLoggedIn, mainController.getInfoUser);
