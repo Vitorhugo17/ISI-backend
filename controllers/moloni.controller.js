@@ -55,7 +55,6 @@ function insertClient(nif, nome, email, callback) {
                         }
                     })
                 } else {
-                    console.log(res);
                     callback({
                         "statusCode": res.statusCode,
                         "body": JSON.parse(res.body)
@@ -241,7 +240,6 @@ function insertPurchase(customer_id, product_id, quantity, status, callback) {
                 }
                 req.post(options, (err, res) => {
                     if (!err && res.statusCode == 200) {
-                        console.log(res.body);
                         callback({
                             "statusCode": res.statusCode,
                             "body": {
