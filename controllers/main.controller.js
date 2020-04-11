@@ -276,12 +276,9 @@ function insertPurchase(request, response) {
     hubspotController.getClient(user_id, (res) => {
         if (res.user) {
             const user = res.user;
-            let options = {
-                url: `${global.urlBase}/products`
-            };
-            req.get(options, (err, res) => {
-                if (!err && res.statusCode == 200) {
-                    const products = JSON.parse(res.body).products;
+            getProductsOrganized((res) => {
+                if (res.products) {
+                    const products = res.products;
                     let product = "";
                     for (let i = 0; i < products.length; i++) {
                         if (products[i].id == product_id) {
@@ -292,8 +289,8 @@ function insertPurchase(request, response) {
                     if (product != "") {
                         const transdev_ticket = user.bilhetes_disponiveis_transdev;
                         const barquense_ticket = user.bilhetes_disponiveis_barquense;
-                        const transdev_ida_volta = user.bilhetes_ida_e_volta_transdev;
-                        const barquense_ida_volta = user.bilhetes_ida_e_volta_barquense;
+                        const bilhetes_ida_e_volta_transdev = user.bilhetes_ida_e_volta_transdev;
+                        const bilhetes_ida_e_volta_barquense = user.bilhetes_ida_e_volta_barquense;
                         if (company == "Barquense") {
                             let moloni_id = user.moloni_id;
 
@@ -346,7 +343,7 @@ function insertPurchase(request, response) {
                                     if (res.statusCode == 200) {
                                         let updatedData = {};
                                         if (product.name.toLowerCase().includes("ida e volta")) {
-                                            let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
+                                            let total = parseInt(bilhetes_ida_e_volta_barquense) + parseInt(quantity * product.quantity);
                                             updatedData = [{
                                                 "property": 'bilhetes_ida_e_volta_barquense',
                                                 "value": total
@@ -382,7 +379,7 @@ function insertPurchase(request, response) {
                                         jasminController.insertPurchase(jasmin_id, (user.firstname + " " + user.lastname), user.nif, product_id, parseInt(quantity), (res) => {
                                             if (res.statusCode == 200) {
                                                 if (product.name.toLowerCase().includes("ida e volta")) {
-                                                    let total = parseInt(transdev_ticket) + parseInt(quantity * product.quantity);
+                                                    let total = parseInt(bilhetes_ida_e_volta_transdev) + parseInt(quantity * product.quantity);
                                                     updatedData = [{
                                                         "property": 'bilhetes_ida_e_volta_transdev',
                                                         "value": total
@@ -466,6 +463,18 @@ function insertPurchase(request, response) {
 }
 
 function getProducts(request, response) {
+    getProductsOrganized((res) => {
+        if (res.products) {
+            response.status(200).send({
+                "products": res.products
+            })
+        } else {
+            response.status(res.statusCode).send(res.body);
+        }
+    })
+}
+
+function getProductsOrganized(callback) {
     moloniController.getProducts((resMoloni) => {
         jasminController.getProducts((resJasmin) => {
             let products = [];
@@ -505,11 +514,12 @@ function getProducts(request, response) {
             }
 
             if (products.length != 0) {
-                response.status(200).send({
+                callback({
                     "products": products
                 });
             } else {
-                response.status(404).send({
+                callback({
+                    "statusCode": 404,
                     "message": "Products not found"
                 })
             }
