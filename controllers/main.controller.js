@@ -34,6 +34,27 @@ function getInfoUser(request, response) {
     })
 }
 
+function getUnusedTickets(request, response) {
+    const user_id = request.user.user_id;
+    hubspotController.getClient(user_id, (res) => {
+        if (res.user) {
+            const result = {
+                "bilhetes_disponiveis_barquense": res.user.bilhetes_disponiveis_barquense,
+                "bilhetes_ida_e_volta_barquense": res.user.bilhetes_ida_e_volta_barquense,
+                "bilhetes_disponiveis_transdev": res.user.bilhetes_disponiveis_transdev,
+                "bilhetes_ida_e_volta_transdev": res.user.bilhetes_ida_e_volta_transdev
+            }
+            response.status(200).send({
+                "bilhetes": result
+            })
+        } else {
+            response.status(400).send({
+                "message": "Data not found"
+            });
+        }
+    })
+}
+
 function updatePass(request, response) {
     const type = request.sanitize('type').escape();
     const password = bCrypt.hashSync(request.sanitize('password').escape(), bCrypt.genSaltSync(10));
@@ -649,5 +670,6 @@ module.exports = {
     pay: pay,
     recoverPass: recoverPass,
     updatePass: updatePass,
-    getInfoUser: getInfoUser
+    getInfoUser: getInfoUser,
+    getUnusedTickets: getUnusedTickets
 }
