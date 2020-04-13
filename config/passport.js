@@ -37,24 +37,24 @@ passport.use('local-signin', new LocalStrategy({
                                 return done(null, userF);
                             } else {
                                 done(null, false, {
-                                    message: `user not found`
+                                    "message": `user not found`
                                 })
                             }
                         })
                     }
                 } else {
                     done(null, false, {
-                        message: `password invalid`
+                        "message": `password invalid`
                     })
                 }
             } else {
                 done(null, false, {
-                    message: `user not found`
+                    "message": `user not found`
                 })
             }
         } else {
             done(null, false, {
-                message: err.code
+                "message": err.code
             })
         }
     })
@@ -183,19 +183,19 @@ passport.deserializeUser((id, done) => {
                             return done(null, userF);
                         } else {
                             done(null, false, {
-                                message: `user not found`
+                                "message": `user not found`
                             })
                         }
                     })
                 }
             } else {
                 done(null, false, {
-                    message: `user not found`
+                    "message": `user not found`
                 })
             }
         } else {
             done(null, false, {
-                message: err.code
+                "message": err.code
             })
         }
     })

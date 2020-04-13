@@ -37,12 +37,12 @@ function generateQrcode(request, response) {
                     })
                 } else {
                     response.status(404).send({
-                        message: "Product not found"
+                        "message": "Product not found"
                     })
                 }
             } else {
                 response.status(404).send({
-                    message: "Product not found"
+                    "message": "Product not found"
                 })
             }
         })
@@ -66,18 +66,18 @@ function generateQrcode(request, response) {
                     })
                 } else {
                     response.status(404).send({
-                        message: "Product not found"
+                        "message": "Product not found"
                     })
                 }
             } else {
                 response.status(404).send({
-                    message: "Product not found"
+                    "message": "Product not found"
                 })
             }
         })
     } else {
         response.status(404).send({
-            message: "Company not found"
+            "message": "Company not found"
         })
     }
 }

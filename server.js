@@ -17,7 +17,7 @@ global.jasminUrl = `https://my.jasminsoftware.com/api/233711/233711-0001/`;
 global.urlFront = `http://localhost:4242`
 
 global.isLoggedIn = (request, response, next) => {
-    if (request.isAuthenticated()) {
+    if (request.isAuthenticated() && !request.user.isEmpresa) {
         next();
     } else {
         response.status(403).send({
@@ -27,7 +27,7 @@ global.isLoggedIn = (request, response, next) => {
 }
 
 global.isLoggedInCompany = (request, response, next) => {
-    if (request.isAuthenticated()) {
+    if (request.isAuthenticated() && request.user.isEmpresa) {
         next();
     } else {
         response.status(403).send({

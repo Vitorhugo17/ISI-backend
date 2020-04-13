@@ -61,7 +61,7 @@ function createClient(properties, callback) {
     req.post(options, (err, res) => {
         if (!err && res.statusCode == 200) {
             callback({
-                statusCode: 200,
+                "statusCode": 200,
                 body: {
                     "user_id": JSON.parse(res.body).vid          
                 }

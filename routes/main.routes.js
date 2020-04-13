@@ -9,13 +9,17 @@ router.get("/authenticated", (request, response) => {
 })
 
 router.get("/stripe-key", isLoggedIn, mainController.getStripeKey);
-router.get('/products', isLoggedIn, mainController.getProducts);
-router.get('/profile', isLoggedIn, mainController.getInfoUser);
-router.get('/tickets/unused', isLoggedIn, mainController.getUnusedTickets);
-router.get('/qrcodes/:qrcode_id', isLoggedIn, mainController.readQrcode);
-
 router.post("/pay", isLoggedIn, mainController.pay);
+
+router.get('/products', isLoggedIn, mainController.getProducts);
+
 router.post('/purchases', isLoggedIn, mainController.insertPurchase);
+
+router.get('/profile', isLoggedIn, mainController.getInfoUser);
+
+router.get('/tickets/unused', isLoggedIn, mainController.getUnusedTickets);
+
+router.get('/qrcodes/:qrcode_id', isLoggedIn, mainController.readQrcode);
 router.post('/qrcodes', isLoggedIn, mainController.generateQrcode);
 router.post('/qrcodes/use', isLoggedInCompany, mainController.useQrcode);
 
