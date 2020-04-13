@@ -21,28 +21,43 @@ function generateQrcode(request, response) {
         moloniController.getProducts((res) => {
             if (res.products) {
                 const products = res.products;
-                for (let i = 0; i < products.length; i++) {
-                    if (products[i].product_id == product_id) {
-                        if (products[i].name.toLowerCase().includes("ida e volta")) {
-                            utilization = 2;
-                        } else {
-                            utilization = 1;
+                hubspotController.getClient(user_id, (res) => {
+                    if (res.user) {
+                        const user = res.user;
+
+                        for (let i = 0; i < products.length; i++) {
+                            if (products[i].product_id == product_id) {
+                                if (products[i].name.toLowerCase().includes("ida e volta")) {
+                                    if (user.bilhetes_ida_e_volta_barquense > 0) {
+                                        utilization = 2;
+                                    }
+                                } else {
+                                    if (user.bilhetes_disponiveis_barquense > 0) {
+                                        utilization = 1;
+                                    }
+                                }
+                                break;
+                            }
                         }
-                        break;
+                        if (utilization != 0) {
+                            qrcodeController.generateQrcode(user_id, company, utilization, (res) => {
+                                response.status(res.statusCode).send(res.body);
+                            })
+                        } else {
+                            response.status(404).send({
+                                "message": "Couldn't generate qrcode"
+                            })
+                        }
+                    } else {
+                        response.status(404).send({
+                            "message": "Couldn't generate qrcode"
+                        })
                     }
-                }
-                if (utilization != 0) {
-                    qrcodeController.generateQrcode(user_id, company, utilization, (res) => {
-                        response.status(res.statusCode).send(res.body);
-                    })
-                } else {
-                    response.status(404).send({
-                        "message": "Product not found"
-                    })
-                }
+                })
+
             } else {
-                response.status(404).send({
-                    "message": "Product not found"
+                response.status(400).send({
+                    "message": "Couldn't generate qrcode"
                 })
             }
         })
@@ -50,34 +65,48 @@ function generateQrcode(request, response) {
         jasminController.getProducts((res) => {
             if (res.products) {
                 const products = res.products;
-                for (let i = 0; i < products.length; i++) {
-                    if (products[i].itemKey == product_id) {
-                        if (products[i].description.toLowerCase().includes("ida e volta")) {
-                            utilization = 2;
-                        } else {
-                            utilization = 1;
+                hubspotController.getClient(user_id, (res) => {
+                    if (res.user) {
+                        const user = res.user;
+
+                        for (let i = 0; i < products.length; i++) {
+                            if (products[i].itemKey == product_id) {
+                                if (products[i].description.toLowerCase().includes("ida e volta")) {
+                                    if (user.bilhetes_ida_e_volta_transdev > 0) {
+                                        utilization = 2;
+                                    }
+                                } else {
+                                    if (user.bilhetes_disponiveis_transdev > 0) {
+                                        utilization = 1;
+                                    }
+                                }
+                                break;
+                            }
                         }
-                        break;
+                        if (utilization != 0) {
+                            qrcodeController.generateQrcode(user_id, company, utilization, (res) => {
+                                response.status(res.statusCode).send(res.body);
+                            })
+                        } else {
+                            response.status(400).send({
+                                "message": "Couldn't generate qrcode"
+                            })
+                        }
+                    } else {
+                        response.status(400).send({
+                            "message": "Couldn't generate qrcode"
+                        })
                     }
-                }
-                if (utilization != 0) {
-                    qrcodeController.generateQrcode(user_id, company, utilization, (res) => {
-                        response.status(res.statusCode).send(res.body);
-                    })
-                } else {
-                    response.status(404).send({
-                        "message": "Product not found"
-                    })
-                }
+                })
             } else {
-                response.status(404).send({
-                    "message": "Product not found"
+                response.status(400).send({
+                    "message": "Couldn't generate qrcode"
                 })
             }
         })
     } else {
-        response.status(404).send({
-            "message": "Company not found"
+        response.status(400).send({
+            "message": "Couldn't generate qrcode"
         })
     }
 }
