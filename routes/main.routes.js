@@ -3,9 +3,17 @@ const router = require('express').Router();
 const mainController = require('./../controllers/main.controller');
 
 router.get("/authenticated", (request, response) => {
-    response.status(200).send({
-        "isAuthenticated": request.isAuthenticated()
-    })
+    if (request.isAuthenticated()) {
+        response.status(200).send({
+            "isAuthenticated": request.isAuthenticated(),
+            "isEmpresa": request.user.isEmpresa
+        })
+    } else{
+        response.status(200).send({
+            "isAuthenticated": request.isAuthenticated()
+        })
+    }
+    
 })
 
 router.get("/stripe-key", isLoggedIn, mainController.getStripeKey);
