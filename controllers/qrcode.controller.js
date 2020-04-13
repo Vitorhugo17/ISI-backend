@@ -182,7 +182,7 @@ function generateQrcode(user_id, company, utilization, callback) {
         if (!err) {
             const qrcode_id = rows.insertId;
             const data = {
-                qrcode_id: qrcode_id
+                qrcode_id: qrcode_id.toString()
             }
             qrCode.toDataURL(JSON.stringify(data), (err, image) => {
                 if (!err) {
