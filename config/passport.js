@@ -4,7 +4,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const bCrypt = require("bcryptjs");
 const hubspotController = require('./../controllers/hubspot.controller');
 
-passport.use('local-login', new LocalStrategy({
+passport.use('local-signin', new LocalStrategy({
     usernameField: 'email'
 }, (email, password, done) => {
     connect.query(`SELECT * FROM utilizador WHERE email="${email}"`, (err, rows, fields) => {

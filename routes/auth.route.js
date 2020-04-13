@@ -12,7 +12,7 @@ module.exports = function (app, passport) {
         });
     });
     app.post('/login', (request, response, next) => {
-        passport.authenticate('local-login', (err, user, info) => {
+        passport.authenticate('local-signin', (err, user, info) => {
             if (err) {
                 return response.status(400).json({
                     "message": err
