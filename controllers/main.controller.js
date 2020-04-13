@@ -82,18 +82,18 @@ function generateQrcode(request, response) {
     }
 }
 
-function readQrcode(request, response){
+function readQrcode(request, response) {
     const qrcode_id = request.sanitize("qrcode_id").escape();
-    qrcodeController.readQrcode(qrcode_id, (res) =>{
+    qrcodeController.readQrcode(qrcode_id, (res) => {
         response.status(res.statusCode).send(res.body);
     })
 }
 
-function useQrcode (request, response){
+function useQrcode(request, response) {
     const qrcode_id = request.sanitize("qrcode_id").escape();
     const company = request.user.nome;
 
-    qrcodeController.useQrcode(qrcode_id, company, (res) =>{
+    qrcodeController.useQrcode(qrcode_id, company, (res) => {
         response.status(res.statusCode).send(res.body);
     })
 }
@@ -143,9 +143,9 @@ function getUnusedTickets(request, response) {
     })
 }
 
-function updatePass(request, response) {
+async function updatePass(request, response) {
     const type = request.sanitize('type').escape();
-    const password = bCrypt.hashSync(request.sanitize('password').escape(), bCrypt.genSaltSync(10));
+    const password = await bCrypt.hash(request.sanitize('password').escape(), await bCrypt.genSalt(10));
     if (type == 'recover') {
         let now = new Date();
         now = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
@@ -195,11 +195,10 @@ function updatePass(request, response) {
             }
         })
     } else {
-        response.status(400).send({
-            "message": "Can't update password"
+        response.status(403).send({
+            "message": "Não está autorizado a aceder a este conteudo"
         })
     }
-
 }
 
 function recoverPass(request, response) {

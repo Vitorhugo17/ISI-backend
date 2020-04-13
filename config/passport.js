@@ -7,11 +7,11 @@ const hubspotController = require('./../controllers/hubspot.controller');
 passport.use('local-signin', new LocalStrategy({
     usernameField: 'email'
 }, (email, password, done) => {
-    connect.query(`SELECT * FROM utilizador WHERE email="${email}"`, (err, rows, fields) => {
+    connect.query(`SELECT * FROM utilizador WHERE email="${email}"`, async (err, rows, fields) => {
         if (!err) {
             if (rows.length != 0) {
                 const user = rows[0];
-                if (isValidPassword(user.password, password)) {
+                if (await isValidPassword(user.password, password)) {
                     if (user.isEmpresa) {
                         let userF = {
                             user_id: user.idUtilizador,
@@ -63,12 +63,11 @@ passport.use('local-signin', new LocalStrategy({
 passport.use('local-signup', new LocalStrategy({
     usernameField: 'email',
     passReqToCallback: true
-}, (request, email, password, done) => {
+}, async (request, email, password, done) => {
     const nome = request.sanitize('nome').escape();
     const apelido = request.sanitize('apelido').escape();
     const nif = request.sanitize('nif').escape();
-    const pass = bCrypt.hashSync(password, bCrypt.genSaltSync(10));
-
+    const pass = await bCrypt.hash(password, await bCrypt.genSalt(10));
     connect.query(`SELECT * FROM utilizador WHERE email="${email}"`, (err, rows, fields) => {
         if (!err) {
             if (rows.length == 0) {
@@ -203,8 +202,8 @@ passport.deserializeUser((id, done) => {
 
 });
 
-const isValidPassword = function (userpass, password) {
-    return bCrypt.compareSync(password, userpass);
+const isValidPassword = async function (userpass, password) {
+    return await bCrypt.compare(password, userpass);
 }
 
 module.exports = passport;
