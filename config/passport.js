@@ -159,7 +159,7 @@ passport.deserializeUser((id, done) => {
         if (!err) {
             if (rows.length != 0) {
                 const user = rows[0];
-                if (user.isEmprsa) {
+                if (user.isEmpresa) {
                     let userF = {
                         user_id: user.idUtilizador,
                         email: user.email,

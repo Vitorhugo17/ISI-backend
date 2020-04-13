@@ -9,6 +9,94 @@ const smtpTransport = require('nodemailer-smtp-transport');
 const hubspotController = require('./hubspot.controller');
 const moloniController = require('./moloni.controller');
 const jasminController = require('./jasmin.controller');
+const qrcodeController = require('./qrcode.controller');
+
+function generateQrcode(request, response) {
+    const user_id = request.user.user_id;
+    const company = request.sanitize("company").escape();
+    const product_id = request.sanitize("product_id").escape();
+    let utilization = 0;
+
+    if (company == "Barquense") {
+        moloniController.getProducts((res) => {
+            if (res.products) {
+                const products = res.products;
+                for (let i = 0; i < products.length; i++) {
+                    if (products[i].product_id == product_id) {
+                        if (products[i].name.toLowerCase().includes("ida e volta")) {
+                            utilization = 2;
+                        } else {
+                            utilization = 1;
+                        }
+                        break;
+                    }
+                }
+                if (utilization != 0) {
+                    qrcodeController.generateQrcode(user_id, company, utilization, (res) => {
+                        response.status(res.statusCode).send(res.body);
+                    })
+                } else {
+                    response.status(404).send({
+                        message: "Product not found"
+                    })
+                }
+            } else {
+                response.status(404).send({
+                    message: "Product not found"
+                })
+            }
+        })
+    } else if (company == "Transdev") {
+        jasminController.getProducts((res) => {
+            if (res.products) {
+                const products = res.products;
+                for (let i = 0; i < products.length; i++) {
+                    if (products[i].itemKey == product_id) {
+                        if (products[i].description.toLowerCase().includes("ida e volta")) {
+                            utilization = 2;
+                        } else {
+                            utilization = 1;
+                        }
+                        break;
+                    }
+                }
+                if (utilization != 0) {
+                    qrcodeController.generateQrcode(user_id, company, utilization, (res) => {
+                        response.status(res.statusCode).send(res.body);
+                    })
+                } else {
+                    response.status(404).send({
+                        message: "Product not found"
+                    })
+                }
+            } else {
+                response.status(404).send({
+                    message: "Product not found"
+                })
+            }
+        })
+    } else {
+        response.status(404).send({
+            message: "Company not found"
+        })
+    }
+}
+
+function readQrcode(request, response){
+    const qrcode_id = request.sanitize("qrcode_id").escape();
+    qrcodeController.readQrcode(qrcode_id, (res) =>{
+        response.status(res.statusCode).send(res.body);
+    })
+}
+
+function useQrcode (request, response){
+    const qrcode_id = request.sanitize("qrcode_id").escape();
+    const company = request.user.nome;
+
+    qrcodeController.useQrcode(qrcode_id, company, (res) =>{
+        response.status(res.statusCode).send(res.body);
+    })
+}
 
 function getInfoUser(request, response) {
     const user_id = request.user.user_id;
@@ -595,6 +683,9 @@ function generateLink() {
 }
 
 module.exports = {
+    generateQrcode: generateQrcode,
+    readQrcode: readQrcode,
+    useQrcode: useQrcode,
     getProducts: getProducts,
     insertPurchase: insertPurchase,
     getStripeKey: getStripeKey,
