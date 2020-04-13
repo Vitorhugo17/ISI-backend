@@ -1,5 +1,3 @@
-const mainController = require('./../controllers/main.controller');
-
 module.exports = function (app, passport) {
     app.get('/logout', (request, response, err) => {
         request.session.destroy(function (err) {
@@ -14,7 +12,7 @@ module.exports = function (app, passport) {
         });
     });
     app.post('/login', (request, response, next) => {
-        passport.authenticate('local', (err, user, info) => {
+        passport.authenticate('local-login', (err, user, info) => {
             if (err) {
                 return response.status(400).json({
                     "message": err
@@ -30,5 +28,14 @@ module.exports = function (app, passport) {
         })(request, response, next);
     });
 
-    app.post('/register', mainController.insertUser);
+    app.post('/register', (request, response, next) => {
+        passport.authenticate('local-signup', (err, info) => {
+            if (err) {
+                return response.status(400).json({
+                    "message": err
+                })
+            }
+            return response.status(info.statusCode).send(info.body);
+        })(request, response, next);
+    });
 };

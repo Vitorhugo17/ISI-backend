@@ -1,9 +1,6 @@
 const router = require('express').Router();
 
 const mainController = require('./../controllers/main.controller');
-const moloniController = require('./../controllers/moloni.controller');
-const jasminController = require('./../controllers/jasmin.controller');
-const hubspotController = require('./../controllers/hubspot.controller');
 
 router.get("/authenticated", (request, response) => {
     response.status(200).send({

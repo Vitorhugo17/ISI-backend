@@ -4,7 +4,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const bCrypt = require("bcryptjs");
 const hubspotController = require('./../controllers/hubspot.controller');
 
-passport.use(new LocalStrategy({
+passport.use('local-login', new LocalStrategy({
     usernameField: 'email'
 }, (email, password, done) => {
     connect.query(`SELECT * FROM utilizador WHERE email="${email}"`, (err, rows, fields) => {
@@ -58,6 +58,96 @@ passport.use(new LocalStrategy({
             })
         }
     })
+}))
+
+passport.use('local-signup', new LocalStrategy({
+    usernameField: 'email',
+    passReqToCallback: true
+}, (request, email, password, done) => {
+    const nome = request.sanitize('nome').escape();
+    const apelido = request.sanitize('apelido').escape();
+    const nif = request.sanitize('nif').escape();
+    const pass = bCrypt.hashSync(password, bCrypt.genSaltSync(10));
+
+    connect.query(`SELECT * FROM utilizador WHERE email="${email}"`, (err, rows, fields) => {
+        if (!err) {
+            if (rows.length == 0) {
+                const properties = [{
+                    property: "firstname",
+                    value: nome
+                }, {
+                    property: "lastname",
+                    value: apelido
+                }, {
+                    property: "email",
+                    value: email
+                }, {
+                    property: "bilhetes_disponiveis_barquense",
+                    value: 0
+                }, {
+                    property: "bilhetes_ida_e_volta_barquense",
+                    value: 0
+                }, {
+                    property: "bilhetes_disponiveis_transdev",
+                    value: 0
+                }, {
+                    property: "bilhetes_ida_e_volta_transdev",
+                    value: 0
+                }];
+                if (nif != "") {
+                    properties.push({
+                        property: "nif",
+                        value: nif
+                    })
+                }
+
+                hubspotController.createClient(properties, (res) => {
+                    if (res.statusCode == 200) {
+                        const post = {
+                            idUtilizador: res.body.user_id,
+                            email: email,
+                            password: pass,
+                            isEmpresa: false
+                        }
+
+                        connect.query('INSERT INTO utilizador SET ?', post, (err, rows, fields) => {
+                            if (!err) {
+                                done(null, {
+                                    "statusCode": 200,
+                                    "body": {
+                                        "message": "User inserted with success"
+                                    }
+                                });
+                            } else {
+                                done(null, {
+                                    "statusCode": 400,
+                                    "body": {
+                                        "message": "User not create"
+                                    }
+                                })
+                            }
+                        })
+                    } else {
+                        done(null, res);
+                    }
+                });
+            } else {
+                done(null, {
+                    "statusCode": 409,
+                    "body": {
+                        "error": "CONTACT_EXISTS"
+                    }
+                });
+            }
+        } else {
+            done(null, {
+                "statusCode": 400,
+                "body": {
+                    "message": err.code
+                }
+            })
+        }
+    });
 }))
 
 passport.serializeUser((user, done) => {
