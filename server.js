@@ -26,6 +26,16 @@ global.isLoggedIn = (request, response, next) => {
     }
 }
 
+global.isLoggedInCompany = (request, response, next) => {
+    if (request.isAuthenticated()) {
+        next();
+    } else {
+        response.status(403).send({
+            "message": "Não está autorizado a aceder a este conteudo"
+        })
+    }
+}
+
 app.use(bodyParser.json({
     limit: '50mb'
 }), bodyParser.urlencoded({

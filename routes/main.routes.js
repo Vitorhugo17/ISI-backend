@@ -17,7 +17,7 @@ router.get('/qrcodes/:qrcode_id', isLoggedIn, mainController.readQrcode);
 router.post("/pay", isLoggedIn, mainController.pay);
 router.post('/purchases', isLoggedIn, mainController.insertPurchase);
 router.post('/qrcodes', isLoggedIn, mainController.generateQrcode);
-router.post('/qrcodes/use', isLoggedIn, mainController.useQrcode);
+router.post('/qrcodes/use', isLoggedInCompany, mainController.useQrcode);
 
 router.post('/password/recover', mainController.recoverPass);
 router.put('/password/update', mainController.updatePass);
