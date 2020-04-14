@@ -225,13 +225,13 @@ function recoverPass(request, response) {
                                        Se não conseguir clicar no botão utilize o seguinte link: ${url}<br><br>
                                        Obrigado, <br>
                                        Equipa ISICampus`;
-                            const transporter = nodemailer.createTransport("SMTP", {
+                            const transporter = nodemailer.createTransport(smtpTransport({
                                 service: 'Gmail',
                                 auth: {
                                     user: connection.email.username,
                                     pass: connection.email.password
                                 }
-                            });
+                            }));
                             transporter.verify(function (error, success) {
                                 if (error) {
                                     console.log(error);
