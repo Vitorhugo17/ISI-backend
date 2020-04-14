@@ -1,126 +1,209 @@
 const passport = require('passport');
+const connect = require('./connectBD');
 const LocalStrategy = require('passport-local').Strategy;
-/*const bCrypt = require("bcryptjs");
+const bCrypt = require("bcryptjs");
+const hubspotController = require('./../controllers/hubspot.controller');
 
-passport.use(new LocalStrategy({
+passport.use('local-signin', new LocalStrategy({
     usernameField: 'email'
 }, (email, password, done) => {
-    let options = {
-        url: `${urlBaseGo}users`
-    }
-    req.get(options, (err, res) => {
-        if (!err && res.statusCode == 200) {
-            const users = JSON.parse(res.body);
-            let user = "";
-            for (let i = 0; i < users.length; i++) {
-                if (users[i].email == email && users[i].tipoLogin == "local") {
-                    user = users[i];
-                }
-            }
-
-            if (user != "") {
-                if (isValidPassword(user.password, password)) {
-                    if (user.confirmado == "0") {
-                        let options1 = {
-                            url: `${urlBaseGo}people/${user.idPessoa}`
+    connect.query(`SELECT * FROM utilizador WHERE email="${email}"`, async (err, rows, fields) => {
+        if (!err) {
+            if (rows.length != 0) {
+                const user = rows[0];
+                if (await isValidPassword(user.password, password)) {
+                    if (user.isEmpresa) {
+                        let userF = {
+                            user_id: user.idUtilizador,
+                            email: user.email,
+                            nome: user.nome,
+                            isEmpresa: true
                         }
-                        req.get(options1, (err1, res1) => {
-                            if (!err1 && res1.statusCode == 200) {
-                                let person = JSON.parse(res1.body)[0];
+                        return done(null, userF);
+                    } else {
+                        hubspotController.getClient(user.idUtilizador, (res) => {
+                            if (res.user) {
                                 let userF = {
-                                    nomePessoa: person.nome,
-                                    idGrupo: person.idGrupo,
-                                    idUtilizador: user.idUtilizador,
+                                    user_id: user.idUtilizador,
                                     email: user.email,
-                                    fotoPessoa: person.fotoPessoa,
-                                    idPessoa: user.idPessoa
-                                }
-                                if (user.tipo == 1) {
-                                    userF.tipo = "user";
-                                } else {
-                                    userF.tipo = "admin";
+                                    nome: res.user.nome,
+                                    apelido: res.user.apelido,
+                                    data_nascimento: res.user.data_nascimento,
+                                    numero_telefone: res.user.numero_telefone,
+                                    numero_mecanografico: res.user.numero_mecanografico,
+                                    nif: res.user.nif,
+                                    isEmpresa: false
                                 }
                                 return done(null, userF);
                             } else {
-                                return done(null, false, {
-                                    message: `user not found`
+                                done(null, false, {
+                                    "message": `user not found`
                                 })
                             }
                         })
-                    } else {
-                        return done(null, false, {
-                            message: "Activate your account"
-                        })
                     }
                 } else {
-                    return done(null, false, {
-                        message: "Incorrect Password"
+                    done(null, false, {
+                        "message": `password invalid`
                     })
                 }
-
             } else {
-                return done(null, false, {
-                    message: "Incorrect email"
+                done(null, false, {
+                    "message": `user not found`
                 })
             }
         } else {
-            return done(null, false, {
-                message: `user not found`
+            done(null, false, {
+                "message": err.code
             })
         }
     })
 }))
 
+passport.use('local-signup', new LocalStrategy({
+    usernameField: 'email',
+    passReqToCallback: true
+}, async (request, email, password, done) => {
+    const nome = request.sanitize('nome').escape();
+    const apelido = request.sanitize('apelido').escape();
+    const nif = request.sanitize('nif').escape();
+    const pass = await bCrypt.hash(password, await bCrypt.genSalt(10));
+    connect.query(`SELECT * FROM utilizador WHERE email="${email}"`, (err, rows, fields) => {
+        if (!err) {
+            if (rows.length == 0) {
+                const properties = [{
+                    property: "firstname",
+                    value: nome
+                }, {
+                    property: "lastname",
+                    value: apelido
+                }, {
+                    property: "email",
+                    value: email
+                }, {
+                    property: "bilhetes_disponiveis_barquense",
+                    value: 0
+                }, {
+                    property: "bilhetes_ida_e_volta_barquense",
+                    value: 0
+                }, {
+                    property: "bilhetes_disponiveis_transdev",
+                    value: 0
+                }, {
+                    property: "bilhetes_ida_e_volta_transdev",
+                    value: 0
+                }];
+                if (nif != "") {
+                    properties.push({
+                        property: "nif",
+                        value: nif
+                    })
+                }
+
+                hubspotController.createClient(properties, (res) => {
+                    if (res.statusCode == 200) {
+                        const post = {
+                            idUtilizador: res.body.user_id,
+                            email: email,
+                            password: pass,
+                            isEmpresa: false
+                        }
+
+                        connect.query('INSERT INTO utilizador SET ?', post, (err, rows, fields) => {
+                            if (!err) {
+                                done(null, {
+                                    "statusCode": 200,
+                                    "body": {
+                                        "message": "User inserted with success"
+                                    }
+                                });
+                            } else {
+                                done(null, {
+                                    "statusCode": 400,
+                                    "body": {
+                                        "message": "User not create"
+                                    }
+                                })
+                            }
+                        })
+                    } else {
+                        done(null, res);
+                    }
+                });
+            } else {
+                done(null, {
+                    "statusCode": 409,
+                    "body": {
+                        "error": "CONTACT_EXISTS"
+                    }
+                });
+            }
+        } else {
+            done(null, {
+                "statusCode": 400,
+                "body": {
+                    "message": err.code
+                }
+            })
+        }
+    });
+}))
+
 passport.serializeUser((user, done) => {
-    done(null, user.idUtilizador);
+    done(null, user.user_id);
 })
 
 passport.deserializeUser((id, done) => {
-    let options = {
-        url: `${urlBaseGo}users/${id}`
-    }
-
-    req.get(options, (err, res) => {
-        if (!err && res.statusCode == 200) {
-            const user = JSON.parse(res.body)[0];
-
-            let options1 = {
-                url: `${urlBaseGo}people/${user.idPessoa}`
-            }
-
-            req.get(options1, (err1, res1) => {
-                if (!err1 && res1.statusCode == 200) {
-                    let person = JSON.parse(res1.body)[0];
+    connect.query(`SELECT * FROM utilizador WHERE idUtilizador=${id}`, (err, rows, fields) => {
+        if (!err) {
+            if (rows.length != 0) {
+                const user = rows[0];
+                if (user.isEmpresa) {
                     let userF = {
-                        nomePessoa: person.nome,
-                        idGrupo: person.idGrupo,
-                        idUtilizador: user.idUtilizador,
+                        user_id: user.idUtilizador,
                         email: user.email,
-                        fotoPessoa: person.fotoPessoa,
-                        idPessoa: user.idPessoa
-                    }
-                    if (user.tipo == 1) {
-                        userF.tipo = "user";
-                    } else {
-                        userF.tipo = "admin";
+                        nome: user.nome,
+                        isEmpresa: true
                     }
                     return done(null, userF);
                 } else {
-                    done(null, false, {
-                        message: `user not found`
+                    hubspotController.getClient(user.idUtilizador, (res) => {
+                        if (res.user) {
+                            let userF = {
+                                user_id: user.idUtilizador,
+                                email: user.email,
+                                nome: res.user.nome,
+                                apelido: res.user.apelido,
+                                data_nascimento: res.user.data_nascimento,
+                                numero_telefone: res.user.numero_telefone,
+                                numero_mecanografico: res.user.numero_mecanografico,
+                                nif: res.user.nif,
+                                isEmpresa: false
+                            }
+                            return done(null, userF);
+                        } else {
+                            done(null, false, {
+                                "message": `user not found`
+                            })
+                        }
                     })
                 }
-            })
+            } else {
+                done(null, false, {
+                    "message": `user not found`
+                })
+            }
         } else {
             done(null, false, {
-                message: `user not found`
+                "message": err.code
             })
         }
     })
-});*/
 
-const isValidPassword = function (userpass, password) {
-    return bCrypt.compareSync(password, userpass);
+});
+
+const isValidPassword = async function (userpass, password) {
+    return await bCrypt.compare(password, userpass);
 }
 
 module.exports = passport;

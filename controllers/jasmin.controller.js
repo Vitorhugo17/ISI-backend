@@ -2,6 +2,70 @@ const querystring = require('querystring');
 const req = require('request');
 const connection = require('./../config/connection');
 
+
+function insertClient(nome, callback) {
+    getToken((res) => {
+        if (res.access_token) {
+            const access_token = res.access_token;
+
+            const json = {
+                "name": nome,
+                "isExternallyManaged": false,
+                "currency": "EUR",
+                "isPerson": true,
+                "country": "PT"
+            };
+            let options = {
+                headers: {
+                    'Authorization': `Bearer ${access_token}`,
+                    'Content-Type': 'application/json',
+                    'Content-Length': JSON.stringify(json).length
+                },
+                url: `${global.jasminUrl}salescore/customerParties`,
+                body: JSON.stringify(json)
+            }
+            req.post(options, (err, res) => {
+                if (!err && res.statusCode == 201) {
+                    const record_id = JSON.parse(res.body);
+
+                    options = {
+                        headers: {
+                            'Authorization': `Bearer ${access_token}`
+                        },
+                        url: `${global.jasminUrl}salescore/customerParties/${record_id}`
+                    }
+                    req.get(options, (err, res) => {
+                        if (!err && res.statusCode == 200) {
+                            callback({
+                                "statusCode": res.statusCode,
+                                "body": {
+                                    customer_id: JSON.parse(res.body).partyKey
+                                }
+                            })
+                        } else {
+                            callback({
+                                "statusCode": res.statusCode,
+                                "body": res.body
+                            })
+                        }
+                    })
+                } else {
+                    callback({
+                        "statusCode": res.statusCode,
+                        "body": res.body
+                    })
+                }
+            })
+        } else {
+            callback({
+                "statusCode": res.statusCode,
+                "body": res.body
+            })
+        }
+    })
+}
+
+
 function insertPurchase(customer_id, customer_name, customer_nif, product_id, quantity, callback) {
     getInvoiceType((res) => {
         if (res.invoiceType) {
@@ -11,20 +75,50 @@ function insertPurchase(customer_id, customer_name, customer_nif, product_id, qu
                 if (res.products) {
                     const products = res.products;
 
-                    let product = {};
+                    let productsF = [];
+                    let quantityF = 0;
                     for (let i = 0; i < products.length; i++) {
-                        if (products[i].itemKey == parseInt(product_id)) {
-                            product = {
-                                "itemKey": products[i].itemKey,
-                                "description": products[i].description,
-                                "priceAmount": products[i].priceListLines[0].priceAmount,
-                                "unit": products[i].priceListLines[0].unit,
-                                "itemTaxSchema": products[i].itemTaxSchema
+                        if (quantity >= 10) {
+                            if (quantity % 10 != 0) {
+                                if (products[i].itemKey == parseInt(product_id)) {
+                                    productsF.push({
+                                        "salesItem": products[i].itemKey,
+                                        "description": products[i].description,
+                                        "quantity": (quantity % 10),
+                                        "unitPrice": products[i].priceListLines[0].priceAmount,
+                                        "unit": products[i].priceListLines[0].unit,
+                                        "itemTaxSchema": products[i].itemTaxSchema,
+                                        "deliveryDate": new Date().toISOString()
+                                    });
+                                }
                             }
-                            break;
+                            if (products[i].description.includes("Pack")) {
+                                productsF.push({
+                                    "salesItem": products[i].itemKey,
+                                    "description": products[i].description,
+                                    "quantity": Math.floor(quantity / 10),
+                                    "unitPrice": products[i].priceListLines[0].priceAmount,
+                                    "unit": products[i].priceListLines[0].unit,
+                                    "itemTaxSchema": products[i].itemTaxSchema,
+                                    "deliveryDate": new Date().toISOString()
+                                });
+                            }
+                        } else {
+                            if (products[i].itemKey == parseInt(product_id)) {
+                                productsF.push({
+                                    "salesItem": products[i].itemKey,
+                                    "description": products[i].description,
+                                    "quantity": quantity,
+                                    "unitPrice": products[i].priceListLines[0].priceAmount,
+                                    "unit": products[i].priceListLines[0].unit,
+                                    "itemTaxSchema": products[i].itemTaxSchema,
+                                    "deliveryDate": new Date().toISOString()
+                                });
+                                break;
+                            }
                         }
                     }
-                    if (product.itemKey) {
+                    if (productsF.length != 0) {
                         let json = {
                             "documentType": "FR",
                             "serie": invoiceType.serie,
@@ -48,15 +142,7 @@ function insertPurchase(customer_id, customer_name, customer_nif, product_id, qu
                             "isSimpleInvoice": false,
                             "isWsCommunicable": false,
                             "deliveryTerm": "EM-MAO",
-                            "documentLines": [{
-                                "salesItem": product.itemKey,
-                                "description": product.description,
-                                "quantity": quantity,
-                                "unitPrice": product.priceAmount,
-                                "unit": product.unit,
-                                "itemTaxSchema": product.itemTaxSchema,
-                                "deliveryDate": new Date().toISOString()
-                            }],
+                            "documentLines": productsF,
                             "WTaxTotal": {
                                 "amount": 0,
                                 "baseAmount": 0,
@@ -71,7 +157,7 @@ function insertPurchase(customer_id, customer_name, customer_nif, product_id, qu
                                 "symbol": "€"
                             }
                         }
-                        
+
                         let options = {
                             headers: {
                                 'Authorization': `Bearer ${access_token}`,
@@ -222,5 +308,6 @@ function getToken(callback) {
 
 module.exports = {
     getProducts: getProducts,
-    insertPurchase: insertPurchase
+    insertPurchase: insertPurchase,
+    insertClient: insertClient
 };

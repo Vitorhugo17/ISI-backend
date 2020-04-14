@@ -2,6 +2,74 @@ const querystring = require('querystring');
 const req = require('request');
 const connection = require('./../config/connection');
 
+function insertClient(nif, nome, email, callback) {
+    getNextNumber((res) => {
+        if (res.company_id) {
+            const company_id = res.company_id;
+            const access_token = res.access_token;
+            const next_number = res.next_number;
+
+            const json = querystring.stringify({
+                company_id: company_id,
+                vat: nif,
+                number: next_number,
+                name: nome,
+                language_id: 1,
+                address: "",
+                zip_code: "",
+                city: "",
+                country_id: 1,
+                email: email,
+                website: "",
+                phone: "",
+                fax: "",
+                contact_name: "",
+                contact_email: "",
+                contact_phone: "",
+                notes: "",
+                salesman_id: 0,
+                price_class_id: 0,
+                maturity_date_id: 0,
+                payment_day: 0,
+                discount: 0,
+                credit_limit: 0,
+                payment_method_id: 0,
+                delivery_method_id: 0,
+                field_notes: ""
+            })
+
+            let options = {
+                headers: {
+                    'Content-Length': json.length,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                url: `https://api.moloni.pt/v1/customers/insert/?access_token=${access_token}`,
+                body: json
+            }
+            req.post(options, (err, res) => {
+                if (!err && res.statusCode == 200) {
+                    callback({
+                        "statusCode": res.statusCode,
+                        "body": {
+                            customer_id: JSON.parse(res.body).customer_id
+                        }
+                    })
+                } else {
+                    callback({
+                        "statusCode": res.statusCode,
+                        "body": JSON.parse(res.body)
+                    })
+                }
+            })
+        } else {
+            callback({
+                "statusCode": res.statusCode,
+                "body": res.body
+            });
+        }
+    })
+}
+
 function getInvoices(callback) {
     getCompany((res) => {
         if (res.company_id) {
@@ -45,41 +113,90 @@ function getInvoices(callback) {
                     });
                 }
             })
+        } else {
+            callback({
+                "statusCode": res.statusCode,
+                "body": res.body
+            });
+
         }
     })
 }
 
-function insertPurchase(customer_id, product_id, quantity,status, callback) {
+function insertPurchase(customer_id, product_id, quantity, status, callback) {
     getProducts((res) => {
         if (res.products) {
             const products = res.products;
             const company_id = res.company_id;
             const access_token = res.access_token;
-            let product = {};
+
+            let productsF = [];
             for (let i = 0; i < products.length; i++) {
-                if (products[i].product_id == product_id) {
-                    product = products[i];
-                    product = {
-                        "product_id": product.product_id,
-                        "name": product.name,
-                        "summary": product.summary,
-                        "qty": quantity,
-                        "price": product.price,
-                        "discount": 0,
-                        "deduction_id": 0,
-                        "order": 0,
-                        "exemption_reason": "",
-                        "taxes": [{
-                            "tax_id": product.taxes[0].tax_id,
-                            "value": product.taxes[0].value,
-                            "order": product.taxes[0].order,
-                            "cumulative": product.taxes[0].cumulative
-                        }]
-                    };
-                    break;
+                if (quantity >= 5) {
+                    if (quantity % 5 != 0) {
+                        if (products[i].product_id == product_id) {
+                            productsF.push({
+                                "product_id": products[i].product_id,
+                                "name": products[i].name,
+                                "summary": products[i].summary,
+                                "qty": (quantity % 5),
+                                "price": products[i].price,
+                                "discount": 0,
+                                "deduction_id": 0,
+                                "order": 0,
+                                "exemption_reason": "",
+                                "taxes": [{
+                                    "tax_id": products[i].taxes[0].tax_id,
+                                    "value": products[i].taxes[0].value,
+                                    "order": products[i].taxes[0].order,
+                                    "cumulative": products[i].taxes[0].cumulative
+                                }]
+                            });
+                        }
+                    }
+                    if (products[i].name.includes("Pack")) {
+                        productsF.push({
+                            "product_id": products[i].product_id,
+                            "name": products[i].name,
+                            "summary": products[i].summary,
+                            "qty": Math.floor(quantity / 5),
+                            "price": products[i].price,
+                            "discount": 0,
+                            "deduction_id": 0,
+                            "order": 0,
+                            "exemption_reason": "",
+                            "taxes": [{
+                                "tax_id": products[i].taxes[0].tax_id,
+                                "value": products[i].taxes[0].value,
+                                "order": products[i].taxes[0].order,
+                                "cumulative": products[i].taxes[0].cumulative
+                            }]
+                        });
+                    }
+                } else {
+                    if (products[i].product_id == product_id) {
+                        productsF.push({
+                            "product_id": products[i].product_id,
+                            "name": products[i].name,
+                            "summary": products[i].summary,
+                            "qty": quantity,
+                            "price": products[i].price,
+                            "discount": 0,
+                            "deduction_id": 0,
+                            "order": 0,
+                            "exemption_reason": "",
+                            "taxes": [{
+                                "tax_id": products[i].taxes[0].tax_id,
+                                "value": products[i].taxes[0].value,
+                                "order": products[i].taxes[0].order,
+                                "cumulative": products[i].taxes[0].cumulative
+                            }]
+                        });
+                        break;
+                    }
                 }
             }
-            if (product.product_id) {
+            if (productsF.length != 0) {
                 let json = {
                     "company_id": company_id,
                     "date": new Date().toISOString(),
@@ -100,13 +217,17 @@ function insertPurchase(customer_id, product_id, quantity,status, callback) {
                     "notes": "",
                     "status": status,
                     "net_value": 0,
-                    "products": [product]
+                    "products": productsF
                 };
                 if (json.status == 1) {
+                    let total = 0;
+                    for (let i = 0; i < productsF.length; i++) {
+                        total += (productsF[i].qty * (productsF[i].price + products[i].taxes[0].value)).toFixed(2);
+                    }
                     json.payments = [{
                         "payment_method_id": 820244,
                         "date": new Date().toISOString(),
-                        "value": (quantity * (product.price + product.taxes[0].value)).toFixed(2)
+                        "value": total
                     }]
                 }
 
@@ -242,6 +363,42 @@ function getCategory(callback) {
     })
 }
 
+function getNextNumber(callback) {
+    getCompany((res) => {
+        if (res.company_id) {
+            const company_id = res.company_id;
+            const access_token = res.access_token;
+
+            const json = querystring.stringify({
+                company_id: company_id
+            })
+            let options = {
+                headers: {
+                    'Content-Length': json.length,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                url: `https://api.moloni.pt/v1/customers/getNextNumber/?access_token=${access_token}`,
+                body: json
+            }
+
+            req.post(options, (err, res) => {
+                if (!err && res.statusCode == 200) {
+                    callback({
+                        "company_id": company_id,
+                        "access_token": access_token,
+                        "next_number": JSON.parse(res.body).number
+                    });
+                } else {
+                    callback({
+                        "statusCode": res.statusCode,
+                        "body": JSON.parse(res.body)
+                    });
+                }
+            })
+        }
+    })
+}
+
 function getCompany(callback) {
     getToken((res) => {
         if (res.access_token) {
@@ -305,19 +462,9 @@ function getToken(callback) {
     })
 }
 
-
-function generatePass() {
-    const length = 25,
-        charSET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let retVal = "";
-    for (let i = 0; i < length; ++i) {
-        retVal += charSET.charAt(Math.floor(Math.random() * charSET.length));
-    }
-    return retVal;
-}
-
 module.exports = {
     getProducts: getProducts,
     getInvoices: getInvoices,
-    insertPurchase: insertPurchase
+    insertPurchase: insertPurchase,
+    insertClient: insertClient
 };

@@ -11,11 +11,30 @@ const session = require('express-session');
 const uuid = require('uuid/v4');
 const RedisStore = require('connect-redis')(session);
 const passport = require('./config/passport');
-const nodemailer = require('nodemailer');
-const smtpTransport = require('nodemailer-smtp-transport');
 
 global.urlBase = `http://${ip.address()}:${process.env.PORT}`;
 global.jasminUrl = `https://my.jasminsoftware.com/api/233711/233711-0001/`;
+global.urlFront = `http://localhost:4242`
+
+global.isLoggedIn = (request, response, next) => {
+    if (request.isAuthenticated() && !request.user.isEmpresa) {
+        next();
+    } else {
+        response.status(403).send({
+            "message": "Não está autorizado a aceder a este conteudo"
+        })
+    }
+}
+
+global.isLoggedInCompany = (request, response, next) => {
+    if (request.isAuthenticated() && request.user.isEmpresa) {
+        next();
+    } else {
+        response.status(403).send({
+            "message": "Não está autorizado a aceder a este conteudo"
+        })
+    }
+}
 
 app.use(bodyParser.json({
     limit: '50mb'
@@ -25,8 +44,8 @@ app.use(bodyParser.json({
 app.use(sanitizer());
 app.use(validator());
 
-/*app.use(session({
-    genid: (req) => {
+app.use(session({
+    /*genid: (req) => {
         return uuid()
     },
     store: new RedisStore({
@@ -34,7 +53,7 @@ app.use(validator());
             host: process.env.REDIS_HOST || '127.0.0.1',
             port: process.env.REDIS_PORT || 6379
         }),
-    }),
+    }),*/
     secret: 'keyboard cat',
     resave: true,
     saveUninitialized: false,
@@ -42,21 +61,22 @@ app.use(validator());
         maxAge: 1800000,
         httpOnly: true
     }
-}));*/
+}));
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-require('./routes/auth.route')(app, passport);
-app.use('/', require('./routes/main.routes'));
-
-app.use(function (request, response, next) {
-    response.locals = {
-        user: request.user,
-        ver: 1.0
-    };
+//CORS
+app.use('/', function (request, response, next) {
+    response.header("Access-Control-Allow-Origin", "http://localhost:4242");
+    response.header("Access-Control-Allow-Credentials", true);
+    response.header("Access-Control-Allow-Methods", "PUT, POST, OPTIONS, GET");
+    response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
+
+require('./routes/auth.route')(app, passport);
+app.use('/', require('./routes/main.routes'));
 
 var server = app.listen(process.env.PORT, function () {
     console.log(`Listening at ${global.urlBase}`);
