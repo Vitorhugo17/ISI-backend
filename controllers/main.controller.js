@@ -83,17 +83,19 @@ function generateQrcode(request, response) {
 }
 
 function readQrcode(request, response) {
-    const qrcode_id = request.sanitize("qrcode_id").escape();
-    qrcodeController.readQrcode(qrcode_id, (res) => {
+    const user_id = request.user.user_id;
+    const hash = request.sanitize("qrcode_id").escape();
+
+    qrcodeController.readQrcode(user_id, hash, (res) => {
         response.status(res.statusCode).send(res.body);
     })
 }
 
 function useQrcode(request, response) {
-    const qrcode_id = request.sanitize("qrcode_id").escape();
+    const hash = request.sanitize("qrcode_id").escape();
     const company = request.user.nome;
 
-    qrcodeController.useQrcode(qrcode_id, company, (res) => {
+    qrcodeController.useQrcode(hash, company, (res) => {
         response.status(res.statusCode).send(res.body);
     })
 }
