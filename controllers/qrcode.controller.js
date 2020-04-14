@@ -194,7 +194,7 @@ function generateQrcode(user_id, company, utilization, callback) {
                             callback({
                                 "statusCode": 200,
                                 body: {
-                                    "message": `/qrcodes/${qrcode_id}`
+                                    "qrcode_id": `${qrcode_id}`
                                 }
                             });
                         } else {
