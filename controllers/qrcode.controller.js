@@ -201,7 +201,8 @@ function generateQrcode(user_id, company, utilization, callback) {
                             callback({
                                 "statusCode": 400,
                                 body: {
-                                    "message": "Couldn't generate qrcode4"
+                                    "message": "Couldn't generate qrcode",
+                                    "err": err
                                 }
                             });
                         }
@@ -210,7 +211,7 @@ function generateQrcode(user_id, company, utilization, callback) {
                     callback({
                         "statusCode": 400,
                         body: {
-                            "message": "Couldn't generate qrcode5"
+                            "message": "Couldn't generate qrcode"
                         }
                     });
                 }
@@ -219,7 +220,7 @@ function generateQrcode(user_id, company, utilization, callback) {
             callback({
                 "statusCode": 400,
                 body: {
-                    "message": "Couldn't generate qrcode6"
+                    "message": "Couldn't generate qrcode"
                 }
             });
         }
