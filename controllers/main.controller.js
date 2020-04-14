@@ -66,18 +66,18 @@ function generateQrcode(request, response) {
                     })
                 } else {
                     response.status(400).send({
-                        "message": "Couldn't generate qrcode"
+                        "message": "Couldn't generate qrcode1"
                     })
                 }
             } else {
                 response.status(400).send({
-                    "message": "Couldn't generate qrcode"
+                    "message": "Couldn't generate qrcode2"
                 })
             }
         })
     } else {
         response.status(400).send({
-            "message": "Couldn't generate qrcode"
+            "message": "Couldn't generate qrcode3"
         })
     }
 }
