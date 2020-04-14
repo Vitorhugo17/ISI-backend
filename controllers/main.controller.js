@@ -235,7 +235,7 @@ function recoverPass(request, response) {
                             transporter.verify(function (error, success) {
                                 if (error) {
                                     console.log(error);
-                                    response.status(400).send("Can't send email");
+                                    response.status(400).send({"message": "Can't send email1", "error": error});
                                 } else {
                                     const mailOptions = {
                                         FROM: connection.email.username,
@@ -246,7 +246,7 @@ function recoverPass(request, response) {
                                     transporter.sendMail(mailOptions, function (error, info) {
                                         if (error) {
                                             console.log(error);
-                                            response.status(400).send("Can't send email");
+                                            response.status(400).send({"message": "Can't send email2", "error": error});
                                         } else {
                                             response.status(200).send({
                                                 "message": "mail sent"
