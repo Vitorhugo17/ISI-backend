@@ -14,90 +14,61 @@ const qrcodeController = require('./qrcode.controller');
 function generateQrcode(request, response) {
     const user_id = request.user.user_id;
     const company = request.sanitize("company").escape();
-    const product_id = request.sanitize("product_id").escape();
+    const product_type = request.sanitize("product_type").escape();
     let utilization = 0;
 
-    if (company == "Barquense") {
-        moloniController.getProducts((res) => {
-            if (res.products) {
-                const products = res.products;
-                hubspotController.getClient(user_id, (res) => {
-                    if (res.user) {
-                        const user = res.user;
+    if (product_type == "barquense") {
+        hubspotController.getClient(user_id, (res) => {
+            if (res.user) {
+                const user = res.user;
 
-                        for (let i = 0; i < products.length; i++) {
-                            if (products[i].product_id == product_id) {
-                                if (products[i].name.toLowerCase().includes("ida e volta")) {
-                                    if (user.bilhetes_ida_e_volta_barquense > 0) {
-                                        utilization = 2;
-                                    }
-                                } else {
-                                    if (user.bilhetes_disponiveis_barquense > 0) {
-                                        utilization = 1;
-                                    }
-                                }
-                                break;
-                            }
-                        }
-                        if (utilization != 0) {
-                            qrcodeController.generateQrcode(user_id, company, utilization, (res) => {
-                                response.status(res.statusCode).send(res.body);
-                            })
-                        } else {
-                            response.status(404).send({
-                                "message": "Couldn't generate qrcode"
-                            })
-                        }
-                    } else {
-                        response.status(404).send({
-                            "message": "Couldn't generate qrcode"
-                        })
+                if (product_type.toLowerCase().includes("ida_e_volta")) {
+                    if (user.bilhetes_ida_e_volta_barquense > 0) {
+                        utilization = 2;
                     }
-                })
-
+                } else {
+                    if (user.bilhetes_disponiveis_barquense > 0) {
+                        utilization = 1;
+                    }
+                }
+                if (utilization != 0) {
+                    qrcodeController.generateQrcode(user_id, company, utilization, (res) => {
+                        response.status(res.statusCode).send(res.body);
+                    })
+                } else {
+                    response.status(404).send({
+                        "message": "Couldn't generate qrcode"
+                    })
+                }
             } else {
-                response.status(400).send({
+                response.status(404).send({
                     "message": "Couldn't generate qrcode"
                 })
             }
         })
-    } else if (company == "Transdev") {
-        jasminController.getProducts((res) => {
-            if (res.products) {
-                const products = res.products;
-                hubspotController.getClient(user_id, (res) => {
-                    if (res.user) {
-                        const user = res.user;
+    } else if (product_type == "transdev") {
+        hubspotController.getClient(user_id, (res) => {
+            if (res.user) {
+                const user = res.user;
 
-                        for (let i = 0; i < products.length; i++) {
-                            if (products[i].itemKey == product_id) {
-                                if (products[i].description.toLowerCase().includes("ida e volta")) {
-                                    if (user.bilhetes_ida_e_volta_transdev > 0) {
-                                        utilization = 2;
-                                    }
-                                } else {
-                                    if (user.bilhetes_disponiveis_transdev > 0) {
-                                        utilization = 1;
-                                    }
-                                }
-                                break;
-                            }
-                        }
-                        if (utilization != 0) {
-                            qrcodeController.generateQrcode(user_id, company, utilization, (res) => {
-                                response.status(res.statusCode).send(res.body);
-                            })
-                        } else {
-                            response.status(400).send({
-                                "message": "Couldn't generate qrcode"
-                            })
-                        }
-                    } else {
-                        response.status(400).send({
-                            "message": "Couldn't generate qrcode"
-                        })
+                if (product_type.toLowerCase().includes("ida_e_volta")) {
+                    if (user.bilhetes_ida_e_volta_transdev > 0) {
+                        utilization = 2;
                     }
-                })
+                } else {
+                    if (user.bilhetes_disponiveis_transdev > 0) {
+                        utilization = 1;
+                    }
+                }
+                if (utilization != 0) {
+                    qrcodeController.generateQrcode(user_id, company, utilization, (res) => {
+                        response.status(res.statusCode).send(res.body);
+                    })
+                } else {
+                    response.status(400).send({
+                        "message": "Couldn't generate qrcode"
+                    })
+                }
             } else {
                 response.status(400).send({
                     "message": "Couldn't generate qrcode"
