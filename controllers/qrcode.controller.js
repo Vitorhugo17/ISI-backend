@@ -1,5 +1,5 @@
 const connect = require('./../config/connectBD');
-const dirQrcode = __dirname + "./../assets/images/qrcodes";
+const dirQrcode = __dirname + "/../assets/images/qrcodes";
 const qrCode = require("qrcode");
 const fs = require("fs");
 
