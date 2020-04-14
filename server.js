@@ -14,7 +14,7 @@ const passport = require('./config/passport');
 
 global.urlBase = `http://${ip.address()}:${process.env.PORT}`;
 global.jasminUrl = `https://my.jasminsoftware.com/api/233711/233711-0001/`;
-global.urlFront = `http://localhost:4242`
+global.urlFront = `https://isicampus.herokuapp.com`
 
 global.isLoggedIn = (request, response, next) => {
     if (request.isAuthenticated() && !request.user.isEmpresa) {
