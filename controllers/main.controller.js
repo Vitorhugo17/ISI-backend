@@ -17,7 +17,7 @@ function generateQrcode(request, response) {
     const product_type = request.sanitize("product_type").escape();
     let utilization = 0;
 
-    if (product_type == "barquense") {
+    if (product_type.includes("barquense")) {
         hubspotController.getClient(user_id, (res) => {
             if (res.user) {
                 const user = res.user;
@@ -36,17 +36,17 @@ function generateQrcode(request, response) {
                         response.status(res.statusCode).send(res.body);
                     })
                 } else {
-                    response.status(404).send({
+                    response.status(400).send({
                         "message": "Couldn't generate qrcode"
                     })
                 }
             } else {
-                response.status(404).send({
+                response.status(400).send({
                     "message": "Couldn't generate qrcode"
                 })
             }
         })
-    } else if (product_type == "transdev") {
+    } else if (product_type.includes("transdev")) {
         hubspotController.getClient(user_id, (res) => {
             if (res.user) {
                 const user = res.user;
