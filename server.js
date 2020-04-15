@@ -59,6 +59,7 @@ app.use(session({
     resave: true,
     saveUninitialized: false,
     cookie: {
+        domain: "isicampus.herokuapp.com",
         maxAge: 1800000,
         httpOnly: true,
         secure: true,
