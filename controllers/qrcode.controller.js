@@ -5,9 +5,9 @@ const fs = require("fs");
 
 const hubspotController = require("./hubspot.controller");
 
-function useQrcode(qrcode_id, company, callback) {
-    const post = [new Date(), qrcode_id, company];
-    connect.query("SELECT * FROM qrcode WHERE dataValidade > ? AND utilizacao > 0 AND idQRCode = ? AND empresa = ?", post, (err, rows) => {
+function useQrcode(user_id, hash, company, callback) {
+    const post = [new Date(), hash, company, user_id];
+    connect.query("SELECT * FROM qrcode WHERE dataValidade > ? AND utilizacao > 0 AND hash = ? AND empresa = ?", post, (err, rows) => {
         if (!err) {
             if (rows.length != 0) {
                 let qrcode = rows[0];
@@ -40,7 +40,7 @@ function useQrcode(qrcode_id, company, callback) {
                                 if (res.statusCode == 200) {
                                     connect.query(`DELETE FROM qrcode WHERE idQRCode = ${qrcode.idQRCode}`, (err, rows) => {
                                         if (!err) {
-                                            const foto = `${dirQrcode}/${qrcode_id}.png`;
+                                            const foto = `${dirQrcode}/${qrcode.idUtilizador}_${qrcode.idQRCode}.png`;
                                             fs.unlink(foto, (err) => {
                                                 callback({
                                                     "statusCode": 200,
@@ -115,17 +115,19 @@ function useQrcode(qrcode_id, company, callback) {
     })
 }
 
-function readQrcode(qrcode_id, callback) {
-    const post = [new Date(), qrcode_id];
-    connect.query("SELECT * FROM qrcode WHERE dataValidade > ? AND utilizacao > 0 AND idQRCode = ?", post, (err, rows) => {
+function readQrcode(user_id, qrcode_id, callback) {
+    const post = [new Date(), hash, user_id];
+    connect.query("SELECT * FROM qrcode WHERE dataValidade > ? AND utilizacao > 0 AND idQRCode=? AND idUtilizador = ?", post, (err, rows) => {
         if (!err) {
             if (rows.length != 0) {
-                const foto = `${dirQrcode}/${qrcode_id}.png`;
-                fs.readFile(foto, function (err, data) {
+                const foto = `${dirQrcode}/${user_id}_${qrcode_id}.png`;
+                fs.readFile(foto, 'base64', function (err, data) {
                     if (!err) {
                         callback({
                             "statusCode": 200,
-                            body: data
+                            body: {
+                                "data": `data:image/png;base64,${data}`
+                            }
                         });
                     } else {
                         callback({
@@ -165,12 +167,14 @@ function generateQrcode(user_id, company, utilization, callback) {
         validation_date.setMinutes(validation_date.getMinutes() + 10); //validade de 10 minutos
     }
 
+    let hash = generateHash();
     const post = {
         dataCriacao: creation_date,
         idUtilizador: user_id,
         empresa: company,
         dataValidade: validation_date,
-        utilizacao: utilization
+        utilizacao: utilization,
+        hash: hash
     }
 
     if (utilization == 2) {
@@ -182,12 +186,12 @@ function generateQrcode(user_id, company, utilization, callback) {
         if (!err) {
             const qrcode_id = rows.insertId;
             const data = {
-                qrcode_id: qrcode_id.toString()
+                qrcode_id: hash
             }
             qrCode.toDataURL(JSON.stringify(data), (err, image) => {
                 if (!err) {
                     const imageData = image.replace(/^data:image\/png;base64,/, "");
-                    const foto = `${dirQrcode}/${qrcode_id}.png`;
+                    const foto = `${dirQrcode}/${user_id}_${qrcode_id}.png`;
 
                     fs.writeFile(foto, imageData, 'base64', function (err) {
                         if (!err) {
@@ -225,6 +229,17 @@ function generateQrcode(user_id, company, utilization, callback) {
             });
         }
     })
+}
+
+
+function generateHash() {
+    const caracteres = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const length = 100;
+    let result = "";
+    for (let i = 0; i < length; i++) {
+        result += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+    }
+    return result;
 }
 
 module.exports = {
