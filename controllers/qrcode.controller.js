@@ -115,12 +115,11 @@ function useQrcode(user_id, hash, company, callback) {
     })
 }
 
-function readQrcode(user_id, hash, callback) {
+function readQrcode(user_id, qrcode_id, callback) {
     const post = [new Date(), hash, user_id];
-    connect.query("SELECT * FROM qrcode WHERE dataValidade > ? AND utilizacao > 0 AND hash=? AND idUtilizador = ?", post, (err, rows) => {
+    connect.query("SELECT * FROM qrcode WHERE dataValidade > ? AND utilizacao > 0 AND idQRCode=? AND idUtilizador = ?", post, (err, rows) => {
         if (!err) {
             if (rows.length != 0) {
-                const qrcode_id = rows[0].idQRCode;
                 const foto = `${dirQrcode}/${user_id}_${qrcode_id}.png`;
                 fs.readFile(foto, 'base64', function (err, data) {
                     if (!err) {
@@ -199,7 +198,7 @@ function generateQrcode(user_id, company, utilization, callback) {
                             callback({
                                 "statusCode": 200,
                                 body: {
-                                    "qrcode_id": `${hash}`
+                                    "qrcode_id": `${qrcode_id}`
                                 }
                             });
                         } else {

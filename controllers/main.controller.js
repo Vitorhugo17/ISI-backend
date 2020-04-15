@@ -84,9 +84,9 @@ function generateQrcode(request, response) {
 
 function readQrcode(request, response) {
     const user_id = request.user.user_id;
-    const hash = request.sanitize("qrcode_id").escape();
+    const qrcode_id = request.sanitize("qrcode_id").escape();
 
-    qrcodeController.readQrcode(user_id, hash, (res) => {
+    qrcodeController.readQrcode(user_id, qrcode_id, (res) => {
         response.status(res.statusCode).send(res.body);
     })
 }
