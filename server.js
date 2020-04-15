@@ -44,6 +44,7 @@ app.use(bodyParser.json({
 app.use(sanitizer());
 app.use(validator());
 
+app.set("trust proxy", 1);
 app.use(session({
     /*genid: (req) => {
         return uuid()
