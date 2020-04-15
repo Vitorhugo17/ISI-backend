@@ -116,7 +116,7 @@ function useQrcode(user_id, hash, company, callback) {
 }
 
 function readQrcode(user_id, qrcode_id, callback) {
-    const post = [new Date(), hash, user_id];
+    const post = [new Date(), qrcode_id, user_id];
     connect.query("SELECT * FROM qrcode WHERE dataValidade > ? AND utilizacao > 0 AND idQRCode=? AND idUtilizador = ?", post, (err, rows) => {
         if (!err) {
             if (rows.length != 0) {
