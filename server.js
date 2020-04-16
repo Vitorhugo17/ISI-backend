@@ -78,7 +78,7 @@ app.use('/', function (request, response, next) {
 require('./routes/auth.route')(app, passport);
 app.use('/', require('./routes/main.routes'));
 
-var server = app.listen(process.env.PORT, function () {
+const server = app.listen(process.env.PORT, function () {
     console.log(`Listening at ${global.urlBase}`);
 });
 
