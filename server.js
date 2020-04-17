@@ -44,6 +44,7 @@ app.use(bodyParser.json({
 app.use(sanitizer());
 app.use(validator());
 
+app.set("trust proxy", 1);
 app.use(session({
     /*genid: (req) => {
         return uuid()
@@ -59,7 +60,9 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         maxAge: 1800000,
-        httpOnly: true
+        httpOnly: true,
+        secure: true,
+        sameSite: "none"
     }
 }));
 
