@@ -245,10 +245,16 @@ function recoverPass(request, response) {
                                     });
                                 } else {
                                     const mailOptions = {
-                                        FROM: process.env.EMAIL_USERNAME,
-                                        to: email,
-                                        subject: 'ISICampus: Recuperar conta',
-                                        html: bodycontent
+                                        "from": {
+                                            "name": 'ISITravel',
+                                            "address": process.env.EMAIL_USERNAME
+                                        },
+                                        "to": {
+                                            "name": `${res.user.nome} ${res.user.apelido}`,
+                                            "address": email
+                                        },
+                                        "subject": 'ISICampus: Recuperar conta',
+                                        "html": bodycontent
                                     };
                                     transporter.sendMail(mailOptions, function (error, info) {
                                         if (error) {
