@@ -327,7 +327,7 @@ function insertPurchase(request, response) {
                                             if (res.statusCode == 200) {
                                                 let updatedData = {};
                                                 if (product.name.toLowerCase().includes("ida e volta")) {
-                                                    let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
+                                                    let total = parseInt(bilhetes_ida_e_volta_barquense) + parseInt(quantity * product.quantity);
                                                     updatedData = [{
                                                         "property": 'bilhetes_ida_e_volta_barquense',
                                                         "value": total
@@ -412,7 +412,7 @@ function insertPurchase(request, response) {
                                                         "value": jasmin_id
                                                     }];
                                                 } else {
-                                                    let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
+                                                    let total = parseInt(transdev_ticket) + parseInt(quantity * product.quantity);
                                                     updatedData = [{
                                                         "property": 'bilhetes_disponiveis_transdev',
                                                         "value": total
@@ -440,13 +440,13 @@ function insertPurchase(request, response) {
                                 jasminController.insertPurchase(jasmin_id, (user.firstname + " " + user.lastname), user.nif, product_id, parseInt(quantity), (res) => {
                                     if (res.statusCode == 200) {
                                         if (product.name.toLowerCase().includes("ida e volta")) {
-                                            let total = parseInt(transdev_ticket) + parseInt(quantity * product.quantity);
+                                            let total = parseInt(bilhetes_ida_e_volta_transdev) + parseInt(quantity * product.quantity);
                                             updatedData = [{
                                                 "property": 'bilhetes_ida_e_volta_transdev',
                                                 "value": total
                                             }];
                                         } else {
-                                            let total = parseInt(barquense_ticket) + parseInt(quantity * product.quantity);
+                                            let total = parseInt(transdev_ticket) + parseInt(quantity * product.quantity);
                                             updatedData = [{
                                                 "property": 'bilhetes_disponiveis_transdev',
                                                 "value": total
