@@ -245,7 +245,7 @@ function recoverPass(request, response) {
                                     });
                                 } else {
                                     const mailOptions = {
-                                        FROM: process.env.EMAIL_USERNAME,
+                                        FROM: `ISITravel <${process.env.EMAIL_USERNAME}>`,
                                         to: email,
                                         subject: 'ISICampus: Recuperar conta',
                                         html: bodycontent
