@@ -1,7 +1,5 @@
 const querystring = require('querystring');
 const req = require('request');
-const connection = require('./../config/connection');
-
 
 function insertClient(nome, callback) {
     getToken((res) => {
@@ -278,8 +276,8 @@ function getProducts(callback) {
 
 function getToken(callback) {
     let json = querystring.stringify({
-        client_id: connection.jasmin.clientID,
-        client_secret: connection.jasmin.secret,
+        client_id: process.env.JASMIN_CLIENTID,
+        client_secret: process.env.JASMIN_SECRET,
         grant_type: "client_credentials",
         scope: "application"
     });

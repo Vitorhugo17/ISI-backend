@@ -1,7 +1,7 @@
 const mysql = require('mysql');
 module.exports = mysql.createPool({
-    host: 'eu-cdbr-west-02.cleardb.net',
-    user: 'b63553727b96b0',
-    password: 'fd782d64',
-    database: 'heroku_1f0b6a19dd5fe3a'
+    host: process.env.MYSQL_HOST,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE
 });

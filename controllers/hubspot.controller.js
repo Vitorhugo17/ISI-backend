@@ -1,6 +1,4 @@
-const bCrypt = require('bcryptjs');
 const req = require('request');
-const connection = require('./../config/connection');
 
 /* 
 Função que permite ir buscar os dados do cliente 
@@ -10,7 +8,7 @@ Retoma: o id do cliente no hubspot, moloni e jasmin, nome e apelido, email, nº 
 
 function getClient(user_id, callback) {
     let options = {
-        url: `https://api.hubapi.com/contacts/v1/contact/vid/${user_id}/profile?hapikey=${connection.hubspot.key}`
+        url: `https://api.hubapi.com/contacts/v1/contact/vid/${user_id}/profile?hapikey=${process.env.HUBSPOT_KEY}`
     }
     req.get(options, (err, res) => {
         if (!err && res.statusCode == 200) {
@@ -55,7 +53,7 @@ function createClient(properties, callback) {
             'Content-Length': json.length,
             'Content-Type': 'application/json'
         },
-        url: `https://api.hubapi.com/contacts/v1/contact/?hapikey=${connection.hubspot.key}`,
+        url: `https://api.hubapi.com/contacts/v1/contact/?hapikey=${process.env.HUBSPOT_KEY}`,
         body: json
     }
     req.post(options, (err, res) => {
@@ -84,7 +82,7 @@ function updateClient(user_id, properties, callback) {
             'Content-Length': JSON.stringify(json).length,
             'Content-Type': 'application/json'
         },
-        url: `https://api.hubapi.com/contacts/v1/contact/vid/${user_id}/profile?hapikey=${connection.hubspot.key}`,
+        url: `https://api.hubapi.com/contacts/v1/contact/vid/${user_id}/profile?hapikey=${process.env.HUBSPOT_KEY}`,
         body: JSON.stringify(json)
     }
 

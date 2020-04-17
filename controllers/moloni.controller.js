@@ -1,6 +1,5 @@
 const querystring = require('querystring');
 const req = require('request');
-const connection = require('./../config/connection');
 
 function insertClient(nif, nome, email, callback) {
     getNextNumber((res) => {
@@ -411,7 +410,7 @@ function getCompany(callback) {
                     let resBody = JSON.parse(res.body);
                     let company_id = -1;
                     for (let i = 0; i < resBody.length; i++) {
-                        if (resBody[i].email == connection.email.username) {
+                        if (resBody[i].email == process.env.EMAIL_USERNAME) {
                             company_id = resBody[i].company_id;
                         }
                     }
@@ -446,7 +445,7 @@ function getCompany(callback) {
 
 function getToken(callback) {
     let options = {
-        url: `https://api.moloni.pt/v1/grant/?grant_type=password&client_id=${connection.moloni.clientID}&client_secret=${connection.moloni.secret}&username=${connection.email.username}&password=${connection.email.password}`
+        url: `https://api.moloni.pt/v1/grant/?grant_type=password&client_id=${process.env.MOLONI_CLIENTID}&client_secret=${process.env.MOLONI_SECRET}&username=${process.env.EMAIL_USERNAME}&password=${process.env.EMAIL_PASSWORD}`
     }
     req.get(options, (err, res) => {
         if (!err && res.statusCode == 200) {

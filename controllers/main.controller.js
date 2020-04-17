@@ -1,10 +1,7 @@
-const req = require('request');
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const bCrypt = require('bcryptjs');
 const connect = require('./../config/connectBD');
-const connection = require('./../config/connection');
 const nodemailer = require('nodemailer');
-const smtpTransport = require('nodemailer-smtp-transport');
 
 const hubspotController = require('./hubspot.controller');
 const moloniController = require('./moloni.controller');
@@ -232,8 +229,8 @@ function recoverPass(request, response) {
                                 port: 465,
                                 secure: true,
                                 auth: {
-                                    user: connection.email.username,
-                                    pass: connection.email.password
+                                    user: process.env.EMAIL_USERNAME,
+                                    pass: process.env.EMAIL_PASSWORD
                                 },
                                 tls: {
                                     // do not fail on invalid certs
@@ -248,7 +245,7 @@ function recoverPass(request, response) {
                                     });
                                 } else {
                                     const mailOptions = {
-                                        FROM: connection.email.username,
+                                        FROM: process.env.EMAIL_USERNAME,
                                         to: email,
                                         subject: 'ISICampus: Recuperar conta',
                                         html: bodycontent
