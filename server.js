@@ -44,6 +44,8 @@ app.use(bodyParser.json({
 app.use(sanitizer());
 app.use(validator());
 
+app.use(express.static(__dirname + '/public/'));
+
 app.set("trust proxy", 1);
 app.use(session({
     /*genid: (req) => {
