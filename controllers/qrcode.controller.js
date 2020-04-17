@@ -5,7 +5,7 @@ const fs = require("fs");
 
 const hubspotController = require("./hubspot.controller");
 
-function useQrcode(user_id, hash, company, callback) {
+function useQrcode(hash, company, callback) {
     const post = [new Date(), hash, company, user_id];
     connect.query("SELECT * FROM qrcode WHERE dataValidade > ? AND utilizacao > 0 AND hash = ? AND empresa = ?", post, (err, rows) => {
         if (!err) {
