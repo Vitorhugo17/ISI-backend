@@ -16,7 +16,7 @@ function insertClient(nome, callback) {
             let options = {
                 headers: {
                     'Authorization': `Bearer ${access_token}`,
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json; charset=utf-8',
                     'Content-Length': JSON.stringify(json).length
                 },
                 url: `${global.jasminUrl}salescore/customerParties`,
@@ -159,7 +159,7 @@ function insertPurchase(customer_id, customer_name, customer_nif, product_id, qu
                         let options = {
                             headers: {
                                 'Authorization': `Bearer ${access_token}`,
-                                'Content-Type': 'application/json',
+                                'Content-Type': 'application/json; charset=utf-8',
                                 'Content-Length': JSON.stringify(json).length
                             },
                             url: `${global.jasminUrl}billing/invoices`,

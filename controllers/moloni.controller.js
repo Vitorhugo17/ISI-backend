@@ -232,7 +232,7 @@ function insertPurchase(customer_id, product_id, quantity, status, callback) {
 
                 let options = {
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json; charset=utf-8'
                     },
                     url: `https://api.moloni.pt/v1/invoiceReceipts/insert/?access_token=${access_token}&json=true`,
                     body: JSON.stringify(json)

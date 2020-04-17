@@ -44,18 +44,18 @@ function getClient(user_id, callback) {
 }
 
 function createClient(properties, callback) {
-    let json = JSON.stringify({
+    let json = {
         "properties": properties
-    });
+    };
 
     let options = {
         headers: {
-            'Content-Length': json.length,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json; charset=utf-8'
         },
         url: `https://api.hubapi.com/contacts/v1/contact/?hapikey=${process.env.HUBSPOT_KEY}`,
-        body: json
+        body: JSON.stringify(json)
     }
+    
     req.post(options, (err, res) => {
         if (!err && res.statusCode == 200) {
             callback({
@@ -79,8 +79,7 @@ function updateClient(user_id, properties, callback) {
     }
     let options = {
         headers: {
-            'Content-Length': JSON.stringify(json).length,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json; charset=utf-8'
         },
         url: `https://api.hubapi.com/contacts/v1/contact/vid/${user_id}/profile?hapikey=${process.env.HUBSPOT_KEY}`,
         body: JSON.stringify(json)
