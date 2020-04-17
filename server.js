@@ -44,6 +44,8 @@ app.use(bodyParser.json({
 app.use(sanitizer());
 app.use(validator());
 
+app.use(express.static(__dirname + '/public/'));
+
 app.use(session({
     /*genid: (req) => {
         return uuid()
