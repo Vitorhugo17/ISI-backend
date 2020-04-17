@@ -228,16 +228,22 @@ function recoverPass(request, response) {
                                        Obrigado, <br>
                                        Equipa ISICampus`;
                             const transporter = nodemailer.createTransport({
-                                service: 'Gmail',
+                                host: 'smtp.gmail.com',
+                                port: 465,
+                                secure: true,
                                 auth: {
                                     user: connection.email.username,
                                     pass: connection.email.password
+                                },
+                                tls: {
+                                    // do not fail on invalid certs
+                                    rejectUnauthorized: false
                                 }
                             });
                             transporter.verify(function (error, success) {
                                 if (error) {
                                     console.log(error);
-                                    response.status(400).send({"message": "Can't send email", "error": error});
+                                    response.status(400).send("Can't send email");
                                 } else {
                                     const mailOptions = {
                                         FROM: connection.email.username,
@@ -248,7 +254,7 @@ function recoverPass(request, response) {
                                     transporter.sendMail(mailOptions, function (error, info) {
                                         if (error) {
                                             console.log(error);
-                                            response.status(400).send({"message": "Can't send email2", "error": error});
+                                            response.status(400).send("Can't send email");
                                         } else {
                                             response.status(200).send({
                                                 "message": "mail sent"
