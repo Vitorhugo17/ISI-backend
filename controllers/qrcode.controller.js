@@ -45,11 +45,9 @@ function useQrcode(hash, company, callback) {
                                         update = [date, qrcode.idQRCode];
                                         query = "UPDATE qrcode SET utilizacao = 0 AND dataUtilizacaoVolta = ? WHERE idQRCode = ?";
                                     }
-                                    const queryRes = connect.query(query, update, (err, rows) => {
-                                        console.log(queryRes.sql);
+                                    connect.query(query, update, (err, rows) => {
                                         if (!err) {
                                             const foto = `${dirQrcode}/${qrcode.idUtilizador}_${qrcode.idQRCode}.png`;
-                                            console.log(foto);
                                             fs.unlink(foto, (err) => {
                                                 callback({
                                                     "statusCode": 200,
