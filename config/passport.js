@@ -72,7 +72,6 @@ passport.use('local-signup', new LocalStrategy({
         if (!err) {
             if (rows.length == 0) {
                 hubspotController.existsClientNif(nif, (res) => {
-                    console.log(res);
                     if (res.statusCode) {
                         done(null, {
                             "statusCode": 409,
