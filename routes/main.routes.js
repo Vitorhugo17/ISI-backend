@@ -2,6 +2,13 @@ const router = require('express').Router();
 
 const mainController = require('./../controllers/main.controller');
 
+const exampleController = require('./../controllers/example.controller');
+
+router.post('/payment', exampleController.paymentIntent);
+router.post('/webhook', exampleController.webhook);
+
+
+
 router.get("/authenticated", (request, response) => {
     if (request.isAuthenticated()) {
         response.status(200).send({

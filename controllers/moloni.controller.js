@@ -131,14 +131,35 @@ function insertPurchase(customer_id, product_id, quantity, status, callback) {
 
             let productsF = [];
             for (let i = 0; i < products.length; i++) {
-                if (quantity >= 5) {
-                    if (quantity % 5 != 0) {
-                        if (products[i].product_id == product_id) {
+                if (products[i].name.toLowerCase().includes("único")) {
+                    if (quantity >= 5) {
+                        if (quantity % 5 != 0) {
+                            if (products[i].product_id == product_id) {
+                                productsF.push({
+                                    "product_id": products[i].product_id,
+                                    "name": products[i].name,
+                                    "summary": products[i].summary,
+                                    "qty": (quantity % 5),
+                                    "price": products[i].price,
+                                    "discount": 0,
+                                    "deduction_id": 0,
+                                    "order": 0,
+                                    "exemption_reason": "",
+                                    "taxes": [{
+                                        "tax_id": products[i].taxes[0].tax_id,
+                                        "value": products[i].taxes[0].value,
+                                        "order": products[i].taxes[0].order,
+                                        "cumulative": products[i].taxes[0].cumulative
+                                    }]
+                                });
+                            }
+                        }
+                        if (products[i].name.toLowerCase().includes("pack")) {
                             productsF.push({
                                 "product_id": products[i].product_id,
                                 "name": products[i].name,
                                 "summary": products[i].summary,
-                                "qty": (quantity % 5),
+                                "qty": Math.floor(quantity / 5),
                                 "price": products[i].price,
                                 "discount": 0,
                                 "deduction_id": 0,
@@ -152,25 +173,27 @@ function insertPurchase(customer_id, product_id, quantity, status, callback) {
                                 }]
                             });
                         }
-                    }
-                    if (products[i].name.includes("Pack")) {
-                        productsF.push({
-                            "product_id": products[i].product_id,
-                            "name": products[i].name,
-                            "summary": products[i].summary,
-                            "qty": Math.floor(quantity / 5),
-                            "price": products[i].price,
-                            "discount": 0,
-                            "deduction_id": 0,
-                            "order": 0,
-                            "exemption_reason": "",
-                            "taxes": [{
-                                "tax_id": products[i].taxes[0].tax_id,
-                                "value": products[i].taxes[0].value,
-                                "order": products[i].taxes[0].order,
-                                "cumulative": products[i].taxes[0].cumulative
-                            }]
-                        });
+                    } else {
+                        if (products[i].product_id == product_id) {
+                            productsF.push({
+                                "product_id": products[i].product_id,
+                                "name": products[i].name,
+                                "summary": products[i].summary,
+                                "qty": quantity,
+                                "price": products[i].price,
+                                "discount": 0,
+                                "deduction_id": 0,
+                                "order": 0,
+                                "exemption_reason": "",
+                                "taxes": [{
+                                    "tax_id": products[i].taxes[0].tax_id,
+                                    "value": products[i].taxes[0].value,
+                                    "order": products[i].taxes[0].order,
+                                    "cumulative": products[i].taxes[0].cumulative
+                                }]
+                            });
+                            break;
+                        }
                     }
                 } else {
                     if (products[i].product_id == product_id) {

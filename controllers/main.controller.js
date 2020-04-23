@@ -628,14 +628,43 @@ function calculateOrderAmount(quantity, product_id, company, callback) {
     if (company == "Barquense") {
         moloniController.getProducts((res) => {
             if (res.products) {
-                let amount = 0;
                 const products = res.products;
+
+                let productsF = [];
                 for (let i = 0; i < products.length; i++) {
-                    if (products[i].product_id == product_id) {
-                        amount = (products[i].price + products[i].taxes[0].value).toFixed(2) * quantity;
+                    if (quantity >= 5) {
+                        if (quantity % 5 != 0) {
+                            if (products[i].product_id == product_id) {
+                                productsF.push({
+                                    "qty": (quantity % 5),
+                                    "price": products[i].price,
+                                    "taxes": products[i].taxes[0].value
+                                });
+                            }
+                        }
+                        if (products[i].name.includes("Pack")) {
+                            productsF.push({
+                                "qty": Math.floor(quantity / 5),
+                                "price": products[i].price,
+                                "taxes": products[i].taxes[0].value
+                            });
+                        }
+                    } else {
+                        if (products[i].product_id == product_id) {
+                            productsF.push({
+                                "qty": quantity,
+                                "price": products[i].price,
+                                "taxes": products[i].taxes[0].value
+                            });
+                            break;
+                        }
                     }
                 }
-                if (amount != 0) {
+                if (productsF.length != 0) {
+                    let amount = 0;
+                    for (let i = 0; i < productsF.length; i++) {
+                        amount += (productsF[i].qty * (productsF[i].price + products[i].taxes[0].value)).toFixed(2);
+                    }
                     callback({
                         "orderAmount": amount
                     })
@@ -657,14 +686,40 @@ function calculateOrderAmount(quantity, product_id, company, callback) {
     } else if (company == "Transdev") {
         jasminController.getProducts((res) => {
             if (res.products) {
-                let amount = 0;
                 const products = res.products;
+
+                let productsF = [];
                 for (let i = 0; i < products.length; i++) {
-                    if (products[i].itemKey == product_id) {
-                        amount = products[i].priceListLines[0].priceAmount.amount.toFixed(2) * quantity;
+                    if (quantity >= 10) {
+                        if (quantity % 10 != 0) {
+                            if (products[i].itemKey == parseInt(product_id)) {
+                                productsF.push({
+                                    "quantity": (quantity % 10),
+                                    "unitPrice": products[i].priceListLines[0].priceAmount
+                                });
+                            }
+                        }
+                        if (products[i].description.includes("Pack")) {
+                            productsF.push({
+                                "quantity": Math.floor(quantity / 10),
+                                "unitPrice": products[i].priceListLines[0].priceAmount
+                            });
+                        }
+                    } else {
+                        if (products[i].itemKey == parseInt(product_id)) {
+                            productsF.push({
+                                "quantity": quantity,
+                                "unitPrice": products[i].priceListLines[0].priceAmount
+                            });
+                            break;
+                        }
                     }
                 }
-                if (amount != 0) {
+                if (productsF.length != 0) {
+                    let amount = 0;
+                    for (let i = 0; i < productsF.length; i++) {
+                        amount += (productsF[i].quantity * productsF[i].unitPrice).toFixed(2);
+                    }
                     callback({
                         "orderAmount": amount
                     })
