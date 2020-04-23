@@ -71,63 +71,84 @@ passport.use('local-signup', new LocalStrategy({
     connect.query(`SELECT * FROM utilizador WHERE email="${email}"`, (err, rows, fields) => {
         if (!err) {
             if (rows.length == 0) {
-                const properties = [{
-                    property: "firstname",
-                    value: nome
-                }, {
-                    property: "lastname",
-                    value: apelido
-                }, {
-                    property: "email",
-                    value: email
-                }, {
-                    property: "bilhetes_disponiveis_barquense",
-                    value: 0
-                }, {
-                    property: "bilhetes_ida_e_volta_barquense",
-                    value: 0
-                }, {
-                    property: "bilhetes_disponiveis_transdev",
-                    value: 0
-                }, {
-                    property: "bilhetes_ida_e_volta_transdev",
-                    value: 0
-                }];
-                if (nif != "") {
-                    properties.push({
-                        property: "nif",
-                        value: nif
-                    })
-                }
-
-                hubspotController.createClient(properties, (res) => {
-                    if (res.statusCode == 200) {
-                        const post = {
-                            idUtilizador: res.body.user_id,
-                            email: email,
-                            password: pass,
-                            isEmpresa: false
-                        }
-
-                        connect.query('INSERT INTO utilizador SET ?', post, (err, rows, fields) => {
-                            if (!err) {
-                                done(null, {
-                                    "statusCode": 200,
-                                    "body": {
-                                        "message": "User inserted with success"
-                                    }
-                                });
-                            } else {
-                                done(null, {
-                                    "statusCode": 400,
-                                    "body": {
-                                        "message": "User not create"
-                                    }
+                hubspotController.existsClientNif(nif, (res) => {
+                    console.log(res);
+                    if (res.statusCode) {
+                        done(null, {
+                            "statusCode": 409,
+                            "body": {
+                                "error": "NIF_EXISTS"
+                            }
+                        });
+                    } else {
+                        if (!res.exists) {
+                            const properties = [{
+                                property: "firstname",
+                                value: nome
+                            }, {
+                                property: "lastname",
+                                value: apelido
+                            }, {
+                                property: "email",
+                                value: email
+                            }, {
+                                property: "bilhetes_disponiveis_barquense",
+                                value: 0
+                            }, {
+                                property: "bilhetes_ida_e_volta_barquense",
+                                value: 0
+                            }, {
+                                property: "bilhetes_disponiveis_transdev",
+                                value: 0
+                            }, {
+                                property: "bilhetes_ida_e_volta_transdev",
+                                value: 0
+                            }];
+                            if (nif != "") {
+                                properties.push({
+                                    property: "nif",
+                                    value: nif
                                 })
                             }
-                        })
-                    } else {
-                        done(null, res);
+
+                            hubspotController.createClient(properties, (res) => {
+                                if (res.statusCode == 200) {
+                                    const post = {
+                                        idUtilizador: res.body.user_id,
+                                        email: email,
+                                        password: pass,
+                                        isEmpresa: false
+                                    }
+
+                                    connect.query('INSERT INTO utilizador SET ?', post, (err, rows, fields) => {
+                                        if (!err) {
+                                            done(null, {
+                                                "statusCode": 200,
+                                                "body": {
+                                                    "message": "User inserted with success"
+                                                }
+                                            });
+                                        } else {
+                                            done(null, {
+                                                "statusCode": 400,
+                                                "body": {
+                                                    "message": "User not create"
+                                                }
+                                            })
+                                        }
+                                    })
+                                } else {
+                                    done(null, res);
+                                }
+                            });
+                        } else {
+                            done(null, {
+                                "statusCode": 409,
+                                "body": {
+                                    "error": "NIF_EXISTS"
+                                }
+                            });
+                        }
                     }
                 });
             } else {

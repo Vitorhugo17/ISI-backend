@@ -43,6 +43,33 @@ function getClient(user_id, callback) {
     })
 }
 
+function existsClientNif(nif, callback) {
+    let options = {
+        url: `https://api.hubapi.com/contacts/v1/search/query?q=&property=nif&hapikey=${process.env.HUBSPOT_KEY}`
+    }
+    req.get(options, (err, res) => {
+        if (!err && res.statusCode == 200) {
+            let users = JSON.parse(res.body).contacts;
+            let exists = false;
+            for (let i = 0; i < users.length; i++) {
+                let data = users[i].properties;
+
+                if (nif == data.nif.value) {
+                    exists = true;
+                }
+            }
+            callback({
+                "exists": exists
+            })
+        } else {
+            callback({
+                "statusCode": res.statusCode,
+                "body": JSON.parse(res.body)
+            })
+        }
+    })
+}
+
 function createClient(properties, callback) {
     let json = {
         "properties": properties
@@ -55,13 +82,13 @@ function createClient(properties, callback) {
         url: `https://api.hubapi.com/contacts/v1/contact/?hapikey=${process.env.HUBSPOT_KEY}`,
         body: JSON.stringify(json)
     }
-    
+
     req.post(options, (err, res) => {
         if (!err && res.statusCode == 200) {
             callback({
                 "statusCode": 200,
                 body: {
-                    "user_id": JSON.parse(res.body).vid          
+                    "user_id": JSON.parse(res.body).vid
                 }
             })
         } else {
@@ -104,6 +131,7 @@ function updateClient(user_id, properties, callback) {
 
 module.exports = {
     getClient: getClient,
+    existsClientNif: existsClientNif,
     createClient: createClient,
     updateClient: updateClient
 };

@@ -233,7 +233,6 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
                         }
                     }
                 }
-                console.log(productsF);
                 if (productsF.length != 0) {
                     let amount = 0;
                     for (let i = 0; i < productsF.length; i++) {
