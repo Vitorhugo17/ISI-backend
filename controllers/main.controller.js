@@ -641,7 +641,7 @@ function editClient(name, lastname, birth_date, telefone, student_number){
         } else {
             response.status(res.statusCode).send(res.body);
         }
-    }
+    })
 }
 
 function insertPurchase(request, response) {
