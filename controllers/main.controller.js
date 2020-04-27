@@ -293,12 +293,13 @@ function recoverPass(request, response) {
 
 function shareTicket(shared_with_id, company, callback) {
     const user_id = request.user.user_id;
+    /*Não necessário pois já se encontra definido e vai dar erro
     const shared_with_id = shared_with_id;
-    const company = company;
+    const company = company;*/
 
     hubspotController.getClient(user_id, (res) => {
         if (res.user) {
-            const user_id = res.user.user_id;
+            //Não precisas disto porque já definiste antes -> const user_id = res.user.user_id;
             let transdev_tickets = res.user.bilhetes_disponiveis_transdev;
             let barquense_tickets = res.user.bilhetes_disponiveis_barquense;
 
@@ -312,32 +313,31 @@ function shareTicket(shared_with_id, company, callback) {
                     if (res.statusCode == 200) {
                         hubspotController.getClient(shared_with_id, (res) => {
                             if (res.user) {
-                                const shared_with = user_id;
                                 const shared_with_transdev_tickets = res.user.bilhetes_disponiveis_transdev;
                                 updatedData = [{
                                     "property": 'bilhetes_disponiveis_transdev',
                                     "value": shared_with_transdev_tickets + 1
                                 }];
-                                hubspotController.updateClient(shared_with, updatedData, (res) => {
+                                hubspotController.updateClient(shared_with_id, updatedData, (res) => {
                                     if (res.statusCode == 200) {
                                         const post = {
                                             idUtilizadorEnviou: user_id,
-                                            idUtilizadorEnviou: shared_with,
-                                            dataPartilha: newDate(),
+                                            idUtilizadorRecebeu: shared_with_id,
+                                            dataPartilha: new Date(),
                                             tipo_bilhete: "único",
-                                            empresa: "transdev"
+                                            empresa: "Transdev"
                                         }
 
                                         connect.query('INSERT INTO partilha_bilhete SET ?', post, (err, rows, fields) => {
                                             if (!err) {
-                                                done(null, {
+                                                callback({
                                                     "statusCode": 200,
                                                     "body": {
                                                         "message": "Shared with success"
                                                     }
                                                 });
                                             } else {
-                                                done(null, {
+                                                callback({
                                                     "statusCode": 400,
                                                     "body": {
                                                         "message": "Ticket not shared"
@@ -346,7 +346,12 @@ function shareTicket(shared_with_id, company, callback) {
                                             }
                                         })
                                     } else {
-                                        done(null, res);
+                                        callback({
+                                            "statusCode": 400,
+                                            body: {
+                                                "message": "Ticket not shared"
+                                            }
+                                        });
                                     }
                                 })
                             } else {
@@ -378,38 +383,46 @@ function shareTicket(shared_with_id, company, callback) {
                     if (res.statusCode == 200) {
                         hubspotController.getClient(shared_with_id, (res) => {
                             if (res.user) {
-                                const shared_with = res.user.user_id;
                                 const shared_with_barquense_tickets = res.user.bilhetes_disponiveis_barquense;
                                 updatedData = [{
                                     "property": 'bilhetes_disponiveis_transdev',
                                     "value": shared_with_barquense_tickets + 1
                                 }];
-                                hubspotController.updateClient(shared_with, updatedData, (res) => {
-                                    const post = {
-                                        idUtilizadorEnviou: user_id,
-                                        idUtilizadorEnviou: shared_with,
-                                        dataPartilha: newDate(),
-                                        tipo_bilhete: "único",
-                                        empresa: "barquense"
-                                    }
-
-                                    connect.query('INSERT INTO partilha_bilhete SET ?', post, (err, rows, fields) => {
-                                        if (!err) {
-                                            done(null, {
-                                                "statusCode": 200,
-                                                "body": {
-                                                    "message": "Shared with success"
-                                                }
-                                            });
-                                        } else {
-                                            done(null, {
-                                                "statusCode": 400,
-                                                "body": {
-                                                    "message": "Ticket not shared"
-                                                }
-                                            })
+                                hubspotController.updateClient(shared_with_id, updatedData, (res) => {
+                                    if (res.statusCode == 200) {
+                                        const post = {
+                                            idUtilizadorEnviou: user_id,
+                                            idUtilizadorRecebeu: shared_with_id,
+                                            dataPartilha: new Date(),
+                                            tipo_bilhete: "único",
+                                            empresa: "Barquense"
                                         }
-                                    })
+
+                                        connect.query('INSERT INTO partilha_bilhete SET ?', post, (err, rows, fields) => {
+                                            if (!err) {
+                                                callback({
+                                                    "statusCode": 200,
+                                                    "body": {
+                                                        "message": "Shared with success"
+                                                    }
+                                                });
+                                            } else {
+                                                callback({
+                                                    "statusCode": 400,
+                                                    "body": {
+                                                        "message": "Ticket not shared"
+                                                    }
+                                                })
+                                            }
+                                        })
+                                    } else {
+                                        callback({
+                                            "statusCode": 400,
+                                            body: {
+                                                "message": "Ticket not shared"
+                                            }
+                                        });
+                                    }
                                 })
                             } else {
                                 callback({
