@@ -291,6 +291,131 @@ function recoverPass(request, response) {
 
 }
 
+function shareTicket(shared_with_id, company, callback) {
+    const user_id = request.user.user_id;
+    const shared_with_id = shared_with_id;
+    const company = company;
+
+    hubspotController.getClient(user_id, (res) => {
+        if (res.user) {
+            const user_id = res.user.user_id;
+            let transdev_tickets = res.user.bilhetes_disponiveis_transdev;
+            let barquense_tickets = res.user.bilhetes_disponiveis_barquense;
+
+            if (company == "transdev" && transdev_tickets != 0) {
+                updatedData = [{
+                    "property": 'bilhetes_disponiveis_transdev',
+                    "value": transdev_tickets - 1
+                }];
+
+                hubspotController.updateClient(user_id, updatedData, (res) => {
+                    if (res.statusCode == 200) {
+                        response.status(200).send({
+                            "message": "Updated with success"
+                        })
+                    } else {
+                        callback({
+                            "statusCode": 400,
+                            body: {
+                                "message": "Ticket not shared"
+                            }
+                        });
+                    }
+                })
+
+                hubspotController.getClient(shared_with_id, (res) => {
+                    if (res.user) {
+                        const shared_with = res.user.user_id;
+                        const shared_with_transdev_tickets = res.user.bilhetes_disponiveis_transdev;
+                        updatedData = [{
+                            "property": 'bilhetes_disponiveis_transdev',
+                            "value": shared_with_transdev_tickets + 1
+                        }];
+                        hubspotController.updateClient(shared_with, updatedData, (res) => {
+                            if (res.statusCode == 200) {
+                                response.status(200).send({
+                                    "message": "Updated with success"
+                                })
+                            } else {
+                                response.status(res.statusCode).send(res.body);
+                            }
+                        })
+                    } else {
+                        callback({
+                            "statusCode": 400,
+                            body: {
+                                "message": "Ticket not shared"
+                            }
+                        });
+                    }
+                })
+
+            } else if (company == "barquense" && barquense_tickets != 0) {
+                updatedData = [{
+                    "property": 'bilhetes_disponiveis_barquense',
+                    "value": barquense_tickets - 1
+                }];
+
+                hubspotController.updateClient(user_id, updatedData, (res) => {
+                    if (res.statusCode == 200) {
+                        response.status(200).send({
+                            "message": "Updated with success"
+                        })
+                    } else {
+                        callback({
+                            "statusCode": 400,
+                            body: {
+                                "message": "Ticket not shared"
+                            }
+                        });
+                    }
+                })
+
+                hubspotController.getClient(shared_with_id, (res) => {
+                    if (res.user) {
+                        const shared_with = res.user.user_id;
+                        const shared_with_barquense_tickets = res.user.bilhetes_disponiveis_barquense;
+                        updatedData = [{
+                            "property": 'bilhetes_disponiveis_transdev',
+                            "value": shared_with_barquense_tickets + 1
+                        }];
+                        hubspotController.updateClient(shared_with, updatedData, (res) => {
+                            if (res.statusCode == 200) {
+                                response.status(200).send({
+                                    "message": "Updated with success"
+                                })
+                            } else {
+                                response.status(res.statusCode).send(res.body);
+                            }
+                        })
+                    } else {
+                        callback({
+                            "statusCode": 400,
+                            body: {
+                                "message": "Ticket not shared"
+                            }
+                        });
+                    }
+                })
+            } else {
+                callback({
+                    "statusCode": 400,
+                    body: {
+                        "message": "No tickets available"
+                    }
+                });
+            }
+        } else {
+            callback({
+                "statusCode": 400,
+                body: {
+                    "message": "Couldn't get the client"
+                }
+            });
+        }
+    })
+}
+
 function insertPurchase(request, response) {
     const user_id = request.user.user_id;
     const product_id = request.sanitize('product_id').escape();
@@ -762,5 +887,6 @@ module.exports = {
     recoverPass: recoverPass,
     updatePass: updatePass,
     getInfoUser: getInfoUser,
-    getUnusedTickets: getUnusedTickets
+    getUnusedTickets: getUnusedTickets,
+    shareTicket: shareTicket
 }
