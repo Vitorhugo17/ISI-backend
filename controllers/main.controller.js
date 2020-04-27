@@ -617,6 +617,33 @@ function shareTicket(shared_with_id, company, tipo, callback) {
     })
 }
 
+function editClient(name, lastname, birth_date, telefone, student_number){
+    const user_id = request.user.user_id;
+
+    updatedData = [{
+        "property": 'nome',
+        "value": name,
+        "property": 'apelido',
+        "value": lastname,
+        "property": 'data_nascimento',
+        "value": birth_date,
+        "property": 'numero_telefone',
+        "value": telefone,
+        "property": 'numero_mecanografico',
+        "value": student_number,
+    }];
+
+    hubspotController.updateClient(user_id, updatedData, (res) => {
+        if (res.statusCode == 200) {
+            response.status(200).send({
+                "message": "Data updated with success"
+            })
+        } else {
+            response.status(res.statusCode).send(res.body);
+        }
+    }
+}
+
 function insertPurchase(request, response) {
     const user_id = request.user.user_id;
     const product_id = request.sanitize('product_id').escape();
@@ -1089,5 +1116,6 @@ module.exports = {
     updatePass: updatePass,
     getInfoUser: getInfoUser,
     getUnusedTickets: getUnusedTickets,
-    shareTicket: shareTicket
+    shareTicket: shareTicket,
+    editClient: editClient
 }
