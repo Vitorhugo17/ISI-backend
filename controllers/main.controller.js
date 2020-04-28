@@ -8,6 +8,52 @@ const moloniController = require('./moloni.controller');
 const jasminController = require('./jasmin.controller');
 const qrcodeController = require('./qrcode.controller');
 
+//Função que devolve o histórico de bilhetes utilizados
+function getUsedTickets(request, response) {
+    const user_id = request.user.user_id;
+    connect.query(`SELECT * FROM qrcode WHERE idUtilizador = ${user_id} AND (dataUtilizacaoIda IS NOT NULL OR dataUtilizacaoVolta IS NOT NULL)`, (err, rows) => {
+        if (!err) {
+            if (rows.length != 0) {
+                let tickets = [];
+                for (let i = 0; i < rows.length; i++) {
+                    if (rows[i].tipo_bilhete == "normal") {
+                        tickets.push({
+                            tipo_bilhete: "normal",
+                            empresa: rows[i].empresa,
+                            data_utilizacao: rows[i].dataUtilizacaoIda
+                        });
+                    } else {
+                        if (rows[i].dataUtilizacaoVolta) {
+                            tickets.push({
+                                tipo_bilhete: "volta",
+                                empresa: rows[i].empresa,
+                                data_utilizacao: rows[i].dataUtilizacaoVolta
+                            })
+                        }
+                        tickets.push({
+                            tipo_bilhete: "ida",
+                            empresa: rows[i].empresa,
+                            data_utilizacao: rows[i].dataUtilizacaoIda
+                        })
+                    }
+                }
+                response.status(200).send({
+                    "usedTickets": tickets
+                })
+            } else {
+                response.status(404).send({
+                    "message": "data not found"
+                })
+            }
+        } else {
+            response.status(404).send({
+                "message": "data not found"
+            })
+        }
+    })
+
+}
+
 function generateQrcode(request, response) {
     const user_id = request.user.user_id;
     const company = request.sanitize("company").escape();
@@ -1058,5 +1104,6 @@ module.exports = {
     getInfoUser: getInfoUser,
     getUnusedTickets: getUnusedTickets,
     shareTicket: shareTicket,
-    editUser: editUser
+    editUser: editUser,
+    getUsedTickets: getUsedTickets
 }
