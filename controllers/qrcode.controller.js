@@ -13,7 +13,7 @@ function useQrcode(hash, company, callback) {
                 let qrcode = rows[0];
                 qrcode.utilizacao -= 1;
 
-                if (qrcode.utilizacao == 0) {
+                if ((qrcode.utilizacao == 0 && qrcode.tipo_bilhete == "normal") || (qrcode.utilizacao == 1 && qrcode.tipo_bilhete == "ida e volta")) {
                     hubspotController.getClient(qrcode.idUtilizador, (res) => {
                         if (res.user) {
                             const user = res.user;
@@ -43,7 +43,7 @@ function useQrcode(hash, company, callback) {
                                     let query = "UPDATE qrcode SET utilizacao = ?, dataUtilizacaoIda = ?, dataUtilizacaoVolta = ? WHERE idQRCode = ?";
                                     if (qrcode.tipo_bilhete != "normal") {
                                         update = [date, qrcode.idQRCode];
-                                        query = "UPDATE qrcode SET utilizacao = 0 AND dataUtilizacaoVolta = ? WHERE idQRCode = ?";
+                                        query = "UPDATE qrcode SET utilizacao = 0 AND dataUtilizacaoIda = ? WHERE idQRCode = ?";
                                     }
                                     connect.query(query, update, (err, rows) => {
                                         if (!err) {
@@ -86,7 +86,7 @@ function useQrcode(hash, company, callback) {
                 } else {
                     let date = new Date();
                     let update = [qrcode.utilizacao, date, qrcode.idQRCode];
-                    connect.query("UPDATE qrcode SET utilizacao = ?, dataUtilizacaoIda = ? WHERE idQRCode = ?", update, (err, rows) => {
+                    connect.query("UPDATE qrcode SET utilizacao = ?, dataUtilizacaoVolta = ? WHERE idQRCode = ?", update, (err, rows) => {
                         if (!err) {
                             callback({
                                 "statusCode": 200,
