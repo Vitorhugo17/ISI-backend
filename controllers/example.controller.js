@@ -6,6 +6,7 @@ const jasminController = require('./jasmin.controller');
 
 async function paymentStatus(request, response) {
     const paymentIntent = await stripe.paymentIntents.retrieve(request.sanitize("id").escape());
+    console.log(paymentIntent);
     response.status(200).send({
         paymentIntent: {
             status: paymentIntent.status
@@ -25,18 +26,20 @@ function paymentIntent(request, response) {
                 const paymentIntent = await stripe.paymentIntents.create({
                     amount: amount * 100,
                     currency: config.currency,
-                    payment_method_types: config.paymentMethods,
+                    payment_method_types: config.paymentMethods
                 });
                 return response.status(200).json({
-                    paymentIntent
+                    paymentIntent: paymentIntent
                 });
             } catch (err) {
-                return response.status(500).json({
+                return response.status(400).json({
                     error: err.message
                 });
             }
         } else {
-            return response.status(res.statusCode).json(res.body);
+            return response.status(400).json({
+                "message": "erro"
+            });
         }
     });
 }
@@ -136,20 +139,24 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
         moloniController.getProducts((res) => {
             if (res.products) {
                 const products = res.products;
-
+                let product;
                 let productsF = [];
                 for (let i = 0; i < products.length; i++) {
-                    if (products[i].name.toLowerCase().includes("único")) {
-                        if (quantity >= 5) {
-                            if (quantity % 5 != 0) {
-                                if (products[i].product_id == product_id) {
-                                    productsF.push({
-                                        "qty": (quantity % 5),
-                                        "price": parseFloat(products[i].price),
-                                        "taxes": parseFloat(products[i].taxes[0].value)
-                                    });
-                                }
-                            }
+                    if (products[i].product_id == product_id) {
+                        product = products[i];
+                    }
+                }
+
+                if (product.name.toLowerCase().includes("único")) {
+                    if (quantity >= 5) {
+                        if (quantity % 5 != 0) {
+                            productsF.push({
+                                "qty": (quantity % 5),
+                                "price": parseFloat(product.price),
+                                "taxes": parseFloat(product.taxes[0].value)
+                            });
+                        }
+                        for (let i = 0; i < products.length; i++) {
                             if (products[i].name.toLowerCase().includes("pack")) {
                                 productsF.push({
                                     "qty": Math.floor(quantity / 5),
@@ -157,31 +164,26 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
                                     "taxes": parseFloat(products[i].taxes[0].value)
                                 });
                             }
-                        } else {
-                            if (products[i].product_id == product_id) {
-                                productsF.push({
-                                    "qty": quantity,
-                                    "price": parseFloat(products[i].price),
-                                    "taxes": parseFloat(products[i].taxes[0].value)
-                                });
-                                break;
-                            }
                         }
                     } else {
-                        if (products[i].product_id == product_id) {
-                            productsF.push({
-                                "qty": quantity,
-                                "price": parseFloat(products[i].price),
-                                "taxes": parseFloat(products[i].taxes[0].value)
-                            });
-                            break;
-                        }
+                        productsF.push({
+                            "qty": quantity,
+                            "price": parseFloat(product.price),
+                            "taxes": parseFloat(product.taxes[0].value)
+                        });
                     }
+                } else {
+                    productsF.push({
+                        "qty": quantity,
+                        "price": parseFloat(product.price),
+                        "taxes": parseFloat(product.taxes[0].value)
+                    });
                 }
+
                 if (productsF.length != 0) {
                     let amount = 0;
                     for (let i = 0; i < productsF.length; i++) {
-                        amount += (productsF[i].qty * (productsF[i].price + products[i].taxes)).toFixed(2);
+                        amount += parseFloat((productsF[i].qty * (productsF[i].price + productsF[i].taxes)).toFixed(2));
                     }
                     callback({
                         "orderAmount": amount
@@ -205,44 +207,42 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
         jasminController.getProducts((res) => {
             if (res.products) {
                 const products = res.products;
-
+                let product;
                 let productsF = [];
                 for (let i = 0; i < products.length; i++) {
-                    if (products[i].description.toLowerCase().includes("único")) {
-                        if (quantity >= 10) {
-                            if (quantity % 10 != 0) {
-                                if (products[i].itemKey == parseInt(product_id)) {
-                                    productsF.push({
-                                        "quantity": (quantity % 10),
-                                        "unitPrice": parseFloat(products[i].priceListLines[0].priceAmount.amount)
-                                    });
-                                }
-                            }
+                    if (products[i].itemKey == parseInt(product_id)) {
+                        product = products[i];
+                    }
+                }
+                if (products[i].description.toLowerCase().includes("único")) {
+                    if (quantity >= 10) {
+                        if (quantity % 10 != 0) {
+                            productsF.push({
+                                "quantity": (quantity % 10),
+                                "unitPrice": parseFloat(product.priceListLines[0].priceAmount.amount)
+                            });
+                        }
+                        for (let i = 0; i < products.length; i++) {
                             if (products[i].description.toLowerCase().includes("pack")) {
                                 productsF.push({
                                     "quantity": Math.floor(quantity / 10),
                                     "unitPrice": parseFloat(products[i].priceListLines[0].priceAmount.amount)
                                 });
                             }
-                        } else {
-                            if (products[i].itemKey == parseInt(product_id)) {
-                                productsF.push({
-                                    "quantity": quantity,
-                                    "unitPrice": parseFloat(products[i].priceListLines[0].priceAmount.amount)
-                                });
-                                break;
-                            }
                         }
                     } else {
-                        if (products[i].itemKey == parseInt(product_id)) {
-                            productsF.push({
-                                "quantity": quantity,
-                                "unitPrice": parseFloat(products[i].priceListLines[0].priceAmount.amount)
-                            });
-                            break;
-                        }
+                        productsF.push({
+                            "quantity": quantity,
+                            "unitPrice": parseFloat(product.priceListLines[0].priceAmount.amount)
+                        });
                     }
+                } else {
+                    productsF.push({
+                        "quantity": quantity,
+                        "unitPrice": parseFloat(product.priceListLines[0].priceAmount.amount)
+                    });
                 }
+
                 if (productsF.length != 0) {
                     let amount = 0;
                     for (let i = 0; i < productsF.length; i++) {
