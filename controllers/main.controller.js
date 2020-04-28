@@ -547,9 +547,7 @@ function shareTicket(request, response) {
         }
     })
 }
-/*Está errado o cabeçalho da função 
-function editUser(name, lastname, birth_date, telefone, student_number){
-Devia ser assim:*/
+
 function editUser(request, response) {
     const name = request.sanitize("name").escape();
     const lastname = request.sanitize("lastname").escape();
@@ -558,20 +556,7 @@ function editUser(request, response) {
     const student_number = request.sanitize("student_number").escape();
 
     const user_id = request.user.user_id;
-    /*O updatedData tem de ser um array de JSONs e tens de definir o tipo de variavel
-        updatedData = [{
-            "property": 'nome',
-            "value": name,
-            "property": 'apelido',
-            "value": lastname,
-            "property": 'data_nascimento',
-            "value": birth_date,
-            "property": 'numero_telefone',
-            "value": contact,
-            "property": 'numero_mecanografico',
-            "value": student_number,
-        }];
-        */
+
     const updatedData = [{
         "property": 'nome',
         "value": name
