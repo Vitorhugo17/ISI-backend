@@ -42,21 +42,31 @@ function useQrcode(hash, company, callback) {
                                     let update = [qrcode.utilizacao, date, date, qrcode.idQRCode];
                                     let query = "UPDATE qrcode SET utilizacao = ?, dataUtilizacaoIda = ?, dataUtilizacaoVolta = ? WHERE idQRCode = ?";
                                     if (qrcode.tipo_bilhete != "normal") {
-                                        update = [date, qrcode.idQRCode];
-                                        query = "UPDATE qrcode SET utilizacao = 0 AND dataUtilizacaoIda = ? WHERE idQRCode = ?";
+                                        update = [qrcode.utilizacao, date, qrcode.idQRCode];
+                                        query = "UPDATE qrcode SET utilizacao = ?, dataUtilizacaoIda = ? WHERE idQRCode = ?";
                                     }
                                     connect.query(query, update, (err, rows) => {
                                         if (!err) {
-                                            const foto = `${dirQrcode}/${qrcode.idUtilizador}_${qrcode.idQRCode}.png`;
-                                            fs.unlink(foto, (err) => {
+                                            if (qrcode.tipo_bilhete == "normal") {
+                                                const foto = `${dirQrcode}/${qrcode.idUtilizador}_${qrcode.idQRCode}.png`;
+                                                fs.unlink(foto, (err) => {
+                                                    callback({
+                                                        "statusCode": 200,
+                                                        body: {
+                                                            "message": "Valid QRCode"
+                                                        }
+                                                    });
+                                                })
+                                            } else {
                                                 callback({
                                                     "statusCode": 200,
                                                     body: {
                                                         "message": "Valid QRCode"
                                                     }
                                                 });
-                                            })
+                                            }
                                         } else {
+                                            console.log(err);
                                             callback({
                                                 "statusCode": 400,
                                                 body: {
@@ -88,12 +98,15 @@ function useQrcode(hash, company, callback) {
                     let update = [qrcode.utilizacao, date, qrcode.idQRCode];
                     connect.query("UPDATE qrcode SET utilizacao = ?, dataUtilizacaoVolta = ? WHERE idQRCode = ?", update, (err, rows) => {
                         if (!err) {
-                            callback({
-                                "statusCode": 200,
-                                body: {
-                                    "message": "Valid QRCode"
-                                }
-                            });
+                            const foto = `${dirQrcode}/${qrcode.idUtilizador}_${qrcode.idQRCode}.png`;
+                            fs.unlink(foto, (err) => {
+                                callback({
+                                    "statusCode": 200,
+                                    body: {
+                                        "message": "Valid QRCode"
+                                    }
+                                });
+                            })
                         } else {
                             callback({
                                 "statusCode": 400,
