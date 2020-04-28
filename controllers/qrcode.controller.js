@@ -66,7 +66,6 @@ function useQrcode(hash, company, callback) {
                                                 });
                                             }
                                         } else {
-                                            console.log(err);
                                             callback({
                                                 "statusCode": 400,
                                                 body: {
