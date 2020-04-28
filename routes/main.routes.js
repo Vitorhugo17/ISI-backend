@@ -31,12 +31,11 @@ router.get('/products', isLoggedIn, mainController.getProducts);
 router.post('/purchases', isLoggedIn, mainController.insertPurchase);
 
 router.get('/profile', isLoggedIn, mainController.getInfoUser);
-router.post('/profile/edit', isLoggedIn, mainController.editClient);
-
+router.post('/profile/edit', isLoggedIn, mainController.editUser);
 
 router.get('/tickets/unused', isLoggedIn, mainController.getUnusedTickets);
-
 router.post('/tickets/share', isLoggedIn, mainController.shareTicket);
+
 router.get('/qrcodes/:qrcode_id', isLoggedIn, mainController.readQrcode);
 router.post('/qrcodes', isLoggedIn, mainController.generateQrcode);
 router.post('/qrcodes/use', isLoggedInCompany, mainController.useQrcode);

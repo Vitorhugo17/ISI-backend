@@ -291,7 +291,10 @@ function recoverPass(request, response) {
 
 }
 
-function shareTicket(shared_with_id, company, tipo, callback) {
+function shareTicket(request, response) {
+    const shared_with_id = request.sanitize("shared_with_id").escape();
+    const company = request.sanitize("company").escape();
+    const type = request.sanitize("type").escape();
     const user_id = request.user.user_id;
 
     hubspotController.getClient(user_id, (res) => {
@@ -302,8 +305,8 @@ function shareTicket(shared_with_id, company, tipo, callback) {
             let barquense_double_tickets = res.user.bilhetes_ida_e_volta_barquense;
 
             if (company == "Transdev") {
-                if (tipo == "bilhetes_disponiveis_transdev") {
-                    updatedData = [{
+                if (type == "bilhetes_disponiveis_transdev" && transdev_tickets != 0) {
+                    let updatedData = [{
                         "property": 'bilhetes_disponiveis_transdev',
                         "value": transdev_tickets - 1
                     }];
@@ -329,53 +332,38 @@ function shareTicket(shared_with_id, company, tipo, callback) {
 
                                             connect.query('INSERT INTO partilha_bilhete SET ?', post, (err, rows, fields) => {
                                                 if (!err) {
-                                                    callback({
-                                                        "statusCode": 200,
-                                                        "body": {
-                                                            "message": "Shared with success"
-                                                        }
+                                                    response.status(200).send({
+                                                        "message": "Shared with success"
                                                     });
                                                 } else {
-                                                    callback({
-                                                        "statusCode": 400,
-                                                        "body": {
-                                                            "message": "Ticket not shared"
-                                                        }
-                                                    })
+                                                    response.status(400).send({
+                                                        "message": "Ticket not shared"
+                                                    });
                                                 }
                                             })
                                         } else {
-                                            callback({
-                                                "statusCode": 400,
-                                                body: {
-                                                    "message": "Ticket not shared"
-                                                }
+                                            response.status(400).send({
+                                                "message": "Ticket not shared"
                                             });
                                         }
                                     })
                                 } else {
-                                    callback({
-                                        "statusCode": 400,
-                                        body: {
-                                            "message": "Ticket not shared"
-                                        }
+                                    response.status(400).send({
+                                        "message": "Ticket not shared"
                                     });
                                 }
                             })
                         } else {
-                            callback({
-                                "statusCode": 400,
-                                body: {
-                                    "message": "Ticket not shared"
-                                }
+                            response.status(400).send({
+                                "message": "Ticket not shared"
                             });
                         }
                     })
-                } else if (tipo == "bilhetes_ida_e_volta_transdev"){
-                        updatedData = [{
-                            "property": 'bilhetes_ida_e_volta_transdev',
-                            "value": transdev_double_tickets - 1
-                        }];
+                } else if (type == "bilhetes_ida_e_volta_transdev" && transdev_double_tickets != 0) {
+                    updatedData = [{
+                        "property": 'bilhetes_ida_e_volta_transdev',
+                        "value": transdev_double_tickets - 1
+                    }];
 
                     hubspotController.updateClient(user_id, updatedData, (res) => {
                         if (res.statusCode == 200) {
@@ -398,58 +386,40 @@ function shareTicket(shared_with_id, company, tipo, callback) {
 
                                             connect.query('INSERT INTO partilha_bilhete SET ?', post, (err, rows, fields) => {
                                                 if (!err) {
-                                                    callback({
-                                                        "statusCode": 200,
-                                                        "body": {
-                                                            "message": "Shared with success"
-                                                        }
+                                                    response.status(200).send({
+                                                        "message": "Shared with success"
                                                     });
                                                 } else {
-                                                    callback({
-                                                        "statusCode": 400,
-                                                        "body": {
-                                                            "message": "Ticket not shared"
-                                                        }
+                                                    response.status(400).send({
+                                                        "message": "Ticket not shared"
                                                     })
                                                 }
                                             })
                                         } else {
-                                            callback({
-                                                "statusCode": 400,
-                                                body: {
-                                                    "message": "Ticket not shared"
-                                                }
+                                            response.status(400).send({
+                                                "message": "Ticket not shared"
                                             });
                                         }
                                     })
                                 } else {
-                                    callback({
-                                        "statusCode": 400,
-                                        body: {
-                                            "message": "Ticket not shared"
-                                        }
+                                    response.status(400).send({
+                                        "message": "Ticket not shared"
                                     });
                                 }
                             })
                         } else {
-                            callback({
-                                "statusCode": 400,
-                                body: {
-                                    "message": "Ticket not shared"
-                                }
+                            response.status(400).send({
+                                "message": "Ticket not shared"
                             });
                         }
                     })
                 } else {
-                    callback({
-                        "statusCode": 400,
-                        body: {
-                            "message": "Ticket not available"
-                        }
+                    response.status(400).send({
+                        "message": "Ticket not available"
                     });
                 }
             } else if (company == "Barquense") {
-                if (tipo == "bilhetes_disponiveis_barquense" && barquense_tickets != 0) {
+                if (type == "bilhetes_disponiveis_barquense" && barquense_tickets != 0) {
                     updatedData = [{
                         "property": 'bilhetes_disponiveis_barquense',
                         "value": barquense_tickets - 1
@@ -476,50 +446,35 @@ function shareTicket(shared_with_id, company, tipo, callback) {
 
                                             connect.query('INSERT INTO partilha_bilhete SET ?', post, (err, rows, fields) => {
                                                 if (!err) {
-                                                    callback({
-                                                        "statusCode": 200,
-                                                        "body": {
-                                                            "message": "Shared with success"
-                                                        }
+                                                    response.status(200).send({
+                                                        "message": "Shared with success"
                                                     });
                                                 } else {
-                                                    callback({
-                                                        "statusCode": 400,
-                                                        "body": {
-                                                            "message": "Ticket not shared"
-                                                        }
-                                                    })
+                                                    response.status(400).send({
+                                                        "message": "Ticket not shared"
+                                                    });
                                                 }
                                             })
                                         } else {
-                                            callback({
-                                                "statusCode": 400,
-                                                body: {
-                                                    "message": "Ticket not shared"
-                                                }
+                                            response.status(400).send({
+                                                "message": "Ticket not shared"
                                             });
                                         }
                                     })
                                 } else {
-                                    callback({
-                                        "statusCode": 400,
-                                        body: {
-                                            "message": "Ticket not shared"
-                                        }
+                                    response.status(400).send({
+                                        "message": "Ticket not shared"
                                     });
                                 }
                             })
                         } else {
-                            callback({
-                                "statusCode": 400,
-                                body: {
-                                    "message": "Ticket not shared"
-                                }
+                            response.status(400).send({
+                                "message": "Ticket not shared"
                             });
                         }
 
                     })
-                } else if (tipo == "bilhetes_ida_e_volta_barquense" && barquense_double_tickets != 0) {
+                } else if (type == "bilhetes_ida_e_volta_barquense" && barquense_double_tickets != 0) {
                     updatedData = [{
                         "property": 'bilhetes_ida_e_volta_barquense',
                         "value": barquense_double_tickets - 1
@@ -546,91 +501,92 @@ function shareTicket(shared_with_id, company, tipo, callback) {
 
                                             connect.query('INSERT INTO partilha_bilhete SET ?', post, (err, rows, fields) => {
                                                 if (!err) {
-                                                    callback({
-                                                        "statusCode": 200,
-                                                        "body": {
-                                                            "message": "Shared with success"
-                                                        }
+                                                    response.status(200).send({
+                                                        "message": "Shared with success"
                                                     });
                                                 } else {
-                                                    callback({
-                                                        "statusCode": 400,
-                                                        "body": {
-                                                            "message": "Ticket not shared"
-                                                        }
-                                                    })
+                                                    response.status(400).send({
+                                                        "message": "Ticket not shared"
+                                                    });
                                                 }
                                             })
                                         } else {
-                                            callback({
-                                                "statusCode": 400,
-                                                body: {
-                                                    "message": "Ticket not shared"
-                                                }
+                                            response.status(400).send({
+                                                "message": "Ticket not shared"
                                             });
                                         }
                                     })
                                 } else {
-                                    callback({
-                                        "statusCode": 400,
-                                        body: {
-                                            "message": "Ticket not shared"
-                                        }
+                                    response.status(400).send({
+                                        "message": "Ticket not shared"
                                     });
                                 }
                             })
                         } else {
-                            callback({
-                                "statusCode": 400,
-                                body: {
-                                    "message": "Ticket not shared"
-                                }
+                            response.status(400).send({
+                                "message": "Ticket not shared"
                             });
                         }
 
                     })
 
                 } else {
-                    callback({
-                        "statusCode": 400,
-                        body: {
-                            "message": "No tickets available"
-                        }
+                    response.status(400).send({
+                        "message": "No tickets available"
                     });
                 }
             } else {
-                callback({
-                    "statusCode": 400,
-                    body: {
-                        "message": "Company doesn't exist"
-                    }
+                response.status(400).send({
+                    "message": "Company doesn't exist"
                 });
             }
         } else {
-            callback({
-                "statusCode": 400,
-                body: {
-                    "message": "Couldn't get the client"
-                }
+            response.status(400).send({
+                "message": "Couldn't get the client"
             });
         }
     })
 }
+/*Está errado o cabeçalho da função 
+function editUser(name, lastname, birth_date, telefone, student_number){
+Devia ser assim:*/
+function editUser(request, response) {
+    const name = request.sanitize("name").escape();
+    const lastname = request.sanitize("lastname").escape();
+    const birth_date = request.sanitize("birth_date").escape();
+    const contact = request.sanitize("contact").escape();
+    const student_number = request.sanitize("student_number").escape();
 
-function editClient(name, lastname, birth_date, telefone, student_number){
     const user_id = request.user.user_id;
-
-    updatedData = [{
+    /*O updatedData tem de ser um array de JSONs e tens de definir o tipo de variavel
+        updatedData = [{
+            "property": 'nome',
+            "value": name,
+            "property": 'apelido',
+            "value": lastname,
+            "property": 'data_nascimento',
+            "value": birth_date,
+            "property": 'numero_telefone',
+            "value": contact,
+            "property": 'numero_mecanografico',
+            "value": student_number,
+        }];
+        */
+    const updatedData = [{
         "property": 'nome',
-        "value": name,
+        "value": name
+    }, {
         "property": 'apelido',
-        "value": lastname,
+        "value": lastname
+    }, {
         "property": 'data_nascimento',
-        "value": birth_date,
+        "value": birth_date
+    }, {
         "property": 'numero_telefone',
-        "value": telefone,
+        "value": contact
+    }, {
         "property": 'numero_mecanografico',
-        "value": student_number,
+        "value": student_number
     }];
 
     hubspotController.updateClient(user_id, updatedData, (res) => {
@@ -1117,5 +1073,5 @@ module.exports = {
     getInfoUser: getInfoUser,
     getUnusedTickets: getUnusedTickets,
     shareTicket: shareTicket,
-    editClient: editClient
+    editUser: editUser
 }
