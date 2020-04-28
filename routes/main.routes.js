@@ -35,6 +35,7 @@ router.get('/profile', isLoggedIn, mainController.getInfoUser);
 router.post('/profile/edit', isLoggedIn, mainController.editUser);
 
 router.get('/tickets/unused', isLoggedIn, mainController.getUnusedTickets);
+router.get('/tickets/used', isLoggedIn, mainController.getUsedTickets);
 router.post('/tickets/share', isLoggedIn, mainController.shareTicket);
 
 router.get('/qrcodes/:qrcode_id', isLoggedIn, mainController.readQrcode);
