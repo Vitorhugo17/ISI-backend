@@ -5,6 +5,7 @@ const mainController = require('./../controllers/main.controller');
 const exampleController = require('./../controllers/example.controller');
 
 router.post('/payment', exampleController.paymentIntent);
+router.post('/payment/:id/status', exampleController.paymentStatus);
 router.post('/webhook', exampleController.webhook);
 
 

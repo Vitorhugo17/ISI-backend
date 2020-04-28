@@ -4,6 +4,16 @@ const stripe = require('stripe')(config.stripe.secretKey);
 const moloniController = require('./moloni.controller');
 const jasminController = require('./jasmin.controller');
 
+async function paymentStatus(request, response) {
+    const paymentIntent = await stripe.paymentIntents.retrieve(request.sanitize("id").escape());
+    response.status(200).send({
+        paymentIntent: {
+            status: paymentIntent.status
+        }
+    });
+};
+
+
 function paymentIntent(request, response) {
     const quantity = request.sanitize("quantity").escape();
     const product_id = request.sanitize("product_id").escape();
@@ -260,6 +270,7 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
 }
 
 module.exports = {
+    paymentStatus: paymentStatus,
     paymentIntent: paymentIntent,
     webhook: webhook
 }
