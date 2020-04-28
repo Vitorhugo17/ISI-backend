@@ -18,6 +18,7 @@ function getUsedTickets(request, response) {
                 for (let i = 0; i < rows.length; i++) {
                     if (rows[i].tipo_bilhete == "normal") {
                         tickets.push({
+                            idQrcode: rows[i].idQRCode,
                             tipo_bilhete: "normal",
                             empresa: rows[i].empresa,
                             data_utilizacao: rows[i].dataUtilizacaoIda
@@ -25,12 +26,14 @@ function getUsedTickets(request, response) {
                     } else {
                         if (rows[i].dataUtilizacaoVolta) {
                             tickets.push({
+                                idQrcode: rows[i].idQRCode,
                                 tipo_bilhete: "volta",
                                 empresa: rows[i].empresa,
                                 data_utilizacao: rows[i].dataUtilizacaoVolta
                             })
                         }
                         tickets.push({
+                            idQrcode: rows[i].idQRCode,
                             tipo_bilhete: "ida",
                             empresa: rows[i].empresa,
                             data_utilizacao: rows[i].dataUtilizacaoIda
