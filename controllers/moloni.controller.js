@@ -69,7 +69,7 @@ function insertClient(nif, nome, email, callback) {
     })
 }
 
-function getInvoices(callback) {
+function getPurchases(customer_id, callback) {
     getCompany((res) => {
         if (res.company_id) {
             const company_id = res.company_id;
@@ -79,7 +79,7 @@ function getInvoices(callback) {
                 company_id: company_id,
                 qty: 0,
                 offset: 0,
-                customer_id: 0,
+                customer_id: customer_id,
                 supplier_id: 0,
                 salesman_id: 0,
                 document_set_id: 0,
@@ -95,12 +95,11 @@ function getInvoices(callback) {
                     'Content-Length': json.length,
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                url: `https://api.moloni.pt/v1/invoices/getAll/?access_token=${access_token}`,
+                url: `https://api.moloni.pt/v1/invoiceReceipts/getAll/?access_token=${access_token}`,
                 body: json
             }
             req.post(options, (err, res) => {
                 if (!err && res.statusCode == 200) {
-                    let resp = JSON.parse(res.body);
                     callback({
                         "statusCode": res.statusCode,
                         "body": JSON.parse(res.body)
@@ -486,7 +485,7 @@ function getToken(callback) {
 
 module.exports = {
     getProducts: getProducts,
-    getInvoices: getInvoices,
+    getPurchases: getPurchases,
     insertPurchase: insertPurchase,
     insertClient: insertClient
 };
