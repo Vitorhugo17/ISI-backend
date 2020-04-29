@@ -537,7 +537,7 @@ function shareTicket(request, response) {
                         "property": 'bilhetes_ida_e_volta_barquense',
                         "value": new_number
                     }];
-                    
+
                     hubspotController.updateClient(user_id, updatedData, (res) => {
                         if (res.statusCode == 200) {
                             hubspotController.getClient(shared_with_id, (res) => {
@@ -616,19 +616,19 @@ function editUser(request, response) {
     const user_id = request.user.user_id;
 
     const updatedData = [{
-        "property": 'nome',
+        "property": 'firstname',
         "value": name
     }, {
-        "property": 'apelido',
+        "property": 'lastname',
         "value": lastname
     }, {
-        "property": 'data_nascimento',
+        "property": 'date_of_birth',
         "value": birth_date
     }, {
-        "property": 'numero_telefone',
+        "property": 'phone',
         "value": contact
     }, {
-        "property": 'numero_mecanografico',
+        "property": 'no_mecanografico',
         "value": student_number
     }];
 
