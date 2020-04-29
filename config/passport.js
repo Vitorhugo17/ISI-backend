@@ -44,7 +44,7 @@ passport.use('local-signin', new LocalStrategy({
                     }
                 } else {
                     done(null, false, {
-                        "message": `password invalid`
+                        "message": `user not found`
                     })
                 }
             } else {
