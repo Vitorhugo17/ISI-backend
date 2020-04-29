@@ -45,4 +45,12 @@ router.post('/qrcodes/use', isLoggedInCompany, mainController.useQrcode);
 router.post('/password/recover', mainController.recoverPass);
 router.put('/password/update', mainController.updatePass);
 
+const moloniController = require('./../controllers/moloni.controller');
+router.get('/',(request, response)=>{
+    moloniController.getPurchases(25483850,(res)=> {
+        response.status(res.statusCode).send(res.body)
+    })
+})
+
+
 module.exports = router;
