@@ -345,6 +345,10 @@ function shareTicket(request, response) {
     const company = request.sanitize("company").escape();
     const type = request.sanitize("type").escape();
     const user_id = request.user.user_id;
+    console.log(user_id);
+    console.log(shared_with_id);
+    console.log(company);
+    console.log(type);
 
     hubspotController.getClient(user_id, (res) => {
         if (res.user) {
@@ -355,19 +359,21 @@ function shareTicket(request, response) {
 
             if (company == "Transdev") {
                 if (type == "bilhetes_disponiveis_transdev" && transdev_tickets != 0) {
+                    new_number = parseInt(transdev_tickets) -1 ;
                     let updatedData = [{
                         "property": 'bilhetes_disponiveis_transdev',
-                        "value": transdev_tickets - 1
+                        "value": new_number
                     }];
 
                     hubspotController.updateClient(user_id, updatedData, (res) => {
                         if (res.statusCode == 200) {
+                            console.log(shared_with_id);
                             hubspotController.getClient(shared_with_id, (res) => {
                                 if (res.user) {
-                                    const shared_with_transdev_tickets = res.user.bilhetes_disponiveis_transdev;
+                                    let shared_with_transdev_tickets = parseInt(res.user.bilhetes_disponiveis_transdev) + 1;
                                     updatedData = [{
                                         "property": 'bilhetes_disponiveis_transdev',
-                                        "value": shared_with_transdev_tickets + 1
+                                        "value": shared_with_transdev_tickets
                                     }];
                                     hubspotController.updateClient(shared_with_id, updatedData, (res) => {
                                         if (res.statusCode == 200) {
@@ -386,42 +392,43 @@ function shareTicket(request, response) {
                                                     });
                                                 } else {
                                                     response.status(400).send({
-                                                        "message": "Ticket not shared"
+                                                        "message": "Ticket not shared 1"
                                                     });
                                                 }
                                             })
                                         } else {
                                             response.status(400).send({
-                                                "message": "Ticket not shared"
+                                                "message": "Ticket not shared2"
                                             });
                                         }
                                     })
                                 } else {
                                     response.status(400).send({
-                                        "message": "Ticket not shared"
+                                        "message": "User to share with doesn't exist"
                                     });
                                 }
                             })
                         } else {
                             response.status(400).send({
-                                "message": "Ticket not shared"
+                                "message": "Ticket not shared4"
                             });
                         }
                     })
                 } else if (type == "bilhetes_ida_e_volta_transdev" && transdev_double_tickets != 0) {
+                    let new_number = parseInt(transdev_double_tickets) - 1;
                     updatedData = [{
                         "property": 'bilhetes_ida_e_volta_transdev',
-                        "value": transdev_double_tickets - 1
+                        "value": new_number
                     }];
 
                     hubspotController.updateClient(user_id, updatedData, (res) => {
                         if (res.statusCode == 200) {
                             hubspotController.getClient(shared_with_id, (res) => {
                                 if (res.user) {
-                                    const shared_with_transdev_tickets = res.user.bilhetes_ida_e_volta_transdev;
+                                    let shared_with_transdev_tickets = parseInt(res.user.bilhetes_ida_e_volta_transdev) + 1;
                                     updatedData = [{
                                         "property": 'bilhetes_ida_e_volta_transdev',
-                                        "value": shared_with_transdev_tickets + 1
+                                        "value": shared_with_transdev_tickets
                                     }];
                                     hubspotController.updateClient(shared_with_id, updatedData, (res) => {
                                         if (res.statusCode == 200) {
@@ -469,19 +476,20 @@ function shareTicket(request, response) {
                 }
             } else if (company == "Barquense") {
                 if (type == "bilhetes_disponiveis_barquense" && barquense_tickets != 0) {
+                    let new_number = parseInt(barquense_tickets) - 1;
                     updatedData = [{
                         "property": 'bilhetes_disponiveis_barquense',
-                        "value": barquense_tickets - 1
+                        "value": new_number
                     }];
 
                     hubspotController.updateClient(user_id, updatedData, (res) => {
                         if (res.statusCode == 200) {
                             hubspotController.getClient(shared_with_id, (res) => {
                                 if (res.user) {
-                                    const shared_with_barquense_tickets = res.user.bilhetes_disponiveis_barquense;
+                                    let shared_with_barquense_tickets = parseInt(res.user.bilhetes_disponiveis_barquense) + 1;
                                     updatedData = [{
-                                        "property": 'bilhetes_disponiveis_transdev',
-                                        "value": shared_with_barquense_tickets + 1
+                                        "property": 'bilhetes_disponiveis_barquense',
+                                        "value": shared_with_barquense_tickets
                                     }];
                                     hubspotController.updateClient(shared_with_id, updatedData, (res) => {
                                         if (res.statusCode == 200) {
@@ -524,19 +532,20 @@ function shareTicket(request, response) {
 
                     })
                 } else if (type == "bilhetes_ida_e_volta_barquense" && barquense_double_tickets != 0) {
+                    const new_number = parseInt(barquense_double_tickets) - 1;
                     updatedData = [{
                         "property": 'bilhetes_ida_e_volta_barquense',
-                        "value": barquense_double_tickets - 1
+                        "value": new_number
                     }];
-
+                    
                     hubspotController.updateClient(user_id, updatedData, (res) => {
                         if (res.statusCode == 200) {
                             hubspotController.getClient(shared_with_id, (res) => {
                                 if (res.user) {
-                                    const shared_with_barquense_tickets = res.user.bilhetes_ida_e_volta_barquense;
+                                    let shared_with_barquense_tickets = parseInt(res.user.bilhetes_ida_e_volta_barquense) + 1;
                                     updatedData = [{
                                         "property": 'bilhetes_ida_e_volta_barquense',
-                                        "value": shared_with_barquense_tickets + 1
+                                        "value": shared_with_barquense_tickets
                                     }];
                                     hubspotController.updateClient(shared_with_id, updatedData, (res) => {
                                         if (res.statusCode == 200) {
