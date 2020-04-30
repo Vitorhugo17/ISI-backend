@@ -130,7 +130,7 @@ async function webhook(request, response) {
     }
 
     // Return a 200 success code to Stripe.
-    respone.status(200).send("OKAY");
+    respone.status(200).send("OK");
 };
 
 function calculatePaymentAmount(quantity, product_id, company, callback) {
