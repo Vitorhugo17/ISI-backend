@@ -986,7 +986,6 @@ module.exports = {
     useQrcode: useQrcode,
     getProducts: getProducts,
     insertPurchase: insertPurchase,
-    getStripeKey: getStripeKey,
     pay: pay,
     recoverPass: recoverPass,
     updatePass: updatePass,
