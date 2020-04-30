@@ -6,7 +6,6 @@ const jasminController = require('./jasmin.controller');
 
 async function paymentStatus(request, response) {
     const paymentIntent = await stripe.paymentIntents.retrieve(request.sanitize("id").escape());
-    console.log(paymentIntent);
     response.status(200).send({
         paymentIntent: {
             status: paymentIntent.status

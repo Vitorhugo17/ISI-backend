@@ -35,12 +35,16 @@ global.isLoggedInCompany = (request, response, next) => {
         })
     }
 }
-
 app.use(bodyParser.json({
-    limit: '50mb'
+    limit: '50mb',
+    verify: function (request, response, buffer) {
+        if (request.originalUrl.startsWith('/webhook')) {
+            request.rawBody = buffer.toString();
+        }
+    }
 }), bodyParser.urlencoded({
     extended: true
-}));
+}), );
 app.use(sanitizer());
 app.use(validator());
 
