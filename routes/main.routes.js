@@ -27,7 +27,7 @@ router.get('/products', isLoggedIn, mainController.getProducts);
 router.post('/purchases', isLoggedIn, mainController.insertPurchase);
 
 router.get('/profile', isLoggedIn, mainController.getInfoUser);
-router.post('/profile/edit', isLoggedIn, mainController.editUser);
+router.put('/profile/edit', isLoggedIn, mainController.editUser);
 
 router.get('/tickets/unused', isLoggedIn, mainController.getUnusedTickets);
 router.get('/tickets/used', isLoggedIn, mainController.getUsedTickets);

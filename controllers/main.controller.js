@@ -345,10 +345,6 @@ function shareTicket(request, response) {
     const company = request.sanitize("company").escape();
     const type = request.sanitize("type").escape();
     const user_id = request.user.user_id;
-    console.log(user_id);
-    console.log(shared_with_id);
-    console.log(company);
-    console.log(type);
 
     hubspotController.getClient(user_id, (res) => {
         if (res.user) {
@@ -392,25 +388,25 @@ function shareTicket(request, response) {
                                                     });
                                                 } else {
                                                     response.status(400).send({
-                                                        "message": "Ticket not shared 1"
+                                                        "message": "Ticket not shared"
                                                     });
                                                 }
                                             })
                                         } else {
                                             response.status(400).send({
-                                                "message": "Ticket not shared2"
+                                                "message": "Ticket not shared"
                                             });
                                         }
                                     })
                                 } else {
                                     response.status(400).send({
-                                        "message": "User to share with doesn't exist"
+                                        "message": "Ticket not shared"
                                     });
                                 }
                             })
                         } else {
                             response.status(400).send({
-                                "message": "Ticket not shared4"
+                                "message": "Ticket not shared"
                             });
                         }
                     })
@@ -471,7 +467,7 @@ function shareTicket(request, response) {
                     })
                 } else {
                     response.status(400).send({
-                        "message": "Ticket not available"
+                        "message": "Ticket not shared"
                     });
                 }
             } else if (company == "Barquense") {
@@ -590,17 +586,17 @@ function shareTicket(request, response) {
 
                 } else {
                     response.status(400).send({
-                        "message": "No tickets available"
+                        "message": "Ticket not shared"
                     });
                 }
             } else {
                 response.status(400).send({
-                    "message": "Company doesn't exist"
+                    "message": "Ticket not shared"
                 });
             }
         } else {
             response.status(400).send({
-                "message": "Couldn't get the client"
+                "message": "Ticket not shared"
             });
         }
     })
@@ -609,9 +605,12 @@ function shareTicket(request, response) {
 function editUser(request, response) {
     const name = request.sanitize("name").escape();
     const lastname = request.sanitize("lastname").escape();
-    const birth_date = request.sanitize("birth_date").escape();
+    let birth_date = request.sanitize("birth_date").escape();
     const contact = request.sanitize("contact").escape();
     const student_number = request.sanitize("student_number").escape();
+
+    const date = new Date(birth_date);
+    birth_date = `${(date.getDate() <10)? "0" + date.getDate(): date.getDate()}/${(date.getMonth() + 1 <10)? "0" + (date.getMonth() + 1): (date.getMonth() + 1)}/${date.getFullYear()}`;
 
     const user_id = request.user.user_id;
 
@@ -986,7 +985,6 @@ module.exports = {
     useQrcode: useQrcode,
     getProducts: getProducts,
     insertPurchase: insertPurchase,
-    getStripeKey: getStripeKey,
     pay: pay,
     recoverPass: recoverPass,
     updatePass: updatePass,
