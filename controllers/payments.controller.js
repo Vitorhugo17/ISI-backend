@@ -1,4 +1,4 @@
-const config = require('./../config/stripe.config');
+const config = require('../config/stripe.config');
 const stripe = require('stripe')(config.stripe.secretKey);
 
 const moloniController = require('./moloni.controller');

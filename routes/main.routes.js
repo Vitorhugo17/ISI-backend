@@ -1,14 +1,7 @@
 const router = require('express').Router();
 
 const mainController = require('./../controllers/main.controller');
-
-const exampleController = require('./../controllers/example.controller');
-
-router.post('/payment', exampleController.paymentIntent);
-router.get('/payment/:id/status', exampleController.paymentStatus);
-router.post('/webhook', exampleController.webhook);
-
-
+const paymentsController = require('./../controllers/payments.controller');
 
 router.get("/authenticated", (request, response) => {
     if (request.isAuthenticated()) {
@@ -24,8 +17,10 @@ router.get("/authenticated", (request, response) => {
     
 })
 
-router.get("/stripe-key", isLoggedIn, mainController.getStripeKey);
-router.post("/pay", isLoggedIn, mainController.pay);
+router.post('/webhook', paymentsController.webhook);
+
+router.get('/payment/:id/status', isLoggedIn, paymentsController.paymentStatus);
+router.post('/payment', isLoggedIn, paymentsController.paymentIntent);
 
 router.get('/products', isLoggedIn, mainController.getProducts);
 
