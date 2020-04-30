@@ -355,7 +355,7 @@ function shareTicket(request, response) {
 
             if (company == "Transdev") {
                 if (type == "bilhetes_disponiveis_transdev" && transdev_tickets != 0) {
-                    new_number = parseInt(transdev_tickets) -1 ;
+                    new_number = parseInt(transdev_tickets) - 1;
                     let updatedData = [{
                         "property": 'bilhetes_disponiveis_transdev',
                         "value": new_number
@@ -610,7 +610,7 @@ function editUser(request, response) {
     const student_number = request.sanitize("student_number").escape();
 
     const date = new Date(birth_date);
-    birth_date = `${(date.getDate() <10)? "0" + date.getDate(): date.getDate()}/${(date.getMonth() + 1 <10)? "0" + (date.getMonth() + 1): (date.getMonth() + 1)}/${date.getFullYear()}`;
+    birth_date = `${(date.getDate() < 10)? "0" + date.getDate(): date.getDate()}/${(date.getMonth() + 1 < 10)? "0" + (date.getMonth() + 1): (date.getMonth() + 1)}/${date.getFullYear()}`;
 
     const user_id = request.user.user_id;
 
