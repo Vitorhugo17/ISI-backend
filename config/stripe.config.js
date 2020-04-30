@@ -27,6 +27,6 @@ module.exports = {
         secretKey: process.env.STRIPE_SECRET_KEY,
         // Setting the webhook secret is good practice in order to verify signatures.
         // After creating a webhook, click to reveal details and find your signing secret.
-        webhookSecret: "whsec_BIQmTq8lZoutrPVnCt4w0gjTGfNV5zA5"
+        webhookSecret: process.env.STRIPE_WEBHOOK_SECRET
     }
 }
