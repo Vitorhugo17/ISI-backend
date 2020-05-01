@@ -16,8 +16,14 @@ router.get("/authenticated", (request, response) => {
     }
     
 })
-
+//rotas sem login
 router.post('/webhook', paymentsController.webhook);
+
+router.post('/password/recover', mainController.recoverPass);
+router.put('/password/update', mainController.updatePass);
+
+//rotas com login
+router.get("/users", isLoggedIn, mainController.getUsers);
 
 router.get('/payment/:id/status', isLoggedIn, paymentsController.paymentStatus);
 router.post('/payment', isLoggedIn, paymentsController.paymentIntent);
@@ -36,9 +42,6 @@ router.post('/tickets/share', isLoggedIn, mainController.shareTicket);
 router.get('/qrcodes/:qrcode_id', isLoggedIn, mainController.readQrcode);
 router.post('/qrcodes', isLoggedIn, mainController.generateQrcode);
 router.post('/qrcodes/use', isLoggedInCompany, mainController.useQrcode);
-
-router.post('/password/recover', mainController.recoverPass);
-router.put('/password/update', mainController.updatePass);
 
 const moloniController = require('./../controllers/moloni.controller');
 router.get('/',(request, response)=>{

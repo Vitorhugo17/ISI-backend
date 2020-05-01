@@ -8,6 +8,28 @@ const moloniController = require('./moloni.controller');
 const jasminController = require('./jasmin.controller');
 const qrcodeController = require('./qrcode.controller');
 
+function getUsers(request, response) {
+    const user_id = request.user.user_id;
+
+    hubspotController.getClients((res) => {
+        if (res.users) {
+            const users = res.users;
+            let usersF = [];
+
+            for (let i = 0; i < users.length; i++) {
+                if (user_id != users[i].id) {
+                    usersF.push(users[i]);
+                }
+            }
+            response.status(200).send({
+                "users": usersF
+            })
+        } else {
+            response.status(res.statusCode).send(res.body);
+        }
+    })
+}
+
 //Função que devolve o histórico de bilhetes utilizados
 function getUsedTickets(request, response) {
     const user_id = request.user.user_id;
@@ -980,6 +1002,7 @@ function generateLink() {
 }
 
 module.exports = {
+    getUsers: getUsers,
     generateQrcode: generateQrcode,
     readQrcode: readQrcode,
     useQrcode: useQrcode,
