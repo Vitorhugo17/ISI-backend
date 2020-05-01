@@ -26,6 +26,7 @@ router.put('/password/update', mainController.updatePass);
 router.get("/users", isLoggedIn, mainController.getUsers);
 
 router.get('/payment/:id/status', isLoggedIn, paymentsController.paymentStatus);
+router.get('/stripe-key', isLoggedIn, paymentsController.getStripeKey);
 router.post('/payment', isLoggedIn, paymentsController.paymentIntent);
 
 router.get('/products', isLoggedIn, mainController.getProducts);
