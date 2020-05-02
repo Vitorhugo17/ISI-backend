@@ -31,8 +31,6 @@ router.post('/payment', isLoggedIn, paymentsController.paymentIntent);
 
 router.get('/products', isLoggedIn, mainController.getProducts);
 
-router.post('/purchases', isLoggedIn, mainController.insertPurchase);
-
 router.get('/profile', isLoggedIn, mainController.getInfoUser);
 router.put('/profile/edit', isLoggedIn, mainController.editUser);
 

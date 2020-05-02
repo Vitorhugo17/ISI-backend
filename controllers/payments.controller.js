@@ -1,8 +1,10 @@
-const config = require('../config/stripe.config');
+const config = require('./../config/stripe.config');
 const stripe = require('stripe')(config.stripe.secretKey);
+const connect = require('./../config/connectBD');
 
 const moloniController = require('./moloni.controller');
 const jasminController = require('./jasmin.controller');
+const mainController = require('./main.controller');
 
 function getStripeKey(request, response) {
     response.status(200).send({
@@ -23,26 +25,44 @@ function paymentIntent(request, response) {
     const quantity = request.sanitize("quantity").escape();
     const product_id = request.sanitize("product_id").escape();
     const company = request.sanitize("company").escape();
+    const user_id = request.user.user_id;
     calculatePaymentAmount(parseInt(quantity), product_id, company, async (res) => {
         if (res.orderAmount) {
             const amount = res.orderAmount;
             try {
                 const paymentIntent = await stripe.paymentIntents.create({
-                    amount: amount * 100,
+                    amount: parseInt((amount * 100).toFixed(0)),
                     currency: config.currency,
                     payment_method_types: config.paymentMethods
                 });
-                return response.status(200).json({
-                    paymentIntent: paymentIntent
-                });
+                const post = {
+                    paymentIntent_id: paymentIntent.id,
+                    idUtilizador: user_id,
+                    idProduto: parseInt(product_id),
+                    companhia: company,
+                    quantidade: parseInt(quantity)
+                }
+                connect.query('INSERT INTO compras_temporaria SET ?', post, (err, rows) => {
+                    console.log(err);
+                    if (!err) {
+                        return response.status(200).json({
+                            paymentIntent: paymentIntent
+                        });
+                    } else {
+                        return response.status(400).json({
+                            error: err.message
+                        });
+                    }
+                })
             } catch (err) {
+                console.log(err);
                 return response.status(400).json({
                     error: err.message
                 });
             }
         } else {
             return response.status(400).json({
-                "message": "erro"
+                error: "erro"
             });
         }
     });
@@ -86,6 +106,25 @@ async function webhook(request, response) {
             console.log(
                 `🔔  Webhook received! Payment for PaymentIntent ${paymentIntent.id} succeeded.`
             );
+            connect.query(`SELECT * FROM compras_temporaria WHERE paymentIntent_id="${paymentIntent.id}"`, (err, rows) => {
+                if (!err) {
+                    if (rows.length != 0) {
+                        const purchase = rows[0];
+
+                        mainController.insertPurchase(purchase.idUtilizador, purchase.idProduto, purchase.quantidade, purchase.companhia, (res) => {
+                            return response.status(res.statusCode).send(res.body);
+                        })
+                    } else {
+                        return response.status(400).json({
+                            error: "Payment not found"
+                        });
+                    }
+                } else {
+                    return response.status(400).json({
+                        error: err.message
+                    });
+                }
+            })
         } else if (eventType === 'payment_intent.payment_failed') {
             const paymentSourceOrMethod = paymentIntent.last_payment_error
                 .payment_method ?
@@ -94,6 +133,7 @@ async function webhook(request, response) {
             console.log(
                 `🔔  Webhook received! Payment on ${paymentSourceOrMethod.object} ${paymentSourceOrMethod.id} of type ${paymentSourceOrMethod.type} for PaymentIntent ${paymentIntent.id} failed.`
             );
+            return response.status(400).send("Payment Failed");
             // Note: you can use the existing PaymentIntent to prompt your customer to try again by attaching a newly created source:
             // https://stripe.com/docs/payments/payment-intents/usage#lifecycle
         }
@@ -113,7 +153,7 @@ async function webhook(request, response) {
         );
         // Check whether this PaymentIntent requires a source.
         if (paymentIntent.status != 'requires_payment_method') {
-            return respone.status(403).send({
+            return response.status(403).send({
                 "error": 'requires_payment_method'
             });
         }
@@ -121,6 +161,7 @@ async function webhook(request, response) {
         await stripe.paymentIntents.confirm(paymentIntent.id, {
             source: source.id
         });
+        return response.status(200).send("OK");
     }
 
     // Monitor `source.failed` and `source.canceled` events.
@@ -132,10 +173,8 @@ async function webhook(request, response) {
         console.log(`🔔  The source ${source.id} failed or timed out.`);
         // Cancel the PaymentIntent.
         await stripe.paymentIntents.cancel(source.metadata.paymentIntent);
+        return response.status(400).send("Payment Cancel");
     }
-
-    // Return a 200 success code to Stripe.
-    respone.status(200).send("OK");
 };
 
 function calculatePaymentAmount(quantity, product_id, company, callback) {
@@ -190,7 +229,7 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
                         amount += parseFloat((productsF[i].qty * (productsF[i].price + productsF[i].taxes)).toFixed(2));
                     }
                     callback({
-                        "orderAmount": amount
+                        "orderAmount": parseFloat(amount).toFixed(2)
                     })
                 } else {
                     callback({
@@ -253,7 +292,7 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
                         amount += parseFloat((productsF[i].quantity * productsF[i].unitPrice).toFixed(2));
                     }
                     callback({
-                        "orderAmount": amount
+                        "orderAmount": parseFloat(amount).toFixed(2)
                     })
                 } else {
                     callback({

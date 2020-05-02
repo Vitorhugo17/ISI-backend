@@ -664,12 +664,7 @@ function editUser(request, response) {
     })
 }
 
-function insertPurchase(request, response) {
-    const user_id = request.user.user_id;
-    const product_id = request.sanitize('product_id').escape();
-    const quantity = request.sanitize('quantity').escape();
-    const company = request.sanitize('company').escape();
-
+function insertPurchase(user_id, product_id, quantity, company, callback) {
     hubspotController.getClient(user_id, (res) => {
         if (res.user) {
             const user = res.user;
@@ -720,19 +715,31 @@ function insertPurchase(request, response) {
                                                 }
                                                 hubspotController.updateClient(user_id, updatedData, (res) => {
                                                     if (res.statusCode == 200) {
-                                                        response.status(200).send({
-                                                            "message": "Purchase inserted with success"
+                                                        callback({
+                                                            "statusCode": 200,
+                                                            "body": {
+                                                                "message": "Purchase inserted with success"
+                                                            }
                                                         })
                                                     } else {
-                                                        response.status(res.statusCode).send(res.body);
+                                                        callback({
+                                                            "statusCode": res.statusCode,
+                                                            "body": res.Body
+                                                        })
                                                     }
                                                 })
                                             } else {
-                                                response.status(res.statusCode).send(res.body);
+                                                callback({
+                                                    "statusCode": res.statusCode,
+                                                    "body": res.Body
+                                                })
                                             }
                                         })
                                     } else {
-                                        response.status(res.statusCode).send(res.body);
+                                        callback({
+                                            "statusCode": res.statusCode,
+                                            "body": res.Body
+                                        })
                                     }
                                 })
                             } else {
@@ -754,15 +761,24 @@ function insertPurchase(request, response) {
                                         }
                                         hubspotController.updateClient(user_id, updatedData, (res) => {
                                             if (res.statusCode == 200) {
-                                                response.status(200).send({
-                                                    "message": "Purchase inserted with success"
+                                                callback({
+                                                    "statusCode": 200,
+                                                    "body": {
+                                                        "message": "Purchase inserted with success"
+                                                    }
                                                 })
                                             } else {
-                                                response.status(res.statusCode).send(res.body);
+                                                callback({
+                                                    "statusCode": res.statusCode,
+                                                    "body": res.Body
+                                                })
                                             }
                                         })
                                     } else {
-                                        response.status(res.statusCode).send(res.body);
+                                        callback({
+                                            "statusCode": res.statusCode,
+                                            "body": res.Body
+                                        })
                                     }
                                 })
                             }
@@ -796,15 +812,24 @@ function insertPurchase(request, response) {
                                                 }
                                                 hubspotController.updateClient(user_id, updatedData, (res) => {
                                                     if (res.statusCode == 200) {
-                                                        response.status(200).send({
-                                                            "message": "Purchase inserted with success"
+                                                        callback({
+                                                            "statusCode": 200,
+                                                            "body": {
+                                                                "message": "Purchase inserted with success"
+                                                            }
                                                         })
                                                     } else {
-                                                        response.status(res.statusCode).send(res.body);
+                                                        callback({
+                                                            "statusCode": res.statusCode,
+                                                            "body": res.Body
+                                                        })
                                                     }
                                                 })
                                             } else {
-                                                response.status(res.statusCode).send(res.body);
+                                                callback({
+                                                    "statusCode": res.statusCode,
+                                                    "body": res.Body
+                                                })
                                             }
                                         })
                                     }
@@ -827,34 +852,55 @@ function insertPurchase(request, response) {
                                         }
                                         hubspotController.updateClient(user_id, updatedData, (res) => {
                                             if (res.statusCode == 200) {
-                                                response.status(200).send({
-                                                    "message": "Purchase inserted with success"
+                                                callback({
+                                                    "statusCode": 200,
+                                                    "body": {
+                                                        "message": "Purchase inserted with success"
+                                                    }
                                                 })
                                             } else {
-                                                response.status(res.statusCode).send(res.body);
+                                                callback({
+                                                    "statusCode": res.statusCode,
+                                                    "body": res.Body
+                                                })
                                             }
                                         })
                                     } else {
-                                        response.status(res.statusCode).send(res.body);
+                                        callback({
+                                            "statusCode": res.statusCode,
+                                            "body": res.Body
+                                        })
                                     }
                                 })
                             }
                         } else {
-                            response.status(400).send({
-                                "message": "Company doesn't exists"
-                            });
+                            callback({
+                                "statusCode": 400,
+                                "body": {
+                                    "message": "Company doesn't exists"
+                                }
+                            })
                         }
                     } else {
-                        response.status(400).send({
-                            "message": "Product doesn't exists"
-                        });
+                        callback({
+                            "statusCode": 400,
+                            "body": {
+                                "message": "Product doesn't exists"
+                            }
+                        })
                     }
                 } else {
-                    response.status(res.statusCode).send(res.body);
+                    callback({
+                        "statusCode": res.statusCode,
+                        "body": res.Body
+                    })
                 }
             })
         } else {
-            response.status(res.statusCode).send(res.body);
+            callback({
+                "statusCode": res.statusCode,
+                "body": res.Body
+            })
         }
     })
 }
