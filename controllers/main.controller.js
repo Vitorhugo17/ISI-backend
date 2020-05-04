@@ -8,6 +8,77 @@ const moloniController = require('./moloni.controller');
 const jasminController = require('./jasmin.controller');
 const qrcodeController = require('./qrcode.controller');
 
+function getUsers(request, response) {
+    const user_id = request.user.user_id;
+
+    hubspotController.getClients((res) => {
+        if (res.users) {
+            const users = res.users;
+            let usersF = [];
+
+            for (let i = 0; i < users.length; i++) {
+                if (user_id != users[i].id) {
+                    usersF.push(users[i]);
+                }
+            }
+            response.status(200).send({
+                "users": usersF
+            })
+        } else {
+            response.status(res.statusCode).send(res.body);
+        }
+    })
+}
+
+//Função que devolve o histórico de bilhetes utilizados
+function getUsedTickets(request, response) {
+    const user_id = request.user.user_id;
+    connect.query(`SELECT * FROM qrcode WHERE idUtilizador = ${user_id} AND (dataUtilizacaoIda IS NOT NULL OR dataUtilizacaoVolta IS NOT NULL)`, (err, rows) => {
+        if (!err) {
+            if (rows.length != 0) {
+                let tickets = [];
+                for (let i = 0; i < rows.length; i++) {
+                    if (rows[i].tipo_bilhete == "normal") {
+                        tickets.push({
+                            idQrcode: rows[i].idQRCode,
+                            tipo_bilhete: "normal",
+                            empresa: rows[i].empresa,
+                            data_utilizacao: rows[i].dataUtilizacaoIda
+                        });
+                    } else {
+                        if (rows[i].dataUtilizacaoVolta) {
+                            tickets.push({
+                                idQrcode: rows[i].idQRCode,
+                                tipo_bilhete: "volta",
+                                empresa: rows[i].empresa,
+                                data_utilizacao: rows[i].dataUtilizacaoVolta
+                            })
+                        }
+                        tickets.push({
+                            idQrcode: rows[i].idQRCode,
+                            tipo_bilhete: "ida",
+                            empresa: rows[i].empresa,
+                            data_utilizacao: rows[i].dataUtilizacaoIda
+                        })
+                    }
+                }
+                response.status(200).send({
+                    "usedTickets": tickets
+                })
+            } else {
+                response.status(404).send({
+                    "message": "data not found"
+                })
+            }
+        } else {
+            response.status(404).send({
+                "message": "data not found"
+            })
+        }
+    })
+
+}
+
 function generateQrcode(request, response) {
     const user_id = request.user.user_id;
     const company = request.sanitize("company").escape();
@@ -291,12 +362,309 @@ function recoverPass(request, response) {
 
 }
 
-function insertPurchase(request, response) {
+function shareTicket(request, response) {
+    const shared_with_id = request.sanitize("shared_with_id").escape();
+    const company = request.sanitize("company").escape();
+    const type = request.sanitize("type").escape();
     const user_id = request.user.user_id;
-    const product_id = request.sanitize('product_id').escape();
-    const quantity = request.sanitize('quantity').escape();
-    const company = request.sanitize('company').escape();
 
+    hubspotController.getClient(user_id, (res) => {
+        if (res.user) {
+            let transdev_tickets = res.user.bilhetes_disponiveis_transdev;
+            let barquense_tickets = res.user.bilhetes_disponiveis_barquense;
+            let transdev_double_tickets = res.user.bilhetes_ida_e_volta_transdev;
+            let barquense_double_tickets = res.user.bilhetes_ida_e_volta_barquense;
+
+            if (company == "Transdev") {
+                if (type == "bilhetes_disponiveis_transdev" && transdev_tickets != 0) {
+                    new_number = parseInt(transdev_tickets) - 1;
+                    let updatedData = [{
+                        "property": 'bilhetes_disponiveis_transdev',
+                        "value": new_number
+                    }];
+
+                    hubspotController.updateClient(user_id, updatedData, (res) => {
+                        if (res.statusCode == 200) {
+                            console.log(shared_with_id);
+                            hubspotController.getClient(shared_with_id, (res) => {
+                                if (res.user) {
+                                    let shared_with_transdev_tickets = parseInt(res.user.bilhetes_disponiveis_transdev) + 1;
+                                    updatedData = [{
+                                        "property": 'bilhetes_disponiveis_transdev',
+                                        "value": shared_with_transdev_tickets
+                                    }];
+                                    hubspotController.updateClient(shared_with_id, updatedData, (res) => {
+                                        if (res.statusCode == 200) {
+                                            const post = {
+                                                idUtilizadorEnviou: user_id,
+                                                idUtilizadorRecebeu: shared_with_id,
+                                                dataPartilha: new Date(),
+                                                tipo_bilhete: "normal",
+                                                empresa: "Transdev"
+                                            }
+
+                                            connect.query('INSERT INTO partilha_bilhete SET ?', post, (err, rows, fields) => {
+                                                if (!err) {
+                                                    response.status(200).send({
+                                                        "message": "Shared with success"
+                                                    });
+                                                } else {
+                                                    response.status(400).send({
+                                                        "message": "Ticket not shared"
+                                                    });
+                                                }
+                                            })
+                                        } else {
+                                            response.status(400).send({
+                                                "message": "Ticket not shared"
+                                            });
+                                        }
+                                    })
+                                } else {
+                                    response.status(400).send({
+                                        "message": "Ticket not shared"
+                                    });
+                                }
+                            })
+                        } else {
+                            response.status(400).send({
+                                "message": "Ticket not shared"
+                            });
+                        }
+                    })
+                } else if (type == "bilhetes_ida_e_volta_transdev" && transdev_double_tickets != 0) {
+                    let new_number = parseInt(transdev_double_tickets) - 1;
+                    updatedData = [{
+                        "property": 'bilhetes_ida_e_volta_transdev',
+                        "value": new_number
+                    }];
+
+                    hubspotController.updateClient(user_id, updatedData, (res) => {
+                        if (res.statusCode == 200) {
+                            hubspotController.getClient(shared_with_id, (res) => {
+                                if (res.user) {
+                                    let shared_with_transdev_tickets = parseInt(res.user.bilhetes_ida_e_volta_transdev) + 1;
+                                    updatedData = [{
+                                        "property": 'bilhetes_ida_e_volta_transdev',
+                                        "value": shared_with_transdev_tickets
+                                    }];
+                                    hubspotController.updateClient(shared_with_id, updatedData, (res) => {
+                                        if (res.statusCode == 200) {
+                                            const post = {
+                                                idUtilizadorEnviou: user_id,
+                                                idUtilizadorRecebeu: shared_with_id,
+                                                dataPartilha: new Date(),
+                                                tipo_bilhete: "ida e volta",
+                                                empresa: "Transdev"
+                                            }
+
+                                            connect.query('INSERT INTO partilha_bilhete SET ?', post, (err, rows, fields) => {
+                                                if (!err) {
+                                                    response.status(200).send({
+                                                        "message": "Shared with success"
+                                                    });
+                                                } else {
+                                                    response.status(400).send({
+                                                        "message": "Ticket not shared"
+                                                    })
+                                                }
+                                            })
+                                        } else {
+                                            response.status(400).send({
+                                                "message": "Ticket not shared"
+                                            });
+                                        }
+                                    })
+                                } else {
+                                    response.status(400).send({
+                                        "message": "Ticket not shared"
+                                    });
+                                }
+                            })
+                        } else {
+                            response.status(400).send({
+                                "message": "Ticket not shared"
+                            });
+                        }
+                    })
+                } else {
+                    response.status(400).send({
+                        "message": "Ticket not shared"
+                    });
+                }
+            } else if (company == "Barquense") {
+                if (type == "bilhetes_disponiveis_barquense" && barquense_tickets != 0) {
+                    let new_number = parseInt(barquense_tickets) - 1;
+                    updatedData = [{
+                        "property": 'bilhetes_disponiveis_barquense',
+                        "value": new_number
+                    }];
+
+                    hubspotController.updateClient(user_id, updatedData, (res) => {
+                        if (res.statusCode == 200) {
+                            hubspotController.getClient(shared_with_id, (res) => {
+                                if (res.user) {
+                                    let shared_with_barquense_tickets = parseInt(res.user.bilhetes_disponiveis_barquense) + 1;
+                                    updatedData = [{
+                                        "property": 'bilhetes_disponiveis_barquense',
+                                        "value": shared_with_barquense_tickets
+                                    }];
+                                    hubspotController.updateClient(shared_with_id, updatedData, (res) => {
+                                        if (res.statusCode == 200) {
+                                            const post = {
+                                                idUtilizadorEnviou: user_id,
+                                                idUtilizadorRecebeu: shared_with_id,
+                                                dataPartilha: new Date(),
+                                                tipo_bilhete: "normal",
+                                                empresa: "Barquense"
+                                            }
+
+                                            connect.query('INSERT INTO partilha_bilhete SET ?', post, (err, rows, fields) => {
+                                                if (!err) {
+                                                    response.status(200).send({
+                                                        "message": "Shared with success"
+                                                    });
+                                                } else {
+                                                    response.status(400).send({
+                                                        "message": "Ticket not shared"
+                                                    });
+                                                }
+                                            })
+                                        } else {
+                                            response.status(400).send({
+                                                "message": "Ticket not shared"
+                                            });
+                                        }
+                                    })
+                                } else {
+                                    response.status(400).send({
+                                        "message": "Ticket not shared"
+                                    });
+                                }
+                            })
+                        } else {
+                            response.status(400).send({
+                                "message": "Ticket not shared"
+                            });
+                        }
+
+                    })
+                } else if (type == "bilhetes_ida_e_volta_barquense" && barquense_double_tickets != 0) {
+                    const new_number = parseInt(barquense_double_tickets) - 1;
+                    updatedData = [{
+                        "property": 'bilhetes_ida_e_volta_barquense',
+                        "value": new_number
+                    }];
+
+                    hubspotController.updateClient(user_id, updatedData, (res) => {
+                        if (res.statusCode == 200) {
+                            hubspotController.getClient(shared_with_id, (res) => {
+                                if (res.user) {
+                                    let shared_with_barquense_tickets = parseInt(res.user.bilhetes_ida_e_volta_barquense) + 1;
+                                    updatedData = [{
+                                        "property": 'bilhetes_ida_e_volta_barquense',
+                                        "value": shared_with_barquense_tickets
+                                    }];
+                                    hubspotController.updateClient(shared_with_id, updatedData, (res) => {
+                                        if (res.statusCode == 200) {
+                                            const post = {
+                                                idUtilizadorEnviou: user_id,
+                                                idUtilizadorRecebeu: shared_with_id,
+                                                dataPartilha: new Date(),
+                                                tipo_bilhete: "ida e volta",
+                                                empresa: "Barquense"
+                                            }
+
+                                            connect.query('INSERT INTO partilha_bilhete SET ?', post, (err, rows, fields) => {
+                                                if (!err) {
+                                                    response.status(200).send({
+                                                        "message": "Shared with success"
+                                                    });
+                                                } else {
+                                                    response.status(400).send({
+                                                        "message": "Ticket not shared"
+                                                    });
+                                                }
+                                            })
+                                        } else {
+                                            response.status(400).send({
+                                                "message": "Ticket not shared"
+                                            });
+                                        }
+                                    })
+                                } else {
+                                    response.status(400).send({
+                                        "message": "Ticket not shared"
+                                    });
+                                }
+                            })
+                        } else {
+                            response.status(400).send({
+                                "message": "Ticket not shared"
+                            });
+                        }
+
+                    })
+
+                } else {
+                    response.status(400).send({
+                        "message": "Ticket not shared"
+                    });
+                }
+            } else {
+                response.status(400).send({
+                    "message": "Ticket not shared"
+                });
+            }
+        } else {
+            response.status(400).send({
+                "message": "Ticket not shared"
+            });
+        }
+    })
+}
+
+function editUser(request, response) {
+    const name = request.sanitize("name").escape();
+    const lastname = request.sanitize("lastname").escape();
+    let birth_date = request.sanitize("birth_date").escape();
+    const contact = request.sanitize("contact").escape();
+    const student_number = request.sanitize("student_number").escape();
+
+    const date = new Date(birth_date);
+    birth_date = `${(date.getDate() < 10)? "0" + date.getDate(): date.getDate()}/${(date.getMonth() + 1 < 10)? "0" + (date.getMonth() + 1): (date.getMonth() + 1)}/${date.getFullYear()}`;
+
+    const user_id = request.user.user_id;
+
+    const updatedData = [{
+        "property": 'firstname',
+        "value": name
+    }, {
+        "property": 'lastname',
+        "value": lastname
+    }, {
+        "property": 'date_of_birth',
+        "value": birth_date
+    }, {
+        "property": 'phone',
+        "value": contact
+    }, {
+        "property": 'no_mecanografico',
+        "value": student_number
+    }];
+
+    hubspotController.updateClient(user_id, updatedData, (res) => {
+        if (res.statusCode == 200) {
+            response.status(200).send({
+                "message": "Data updated with success"
+            })
+        } else {
+            response.status(res.statusCode).send(res.body);
+        }
+    })
+}
+
+function insertPurchase(user_id, product_id, quantity, company, callback) {
     hubspotController.getClient(user_id, (res) => {
         if (res.user) {
             const user = res.user;
@@ -347,19 +715,31 @@ function insertPurchase(request, response) {
                                                 }
                                                 hubspotController.updateClient(user_id, updatedData, (res) => {
                                                     if (res.statusCode == 200) {
-                                                        response.status(200).send({
-                                                            "message": "Purchase inserted with success"
+                                                        callback({
+                                                            "statusCode": 200,
+                                                            "body": {
+                                                                "message": "Purchase inserted with success"
+                                                            }
                                                         })
                                                     } else {
-                                                        response.status(res.statusCode).send(res.body);
+                                                        callback({
+                                                            "statusCode": res.statusCode,
+                                                            "body": res.Body
+                                                        })
                                                     }
                                                 })
                                             } else {
-                                                response.status(res.statusCode).send(res.body);
+                                                callback({
+                                                    "statusCode": res.statusCode,
+                                                    "body": res.Body
+                                                })
                                             }
                                         })
                                     } else {
-                                        response.status(res.statusCode).send(res.body);
+                                        callback({
+                                            "statusCode": res.statusCode,
+                                            "body": res.Body
+                                        })
                                     }
                                 })
                             } else {
@@ -381,15 +761,24 @@ function insertPurchase(request, response) {
                                         }
                                         hubspotController.updateClient(user_id, updatedData, (res) => {
                                             if (res.statusCode == 200) {
-                                                response.status(200).send({
-                                                    "message": "Purchase inserted with success"
+                                                callback({
+                                                    "statusCode": 200,
+                                                    "body": {
+                                                        "message": "Purchase inserted with success"
+                                                    }
                                                 })
                                             } else {
-                                                response.status(res.statusCode).send(res.body);
+                                                callback({
+                                                    "statusCode": res.statusCode,
+                                                    "body": res.Body
+                                                })
                                             }
                                         })
                                     } else {
-                                        response.status(res.statusCode).send(res.body);
+                                        callback({
+                                            "statusCode": res.statusCode,
+                                            "body": res.Body
+                                        })
                                     }
                                 })
                             }
@@ -423,15 +812,24 @@ function insertPurchase(request, response) {
                                                 }
                                                 hubspotController.updateClient(user_id, updatedData, (res) => {
                                                     if (res.statusCode == 200) {
-                                                        response.status(200).send({
-                                                            "message": "Purchase inserted with success"
+                                                        callback({
+                                                            "statusCode": 200,
+                                                            "body": {
+                                                                "message": "Purchase inserted with success"
+                                                            }
                                                         })
                                                     } else {
-                                                        response.status(res.statusCode).send(res.body);
+                                                        callback({
+                                                            "statusCode": res.statusCode,
+                                                            "body": res.Body
+                                                        })
                                                     }
                                                 })
                                             } else {
-                                                response.status(res.statusCode).send(res.body);
+                                                callback({
+                                                    "statusCode": res.statusCode,
+                                                    "body": res.Body
+                                                })
                                             }
                                         })
                                     }
@@ -454,34 +852,55 @@ function insertPurchase(request, response) {
                                         }
                                         hubspotController.updateClient(user_id, updatedData, (res) => {
                                             if (res.statusCode == 200) {
-                                                response.status(200).send({
-                                                    "message": "Purchase inserted with success"
+                                                callback({
+                                                    "statusCode": 200,
+                                                    "body": {
+                                                        "message": "Purchase inserted with success"
+                                                    }
                                                 })
                                             } else {
-                                                response.status(res.statusCode).send(res.body);
+                                                callback({
+                                                    "statusCode": res.statusCode,
+                                                    "body": res.Body
+                                                })
                                             }
                                         })
                                     } else {
-                                        response.status(res.statusCode).send(res.body);
+                                        callback({
+                                            "statusCode": res.statusCode,
+                                            "body": res.Body
+                                        })
                                     }
                                 })
                             }
                         } else {
-                            response.status(400).send({
-                                "message": "Company doesn't exists"
-                            });
+                            callback({
+                                "statusCode": 400,
+                                "body": {
+                                    "message": "Company doesn't exists"
+                                }
+                            })
                         }
                     } else {
-                        response.status(400).send({
-                            "message": "Product doesn't exists"
-                        });
+                        callback({
+                            "statusCode": 400,
+                            "body": {
+                                "message": "Product doesn't exists"
+                            }
+                        })
                     }
                 } else {
-                    response.status(res.statusCode).send(res.body);
+                    callback({
+                        "statusCode": res.statusCode,
+                        "body": res.Body
+                    })
                 }
             })
         } else {
-            response.status(res.statusCode).send(res.body);
+            callback({
+                "statusCode": res.statusCode,
+                "body": res.Body
+            })
         }
     })
 }
@@ -551,12 +970,6 @@ function getProductsOrganized(callback) {
     })
 }
 
-function getStripeKey(request, response) {
-    response.status(200).send({
-        publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
-    });
-}
-
 function pay(request, response) {
     const paymentMethodId = request.sanitize("paymentMethodId").escape();
     const paymentIntentId = request.sanitize("paymentIntentId").escape();
@@ -624,68 +1037,6 @@ function pay(request, response) {
     })
 }
 
-function calculateOrderAmount(quantity, product_id, company, callback) {
-    if (company == "Barquense") {
-        moloniController.getProducts((res) => {
-            if (res.products) {
-                let amount = 0;
-                const products = res.products;
-                for (let i = 0; i < products.length; i++) {
-                    if (products[i].product_id == product_id) {
-                        amount = (products[i].price + products[i].taxes[0].value).toFixed(2) * quantity;
-                    }
-                }
-                if (amount != 0) {
-                    callback({
-                        "orderAmount": amount
-                    })
-                } else {
-                    callback({
-                        "statusCode": 404,
-                        "body": {
-                            "message": "Product not found"
-                        }
-                    });
-                }
-            } else {
-                callback({
-                    "statusCode": res.statusCode,
-                    "body": res.body
-                });
-            }
-        })
-    } else if (company == "Transdev") {
-        jasminController.getProducts((res) => {
-            if (res.products) {
-                let amount = 0;
-                const products = res.products;
-                for (let i = 0; i < products.length; i++) {
-                    if (products[i].itemKey == product_id) {
-                        amount = products[i].priceListLines[0].priceAmount.amount.toFixed(2) * quantity;
-                    }
-                }
-                if (amount != 0) {
-                    callback({
-                        "orderAmount": amount
-                    })
-                } else {
-                    callback({
-                        "statusCode": 404,
-                        "body": {
-                            "message": "Product not found"
-                        }
-                    });
-                }
-            } else {
-                callback({
-                    "statusCode": res.statusCode,
-                    "body": res.body
-                });
-            }
-        })
-    }
-}
-
 function generateLink() {
     const caracteres = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const length = 25;
@@ -697,15 +1048,18 @@ function generateLink() {
 }
 
 module.exports = {
+    getUsers: getUsers,
     generateQrcode: generateQrcode,
     readQrcode: readQrcode,
     useQrcode: useQrcode,
     getProducts: getProducts,
     insertPurchase: insertPurchase,
-    getStripeKey: getStripeKey,
     pay: pay,
     recoverPass: recoverPass,
     updatePass: updatePass,
     getInfoUser: getInfoUser,
-    getUnusedTickets: getUnusedTickets
+    getUnusedTickets: getUnusedTickets,
+    shareTicket: shareTicket,
+    editUser: editUser,
+    getUsedTickets: getUsedTickets
 }

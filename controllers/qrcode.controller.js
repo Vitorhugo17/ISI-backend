@@ -7,13 +7,13 @@ const hubspotController = require("./hubspot.controller");
 
 function useQrcode(hash, company, callback) {
     const post = [new Date(), hash, company];
-    connect.query("SELECT * FROM qrcode WHERE dataValidade > ? AND utilizacao > 0 AND hash = ? AND empresa = ?", post, (err, rows) => {
+    connect.query("SELECT * FROM qrcode WHERE dataValidade > ? AND (dataUtilizacaoIda IS NULL OR dataUtilizacaoVolta IS NULL) AND utilizacao > 0 AND hash = ? AND empresa = ?", post, (err, rows) => {
         if (!err) {
             if (rows.length != 0) {
                 let qrcode = rows[0];
                 qrcode.utilizacao -= 1;
 
-                if (qrcode.utilizacao == 0) {
+                if ((qrcode.utilizacao == 0 && qrcode.tipo_bilhete == "normal") || (qrcode.utilizacao == 1 && qrcode.tipo_bilhete == "ida e volta")) {
                     hubspotController.getClient(qrcode.idUtilizador, (res) => {
                         if (res.user) {
                             const user = res.user;
@@ -38,17 +38,33 @@ function useQrcode(hash, company, callback) {
                             }
                             hubspotController.updateClient(qrcode.idUtilizador, [properties], (res) => {
                                 if (res.statusCode == 200) {
-                                    connect.query(`DELETE FROM qrcode WHERE idQRCode = ${qrcode.idQRCode}`, (err, rows) => {
+                                    let date = new Date();
+                                    let update = [qrcode.utilizacao, date, date, qrcode.idQRCode];
+                                    let query = "UPDATE qrcode SET utilizacao = ?, dataUtilizacaoIda = ?, dataUtilizacaoVolta = ? WHERE idQRCode = ?";
+                                    if (qrcode.tipo_bilhete != "normal") {
+                                        update = [qrcode.utilizacao, date, qrcode.idQRCode];
+                                        query = "UPDATE qrcode SET utilizacao = ?, dataUtilizacaoIda = ? WHERE idQRCode = ?";
+                                    }
+                                    connect.query(query, update, (err, rows) => {
                                         if (!err) {
-                                            const foto = `${dirQrcode}/${qrcode.idUtilizador}_${qrcode.idQRCode}.png`;
-                                            fs.unlink(foto, (err) => {
+                                            if (qrcode.tipo_bilhete == "normal") {
+                                                const foto = `${dirQrcode}/${qrcode.idUtilizador}_${qrcode.idQRCode}.png`;
+                                                fs.unlink(foto, (err) => {
+                                                    callback({
+                                                        "statusCode": 200,
+                                                        body: {
+                                                            "message": "Valid QRCode"
+                                                        }
+                                                    });
+                                                })
+                                            } else {
                                                 callback({
                                                     "statusCode": 200,
                                                     body: {
                                                         "message": "Valid QRCode"
                                                     }
                                                 });
-                                            })
+                                            }
                                         } else {
                                             callback({
                                                 "statusCode": 400,
@@ -77,15 +93,19 @@ function useQrcode(hash, company, callback) {
                         }
                     })
                 } else {
-                    const update = [qrcode.utilizacao, qrcode.idQRCode];
-                    connect.query("UPDATE qrcode SET utilizacao = ? WHERE idQRCode = ?", update, (err, rows) => {
+                    let date = new Date();
+                    let update = [qrcode.utilizacao, date, qrcode.idQRCode];
+                    connect.query("UPDATE qrcode SET utilizacao = ?, dataUtilizacaoVolta = ? WHERE idQRCode = ?", update, (err, rows) => {
                         if (!err) {
-                            callback({
-                                "statusCode": 200,
-                                body: {
-                                    "message": "Valid QRCode"
-                                }
-                            });
+                            const foto = `${dirQrcode}/${qrcode.idUtilizador}_${qrcode.idQRCode}.png`;
+                            fs.unlink(foto, (err) => {
+                                callback({
+                                    "statusCode": 200,
+                                    body: {
+                                        "message": "Valid QRCode"
+                                    }
+                                });
+                            })
                         } else {
                             callback({
                                 "statusCode": 400,
@@ -117,7 +137,7 @@ function useQrcode(hash, company, callback) {
 
 function readQrcode(user_id, qrcode_id, callback) {
     const post = [new Date(), qrcode_id, user_id];
-    connect.query("SELECT * FROM qrcode WHERE dataValidade > ? AND utilizacao > 0 AND idQRCode=? AND idUtilizador = ?", post, (err, rows) => {
+    connect.query("SELECT * FROM qrcode WHERE dataValidade > ? AND (dataUtilizacaoIda IS NULL OR dataUtilizacaoVolta IS NULL) AND utilizacao > 0 AND idQRCode=? AND idUtilizador = ?", post, (err, rows) => {
         if (!err) {
             if (rows.length != 0) {
                 const foto = `${dirQrcode}/${user_id}_${qrcode_id}.png`;
@@ -174,7 +194,9 @@ function generateQrcode(user_id, company, utilization, callback) {
         empresa: company,
         dataValidade: validation_date,
         utilizacao: utilization,
-        hash: hash
+        hash: hash,
+        dataUtilizacaoIda: null,
+        dataUtilizacaoVolta: null
     }
 
     if (utilization == 2) {

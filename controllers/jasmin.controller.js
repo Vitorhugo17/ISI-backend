@@ -74,32 +74,46 @@ function insertPurchase(customer_id, customer_name, customer_nif, product_id, qu
                     const products = res.products;
 
                     let productsF = [];
-                    let quantityF = 0;
                     for (let i = 0; i < products.length; i++) {
-                        if (quantity >= 10) {
-                            if (quantity % 10 != 0) {
-                                if (products[i].itemKey == parseInt(product_id)) {
+                        if (products[i].description.toLowerCase().includes("único")) {
+                            if (quantity >= 10) {
+                                if (quantity % 10 != 0) {
+                                    if (products[i].itemKey == parseInt(product_id)) {
+                                        productsF.push({
+                                            "salesItem": products[i].itemKey,
+                                            "description": products[i].description,
+                                            "quantity": (quantity % 10),
+                                            "unitPrice": products[i].priceListLines[0].priceAmount,
+                                            "unit": products[i].priceListLines[0].unit,
+                                            "itemTaxSchema": products[i].itemTaxSchema,
+                                            "deliveryDate": new Date().toISOString()
+                                        });
+                                    }
+                                }
+                                if (products[i].description.toLowerCase().includes("pack")) {
                                     productsF.push({
                                         "salesItem": products[i].itemKey,
                                         "description": products[i].description,
-                                        "quantity": (quantity % 10),
+                                        "quantity": Math.floor(quantity / 10),
                                         "unitPrice": products[i].priceListLines[0].priceAmount,
                                         "unit": products[i].priceListLines[0].unit,
                                         "itemTaxSchema": products[i].itemTaxSchema,
                                         "deliveryDate": new Date().toISOString()
                                     });
                                 }
-                            }
-                            if (products[i].description.includes("Pack")) {
-                                productsF.push({
-                                    "salesItem": products[i].itemKey,
-                                    "description": products[i].description,
-                                    "quantity": Math.floor(quantity / 10),
-                                    "unitPrice": products[i].priceListLines[0].priceAmount,
-                                    "unit": products[i].priceListLines[0].unit,
-                                    "itemTaxSchema": products[i].itemTaxSchema,
-                                    "deliveryDate": new Date().toISOString()
-                                });
+                            } else {
+                                if (products[i].itemKey == parseInt(product_id)) {
+                                    productsF.push({
+                                        "salesItem": products[i].itemKey,
+                                        "description": products[i].description,
+                                        "quantity": quantity,
+                                        "unitPrice": products[i].priceListLines[0].priceAmount,
+                                        "unit": products[i].priceListLines[0].unit,
+                                        "itemTaxSchema": products[i].itemTaxSchema,
+                                        "deliveryDate": new Date().toISOString()
+                                    });
+                                    break;
+                                }
                             }
                         } else {
                             if (products[i].itemKey == parseInt(product_id)) {

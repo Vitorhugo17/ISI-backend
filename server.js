@@ -35,26 +35,29 @@ global.isLoggedInCompany = (request, response, next) => {
         })
     }
 }
-
 app.use(bodyParser.json({
-    limit: '50mb'
+    limit: '50mb',
+    verify: function (request, response, buffer) {
+        if (request.originalUrl.startsWith('/webhook')) {
+            request.rawBody = buffer.toString();
+        }
+    }
 }), bodyParser.urlencoded({
     extended: true
-}));
+}), );
 app.use(sanitizer());
 app.use(validator());
 
 app.set("trust proxy", 1);
 app.use(session({
-    /*genid: (req) => {
+    genid: (req) => {
         return uuid()
     },
     store: new RedisStore({
         client: require('redis').createClient({
-            host: process.env.REDIS_HOST || '127.0.0.1',
-            port: process.env.REDIS_PORT || 6379
+            url: process.env.REDIS_URL
         }),
-    }),*/
+    }),
     secret: 'keyboard cat',
     resave: true,
     saveUninitialized: false,
