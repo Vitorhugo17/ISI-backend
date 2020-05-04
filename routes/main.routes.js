@@ -7,7 +7,8 @@ router.get("/authenticated", (request, response) => {
     if (request.isAuthenticated()) {
         response.status(200).send({
             "isAuthenticated": request.isAuthenticated(),
-            "isEmpresa": request.user.isEmpresa
+            "isEmpresa": request.user.isEmpresa,
+            "user": request.user
         })
     } else{
         response.status(200).send({
