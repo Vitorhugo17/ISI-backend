@@ -49,15 +49,14 @@ app.use(sanitizer());
 app.use(validator());
 
 app.use(session({
-    /*genid: (req) => {
+    genid: (req) => {
         return uuid()
     },
     store: new RedisStore({
         client: require('redis').createClient({
-            host: process.env.REDIS_HOST || '127.0.0.1',
-            port: process.env.REDIS_PORT || 6379
+            url: process.env.REDIS_URL
         }),
-    }),*/
+    }),
     secret: 'keyboard cat',
     resave: true,
     saveUninitialized: false,
