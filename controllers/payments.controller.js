@@ -43,7 +43,6 @@ function paymentIntent(request, response) {
                     quantidade: parseInt(quantity)
                 }
                 connect.query('INSERT INTO compras_temporaria SET ?', post, (err, rows) => {
-                    console.log(err);
                     if (!err) {
                         return response.status(200).json({
                             paymentIntent: paymentIntent
@@ -55,7 +54,6 @@ function paymentIntent(request, response) {
                     }
                 })
             } catch (err) {
-                console.log(err);
                 return response.status(400).json({
                     error: err.message
                 });
@@ -257,7 +255,7 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
                         product = products[i];
                     }
                 }
-                if (products[i].description.toLowerCase().includes("único")) {
+                if (product.description.toLowerCase().includes("único")) {
                     if (quantity >= 10) {
                         if (quantity % 10 != 0) {
                             productsF.push({
