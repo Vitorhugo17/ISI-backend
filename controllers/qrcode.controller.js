@@ -1,38 +1,38 @@
 const connect = require('./../config/connectBD');
-const dirQrcode = __dirname + "/../assets/images/qrcodes";
-const qrCode = require("qrcode");
-const fs = require("fs");
+const dirQrcode = __dirname + '/../assets/images/qrcodes';
+const qrCode = require('qrcode');
+const fs = require('fs');
 
-const hubspotController = require("./hubspot.controller");
+const hubspotController = require('./hubspot.controller');
 
 function useQrcode(hash, company, callback) {
     const post = [new Date(), hash, company];
-    connect.query("SELECT * FROM qrcode WHERE dataValidade > ? AND (dataUtilizacaoIda IS NULL OR dataUtilizacaoVolta IS NULL) AND utilizacao > 0 AND hash = ? AND empresa = ?", post, (err, rows) => {
+    connect.query('SELECT * FROM qrcode WHERE dataValidade > ? AND (dataUtilizacaoIda IS NULL OR dataUtilizacaoVolta IS NULL) AND utilizacao > 0 AND hash = ? AND empresa = ?', post, (err, rows) => {
         if (!err) {
             if (rows.length != 0) {
                 let qrcode = rows[0];
                 qrcode.utilizacao -= 1;
 
-                if ((qrcode.utilizacao == 0 && qrcode.tipo_bilhete == "normal") || (qrcode.utilizacao == 1 && qrcode.tipo_bilhete == "ida e volta")) {
+                if ((qrcode.utilizacao == 0 && qrcode.tipo_bilhete == 'normal') || (qrcode.utilizacao == 1 && qrcode.tipo_bilhete == 'ida e volta')) {
                     hubspotController.getClient(qrcode.idUtilizador, (res) => {
                         if (res.user) {
                             const user = res.user;
 
                             let properties = {};
-                            if (company == "Barquense") {
-                                if (qrcode.tipo_bilhete == "normal") {
-                                    properties.property = "bilhetes_disponiveis_barquense";
+                            if (company == 'Barquense') {
+                                if (qrcode.tipo_bilhete == 'normal') {
+                                    properties.property = 'bilhetes_disponiveis_barquense';
                                     properties.value = parseInt(user.bilhetes_disponiveis_barquense) - 1;
                                 } else {
-                                    properties.property = "bilhetes_ida_e_volta_barquense";
+                                    properties.property = 'bilhetes_ida_e_volta_barquense';
                                     properties.value = parseInt(user.bilhetes_ida_e_volta_barquense) - 1;
                                 }
                             } else {
-                                if (qrcode.tipo_bilhete == "normal") {
-                                    properties.property = "bilhetes_disponiveis_transdev";
+                                if (qrcode.tipo_bilhete == 'normal') {
+                                    properties.property = 'bilhetes_disponiveis_transdev';
                                     properties.value = parseInt(user.bilhetes_disponiveis_transdev) - 1;
                                 } else {
-                                    properties.property = "bilhetes_ida_e_volta_transdev";
+                                    properties.property = 'bilhetes_ida_e_volta_transdev';
                                     properties.value = parseInt(user.bilhetes_ida_e_volta_transdev) - 1;
                                 }
                             }
@@ -40,54 +40,54 @@ function useQrcode(hash, company, callback) {
                                 if (res.statusCode == 200) {
                                     let date = new Date();
                                     let update = [qrcode.utilizacao, date, date, qrcode.idQRCode];
-                                    let query = "UPDATE qrcode SET utilizacao = ?, dataUtilizacaoIda = ?, dataUtilizacaoVolta = ? WHERE idQRCode = ?";
-                                    if (qrcode.tipo_bilhete != "normal") {
+                                    let query = 'UPDATE qrcode SET utilizacao = ?, dataUtilizacaoIda = ?, dataUtilizacaoVolta = ? WHERE idQRCode = ?';
+                                    if (qrcode.tipo_bilhete != 'normal') {
                                         update = [qrcode.utilizacao, date, qrcode.idQRCode];
-                                        query = "UPDATE qrcode SET utilizacao = ?, dataUtilizacaoIda = ? WHERE idQRCode = ?";
+                                        query = 'UPDATE qrcode SET utilizacao = ?, dataUtilizacaoIda = ? WHERE idQRCode = ?';
                                     }
                                     connect.query(query, update, (err, rows) => {
                                         if (!err) {
-                                            if (qrcode.tipo_bilhete == "normal") {
+                                            if (qrcode.tipo_bilhete == 'normal') {
                                                 const foto = `${dirQrcode}/${qrcode.idUtilizador}_${qrcode.idQRCode}.png`;
                                                 fs.unlink(foto, (err) => {
                                                     callback({
-                                                        "statusCode": 200,
+                                                        'statusCode': 200,
                                                         body: {
-                                                            "message": "Valid QRCode"
+                                                            'message': 'Valid QRCode'
                                                         }
                                                     });
                                                 })
                                             } else {
                                                 callback({
-                                                    "statusCode": 200,
+                                                    'statusCode': 200,
                                                     body: {
-                                                        "message": "Valid QRCode"
+                                                        'message': 'Valid QRCode'
                                                     }
                                                 });
                                             }
                                         } else {
                                             callback({
-                                                "statusCode": 400,
+                                                'statusCode': 400,
                                                 body: {
-                                                    "message": "Invalid QRCode"
+                                                    'message': 'Invalid QRCode'
                                                 }
                                             });
                                         }
                                     })
                                 } else {
                                     callback({
-                                        "statusCode": 400,
+                                        'statusCode': 400,
                                         body: {
-                                            "message": "Invalid QRCode"
+                                            'message': 'Invalid QRCode'
                                         }
                                     });
                                 }
                             })
                         } else {
                             callback({
-                                "statusCode": 400,
+                                'statusCode': 400,
                                 body: {
-                                    "message": "Invalid QRCode"
+                                    'message': 'Invalid QRCode'
                                 }
                             });
                         }
@@ -95,22 +95,22 @@ function useQrcode(hash, company, callback) {
                 } else {
                     let date = new Date();
                     let update = [qrcode.utilizacao, date, qrcode.idQRCode];
-                    connect.query("UPDATE qrcode SET utilizacao = ?, dataUtilizacaoVolta = ? WHERE idQRCode = ?", update, (err, rows) => {
+                    connect.query('UPDATE qrcode SET utilizacao = ?, dataUtilizacaoVolta = ? WHERE idQRCode = ?', update, (err, rows) => {
                         if (!err) {
                             const foto = `${dirQrcode}/${qrcode.idUtilizador}_${qrcode.idQRCode}.png`;
                             fs.unlink(foto, (err) => {
                                 callback({
-                                    "statusCode": 200,
+                                    'statusCode': 200,
                                     body: {
-                                        "message": "Valid QRCode"
+                                        'message': 'Valid QRCode'
                                     }
                                 });
                             })
                         } else {
                             callback({
-                                "statusCode": 400,
+                                'statusCode': 400,
                                 body: {
-                                    "message": "Invalid QRCode"
+                                    'message': 'Invalid QRCode'
                                 }
                             });
                         }
@@ -118,17 +118,17 @@ function useQrcode(hash, company, callback) {
                 }
             } else {
                 callback({
-                    "statusCode": 400,
+                    'statusCode': 400,
                     body: {
-                        "message": "Invalid QRCode"
+                        'message': 'Invalid QRCode'
                     }
                 });
             }
         } else {
             callback({
-                "statusCode": 400,
+                'statusCode': 400,
                 body: {
-                    "message": "Invalid QRCode"
+                    'message': 'Invalid QRCode'
                 }
             });
         }
@@ -137,40 +137,40 @@ function useQrcode(hash, company, callback) {
 
 function readQrcode(user_id, qrcode_id, callback) {
     const post = [new Date(), qrcode_id, user_id];
-    connect.query("SELECT * FROM qrcode WHERE dataValidade > ? AND (dataUtilizacaoIda IS NULL OR dataUtilizacaoVolta IS NULL) AND utilizacao > 0 AND idQRCode=? AND idUtilizador = ?", post, (err, rows) => {
+    connect.query('SELECT * FROM qrcode WHERE dataValidade > ? AND (dataUtilizacaoIda IS NULL OR dataUtilizacaoVolta IS NULL) AND utilizacao > 0 AND idQRCode=? AND idUtilizador = ?', post, (err, rows) => {
         if (!err) {
             if (rows.length != 0) {
                 const foto = `${dirQrcode}/${user_id}_${qrcode_id}.png`;
                 fs.readFile(foto, 'base64', function (err, data) {
                     if (!err) {
                         callback({
-                            "statusCode": 200,
+                            'statusCode': 200,
                             body: {
-                                "data": `data:image/png;base64,${data}`
+                                'data': `data:image/png;base64,${data}`
                             }
                         });
                     } else {
                         callback({
-                            "statusCode": 404,
+                            'statusCode': 404,
                             body: {
-                                "message": "QRCode not found"
+                                'message': 'QRCode not found'
                             }
                         });
                     }
                 })
             } else {
                 callback({
-                    "statusCode": 404,
+                    'statusCode': 404,
                     body: {
-                        "message": "QRCode not found"
+                        'message': 'QRCode not found'
                     }
                 });
             }
         } else {
             callback({
-                "statusCode": 404,
+                'statusCode': 404,
                 body: {
-                    "message": "QRCode not found"
+                    'message': 'QRCode not found'
                 }
             });
         }
@@ -200,11 +200,11 @@ function generateQrcode(user_id, company, utilization, callback) {
     }
 
     if (utilization == 2) {
-        post.tipo_bilhete = "ida e volta";
+        post.tipo_bilhete = 'ida e volta';
     } else {
-        post.tipo_bilhete = "normal";
+        post.tipo_bilhete = 'normal';
     }
-    connect.query("INSERT INTO qrcode SET ?", post, (err, rows) => {
+    connect.query('INSERT INTO qrcode SET ?', post, (err, rows) => {
         if (!err) {
             const qrcode_id = rows.insertId;
             const data = {
@@ -212,41 +212,41 @@ function generateQrcode(user_id, company, utilization, callback) {
             }
             qrCode.toDataURL(JSON.stringify(data), (err, image) => {
                 if (!err) {
-                    const imageData = image.replace(/^data:image\/png;base64,/, "");
+                    const imageData = image.replace(/^data:image\/png;base64,/, '');
                     const foto = `${dirQrcode}/${user_id}_${qrcode_id}.png`;
 
                     fs.writeFile(foto, imageData, 'base64', function (err) {
                         if (!err) {
                             callback({
-                                "statusCode": 200,
+                                'statusCode': 200,
                                 body: {
-                                    "qrcode_id": `${qrcode_id}`
+                                    'qrcode_id': `${qrcode_id}`
                                 }
                             });
                         } else {
                             callback({
-                                "statusCode": 400,
+                                'statusCode': 400,
                                 body: {
-                                    "message": "Couldn't generate qrcode",
-                                    "err": err
+                                    'message': 'Couldn't generate qrcode',
+                                    'err': err
                                 }
                             });
                         }
                     })
                 } else {
                     callback({
-                        "statusCode": 400,
+                        'statusCode': 400,
                         body: {
-                            "message": "Couldn't generate qrcode"
+                            'message': 'Couldn't generate qrcode'
                         }
                     });
                 }
             })
         } else {
             callback({
-                "statusCode": 400,
+                'statusCode': 400,
                 body: {
-                    "message": "Couldn't generate qrcode"
+                    'message': 'Couldn't generate qrcode'
                 }
             });
         }
@@ -255,9 +255,9 @@ function generateQrcode(user_id, company, utilization, callback) {
 
 
 function generateHash() {
-    const caracteres = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const caracteres = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     const length = 100;
-    let result = "";
+    let result = '';
     for (let i = 0; i < length; i++) {
         result += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
     }

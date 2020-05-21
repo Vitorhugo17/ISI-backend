@@ -3,16 +3,16 @@ const router = require('express').Router();
 const mainController = require('./../controllers/main.controller');
 const paymentsController = require('./../controllers/payments.controller');
 
-router.get("/authenticated", (request, response) => {
+router.get('/authenticated', (request, response) => {
     if (request.isAuthenticated()) {
         response.status(200).send({
-            "isAuthenticated": request.isAuthenticated(),
-            "isEmpresa": request.user.isEmpresa,
-            "user": request.user
+            'isAuthenticated': request.isAuthenticated(),
+            'isEmpresa': request.user.isEmpresa,
+            'user': request.user
         })
     } else{
         response.status(200).send({
-            "isAuthenticated": request.isAuthenticated()
+            'isAuthenticated': request.isAuthenticated()
         })
     }
     
@@ -24,13 +24,15 @@ router.post('/password/recover', mainController.recoverPass);
 router.put('/password/update', mainController.updatePass);
 
 //rotas com login
-router.get("/users", isLoggedIn, mainController.getUsers);
+router.get('/users', isLoggedIn, mainController.getUsers);
 
 router.get('/payment/:id/status', isLoggedIn, paymentsController.paymentStatus);
 router.get('/stripe-key', isLoggedIn, paymentsController.getStripeKey);
 router.post('/payment', isLoggedIn, paymentsController.paymentIntent);
 
 router.get('/products', isLoggedIn, mainController.getProducts);
+
+router.get('/purchases', isLoggedIn, mainController.getPurchases);
 
 router.get('/profile', isLoggedIn, mainController.getInfoUser);
 router.put('/profile/edit', isLoggedIn, mainController.editUser);
@@ -42,13 +44,5 @@ router.post('/tickets/share', isLoggedIn, mainController.shareTicket);
 router.get('/qrcodes/:qrcode_id', isLoggedIn, mainController.readQrcode);
 router.post('/qrcodes', isLoggedIn, mainController.generateQrcode);
 router.post('/qrcodes/use', isLoggedInCompany, mainController.useQrcode);
-
-const moloniController = require('./../controllers/moloni.controller');
-router.get('/',(request, response)=>{
-    moloniController.getPurchases(25483850,(res)=> {
-        response.status(res.statusCode).send(res.body)
-    })
-})
-
 
 module.exports = router;

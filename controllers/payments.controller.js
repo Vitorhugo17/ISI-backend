@@ -8,12 +8,12 @@ const mainController = require('./main.controller');
 
 function getStripeKey(request, response) {
     response.status(200).send({
-        "publishableKey": process.env.STRIPE_PUBLISHABLE_KEY
+        'publishableKey': process.env.STRIPE_PUBLISHABLE_KEY
     })
 }
 
 async function paymentStatus(request, response) {
-    const paymentIntent = await stripe.paymentIntents.retrieve(request.sanitize("id").escape());
+    const paymentIntent = await stripe.paymentIntents.retrieve(request.sanitize('id').escape());
     response.status(200).send({
         paymentIntent: {
             status: paymentIntent.status
@@ -22,9 +22,9 @@ async function paymentStatus(request, response) {
 };
 
 function paymentIntent(request, response) {
-    const quantity = request.sanitize("quantity").escape();
-    const product_id = request.sanitize("product_id").escape();
-    const company = request.sanitize("company").escape();
+    const quantity = request.sanitize('quantity').escape();
+    const product_id = request.sanitize('product_id').escape();
+    const company = request.sanitize('company').escape();
     const user_id = request.user.user_id;
     calculatePaymentAmount(parseInt(quantity), product_id, company, async (res) => {
         if (res.orderAmount) {
@@ -61,7 +61,7 @@ function paymentIntent(request, response) {
             }
         } else {
             return response.status(400).json({
-                error: "erro"
+                error: 'erro'
             });
         }
     });
@@ -84,7 +84,7 @@ async function webhook(request, response) {
         } catch (err) {
             console.log(`⚠️  Webhook signature verification failed.`);
             return response.status(400).send({
-                "error": "Webhook signature verification failed."
+                'error': 'Webhook signature verification failed.'
             });
         }
         // Extract the object from the event.
@@ -105,7 +105,7 @@ async function webhook(request, response) {
             console.log(
                 `🔔  Webhook received! Payment for PaymentIntent ${paymentIntent.id} succeeded.`
             );
-            connect.query(`SELECT * FROM compras_temporaria WHERE paymentIntent_id="${paymentIntent.id}"`, (err, rows) => {
+            connect.query(`SELECT * FROM compras_temporaria WHERE paymentIntent_id='${paymentIntent.id}'`, (err, rows) => {
                 if (!err) {
                     if (rows.length != 0) {
                         const purchase = rows[0];
@@ -115,7 +115,7 @@ async function webhook(request, response) {
                         })
                     } else {
                         return response.status(400).json({
-                            error: "Payment not found"
+                            error: 'Payment not found'
                         });
                     }
                 } else {
@@ -132,7 +132,7 @@ async function webhook(request, response) {
             console.log(
                 `🔔  Webhook received! Payment on ${paymentSourceOrMethod.object} ${paymentSourceOrMethod.id} of type ${paymentSourceOrMethod.type} for PaymentIntent ${paymentIntent.id} failed.`
             );
-            return response.status(400).send("Payment Failed");
+            return response.status(400).send('Payment Failed');
             // Note: you can use the existing PaymentIntent to prompt your customer to try again by attaching a newly created source:
             // https://stripe.com/docs/payments/payment-intents/usage#lifecycle
         }
@@ -153,14 +153,14 @@ async function webhook(request, response) {
         // Check whether this PaymentIntent requires a source.
         if (paymentIntent.status != 'requires_payment_method') {
             return response.status(403).send({
-                "error": 'requires_payment_method'
+                'error': 'requires_payment_method'
             });
         }
         // Confirm the PaymentIntent with the chargeable source.
         await stripe.paymentIntents.confirm(paymentIntent.id, {
             source: source.id
         });
-        return response.status(200).send("OK");
+        return response.status(200).send('OK');
     }
 
     // Monitor `source.failed` and `source.canceled` events.
@@ -172,12 +172,12 @@ async function webhook(request, response) {
         console.log(`🔔  The source ${source.id} failed or timed out.`);
         // Cancel the PaymentIntent.
         await stripe.paymentIntents.cancel(source.metadata.paymentIntent);
-        return response.status(400).send("Payment Cancel");
+        return response.status(400).send('Payment Cancel');
     }
 };
 
 function calculatePaymentAmount(quantity, product_id, company, callback) {
-    if (company == "Barquense") {
+    if (company == 'Barquense') {
         moloniController.getProducts((res) => {
             if (res.products) {
                 const products = res.products;
@@ -189,36 +189,36 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
                     }
                 }
 
-                if (product.name.toLowerCase().includes("único")) {
+                if (product.name.toLowerCase().includes('único')) {
                     if (quantity >= 5) {
                         if (quantity % 5 != 0) {
                             productsF.push({
-                                "qty": (quantity % 5),
-                                "price": parseFloat(product.price),
-                                "taxes": parseFloat(product.taxes[0].value)
+                                'qty': (quantity % 5),
+                                'price': parseFloat(product.price),
+                                'taxes': parseFloat(product.taxes[0].value)
                             });
                         }
                         for (let i = 0; i < products.length; i++) {
-                            if (products[i].name.toLowerCase().includes("pack")) {
+                            if (products[i].name.toLowerCase().includes('pack')) {
                                 productsF.push({
-                                    "qty": Math.floor(quantity / 5),
-                                    "price": parseFloat(products[i].price),
-                                    "taxes": parseFloat(products[i].taxes[0].value)
+                                    'qty': Math.floor(quantity / 5),
+                                    'price': parseFloat(products[i].price),
+                                    'taxes': parseFloat(products[i].taxes[0].value)
                                 });
                             }
                         }
                     } else {
                         productsF.push({
-                            "qty": quantity,
-                            "price": parseFloat(product.price),
-                            "taxes": parseFloat(product.taxes[0].value)
+                            'qty': quantity,
+                            'price': parseFloat(product.price),
+                            'taxes': parseFloat(product.taxes[0].value)
                         });
                     }
                 } else {
                     productsF.push({
-                        "qty": quantity,
-                        "price": parseFloat(product.price),
-                        "taxes": parseFloat(product.taxes[0].value)
+                        'qty': quantity,
+                        'price': parseFloat(product.price),
+                        'taxes': parseFloat(product.taxes[0].value)
                     });
                 }
 
@@ -228,24 +228,24 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
                         amount += parseFloat((productsF[i].qty * (productsF[i].price + productsF[i].taxes)).toFixed(2));
                     }
                     callback({
-                        "orderAmount": parseFloat(amount).toFixed(2)
+                        'orderAmount': parseFloat(amount).toFixed(2)
                     })
                 } else {
                     callback({
-                        "statusCode": 404,
-                        "body": {
-                            "message": "Product not found"
+                        'statusCode': 404,
+                        'body': {
+                            'message': 'Product not found'
                         }
                     });
                 }
             } else {
                 callback({
-                    "statusCode": res.statusCode,
-                    "body": res.body
+                    'statusCode': res.statusCode,
+                    'body': res.body
                 });
             }
         })
-    } else if (company == "Transdev") {
+    } else if (company == 'Transdev') {
         jasminController.getProducts((res) => {
             if (res.products) {
                 const products = res.products;
@@ -256,32 +256,32 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
                         product = products[i];
                     }
                 }
-                if (product.description.toLowerCase().includes("único")) {
+                if (product.description.toLowerCase().includes('único')) {
                     if (quantity >= 10) {
                         if (quantity % 10 != 0) {
                             productsF.push({
-                                "quantity": (quantity % 10),
-                                "unitPrice": parseFloat(product.priceListLines[0].priceAmount.amount)
+                                'quantity': (quantity % 10),
+                                'unitPrice': parseFloat(product.priceListLines[0].priceAmount.amount)
                             });
                         }
                         for (let i = 0; i < products.length; i++) {
-                            if (products[i].description.toLowerCase().includes("pack")) {
+                            if (products[i].description.toLowerCase().includes('pack')) {
                                 productsF.push({
-                                    "quantity": Math.floor(quantity / 10),
-                                    "unitPrice": parseFloat(products[i].priceListLines[0].priceAmount.amount)
+                                    'quantity': Math.floor(quantity / 10),
+                                    'unitPrice': parseFloat(products[i].priceListLines[0].priceAmount.amount)
                                 });
                             }
                         }
                     } else {
                         productsF.push({
-                            "quantity": quantity,
-                            "unitPrice": parseFloat(product.priceListLines[0].priceAmount.amount)
+                            'quantity': quantity,
+                            'unitPrice': parseFloat(product.priceListLines[0].priceAmount.amount)
                         });
                     }
                 } else {
                     productsF.push({
-                        "quantity": quantity,
-                        "unitPrice": parseFloat(product.priceListLines[0].priceAmount.amount)
+                        'quantity': quantity,
+                        'unitPrice': parseFloat(product.priceListLines[0].priceAmount.amount)
                     });
                 }
 
@@ -291,20 +291,20 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
                         amount += parseFloat((productsF[i].quantity * productsF[i].unitPrice).toFixed(2));
                     }
                     callback({
-                        "orderAmount": parseFloat(amount).toFixed(2)
+                        'orderAmount': parseFloat(amount).toFixed(2)
                     })
                 } else {
                     callback({
-                        "statusCode": 404,
-                        "body": {
-                            "message": "Product not found"
+                        'statusCode': 404,
+                        'body': {
+                            'message': 'Product not found'
                         }
                     });
                 }
             } else {
                 callback({
-                    "statusCode": res.statusCode,
-                    "body": res.body
+                    'statusCode': res.statusCode,
+                    'body': res.body
                 });
             }
         })
