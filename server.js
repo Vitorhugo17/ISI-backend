@@ -44,7 +44,7 @@ app.use(bodyParser.json({
     }
 }), bodyParser.urlencoded({
     extended: true
-}), );
+}));
 app.use(sanitizer());
 app.use(validator());
 
