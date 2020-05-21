@@ -12,9 +12,9 @@ const uuid = require('uuid/v4');
 const RedisStore = require('connect-redis')(session);
 const passport = require('./config/passport');
 
-global.urlBase = `https://test-api-isicampus.herokuapp.com/`;
+global.urlBase = `https://test-api-isicampus.herokuapp.com`;
 global.jasminUrl = `https://my.jasminsoftware.com/api/233711/233711-0001/`;
-global.urlFront = `https://test-isicampus.herokuapp.com/`
+global.urlFront = `https://test-isicampus.herokuapp.com`
 
 global.isLoggedIn = (request, response, next) => {
     if (request.isAuthenticated() && !request.user.isEmpresa) {
