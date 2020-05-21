@@ -149,12 +149,12 @@ function generateQrcode(request, response) {
                     })
                 } else {
                     response.status(400).send({
-                        'message': 'Couldn't generate qrcode'
+                        'message': "Couldn't generate qrcode"
                     })
                 }
             } else {
                 response.status(400).send({
-                    'message': 'Couldn't generate qrcode'
+                    'message': "Couldn't generate qrcode"
                 })
             }
         })
@@ -178,18 +178,18 @@ function generateQrcode(request, response) {
                     })
                 } else {
                     response.status(400).send({
-                        'message': 'Couldn't generate qrcode'
+                        'message': "Couldn't generate qrcode"
                     })
                 }
             } else {
                 response.status(400).send({
-                    'message': 'Couldn't generate qrcode'
+                    'message': "Couldn't generate qrcode"
                 })
             }
         })
     } else {
         response.status(400).send({
-            'message': 'Couldn't generate qrcode'
+            'message': "Couldn't generate qrcode"
         })
     }
 }
@@ -285,13 +285,13 @@ async function updatePass(request, response) {
                         })
                     } else {
                         response.status(400).send({
-                            'message': 'Can't update password'
+                            'message': "Can't update password"
                         })
                     }
                 })
             } else {
                 response.status(400).send({
-                    'message': 'Can't update password'
+                    'message': "Can't update password"
                 })
             }
         })
@@ -304,7 +304,7 @@ async function updatePass(request, response) {
                 })
             } else {
                 response.status(400).send({
-                    'message': 'Can't update password'
+                    'message': "Can't update password"
                 })
             }
         })
@@ -355,7 +355,7 @@ function recoverPass(request, response) {
                             transporter.verify(function (error, success) {
                                 if (error) {
                                     response.status(400).send({
-                                        'message': 'Can't send email',
+                                        'message': "Can't send email",
                                         'error': error
                                     });
                                 } else {
@@ -374,7 +374,7 @@ function recoverPass(request, response) {
                                     transporter.sendMail(mailOptions, function (error, info) {
                                         if (error) {
                                             response.status(400).send({
-                                                'message': 'Can't send email',
+                                                'message': "Can't send email",
                                                 'error': error
                                             });
                                         } else {
@@ -676,7 +676,7 @@ function editUser(request, response) {
     const student_number = request.sanitize('student_number').escape();
 
     const date = new Date(birth_date);
-    birth_date = `${(date.getDate() < 10)? '0' + date.getDate(): date.getDate()}/${(date.getMonth() + 1 < 10)? '0' + (date.getMonth() + 1): (date.getMonth() + 1)}/${date.getFullYear()}`;
+    birth_date = `${(date.getDate() < 10)?'0' + date.getDate(): date.getDate()}/${(date.getMonth() + 1 < 10)?'0' + (date.getMonth() + 1): (date.getMonth() + 1)}/${date.getFullYear()}`;
 
     const user_id = request.user.user_id;
 
@@ -731,7 +731,7 @@ function insertPurchase(user_id, product_id, quantity, company, callback) {
                             let moloni_id = user.moloni_id;
 
                             if (moloni_id == -1) {
-                                moloniController.insertClient(user.nif, (user.nome + ' ' + user.apelido), user.email, (res) => {
+                                moloniController.insertClient(user.nif, (user.nome + '' + user.apelido), user.email, (res) => {
                                     if (res.statusCode == 200) {
                                         moloni_id = res.body.customer_id;
 
@@ -829,11 +829,11 @@ function insertPurchase(user_id, product_id, quantity, company, callback) {
                         } else if (company == 'Transdev') {
                             let jasmin_id = user.jasmin_id;
                             if (jasmin_id == -1) {
-                                jasminController.insertClient((user.nome + ' ' + user.apelido), (res) => {
+                                jasminController.insertClient((user.nome + '' + user.apelido), (res) => {
                                     if (res.statusCode == 200) {
                                         jasmin_id = res.body.customer_id;
 
-                                        jasminController.insertPurchase(jasmin_id, (user.firstname + ' ' + user.lastname), user.nif, product_id, parseInt(quantity), (res) => {
+                                        jasminController.insertPurchase(jasmin_id, (user.firstname + '' + user.lastname), user.nif, product_id, parseInt(quantity), (res) => {
                                             if (res.statusCode == 200) {
                                                 if (product.name.toLowerCase().includes('ida e volta')) {
                                                     let total = parseInt(bilhetes_ida_e_volta_transdev) + parseInt(quantity * product.quantity);
@@ -879,7 +879,7 @@ function insertPurchase(user_id, product_id, quantity, company, callback) {
                                     }
                                 })
                             } else {
-                                jasminController.insertPurchase(jasmin_id, (user.firstname + ' ' + user.lastname), user.nif, product_id, parseInt(quantity), (res) => {
+                                jasminController.insertPurchase(jasmin_id, (user.firstname + '' + user.lastname), user.nif, product_id, parseInt(quantity), (res) => {
                                     if (res.statusCode == 200) {
                                         if (product.name.toLowerCase().includes('ida e volta')) {
                                             let total = parseInt(bilhetes_ida_e_volta_transdev) + parseInt(quantity * product.quantity);
@@ -921,7 +921,7 @@ function insertPurchase(user_id, product_id, quantity, company, callback) {
                             callback({
                                 'statusCode': 400,
                                 'body': {
-                                    'message': 'Company doesn't exists'
+                                    'message': "Company doesn't exists"
                                 }
                             })
                         }
@@ -929,7 +929,7 @@ function insertPurchase(user_id, product_id, quantity, company, callback) {
                         callback({
                             'statusCode': 400,
                             'body': {
-                                'message': 'Product doesn't exists'
+                                'message': "Product doesn't exists"
                             }
                         })
                     }
