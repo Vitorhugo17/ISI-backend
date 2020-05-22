@@ -3,7 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 
-const ip = require("ip");
+const ip = require('ip');
 const bodyParser = require('body-parser');
 const validator = require('express-validator');
 const sanitizer = require('express-sanitizer');
@@ -21,7 +21,7 @@ global.isLoggedIn = (request, response, next) => {
         next();
     } else {
         response.status(403).send({
-            "message": "Não está autorizado a aceder a este conteudo"
+            'message': 'Não está autorizado a aceder a este conteudo'
         })
     }
 }
@@ -31,7 +31,7 @@ global.isLoggedInCompany = (request, response, next) => {
         next();
     } else {
         response.status(403).send({
-            "message": "Não está autorizado a aceder a este conteudo"
+            'message': 'Não está autorizado a aceder a este conteudo'
         })
     }
 }
@@ -74,10 +74,10 @@ app.use(passport.session());
 
 //CORS
 app.use('/', function (request, response, next) {
-    response.header("Access-Control-Allow-Origin", urlFront);
-    response.header("Access-Control-Allow-Credentials", true);
-    response.header("Access-Control-Allow-Methods", "PUT, POST, OPTIONS, GET");
-    response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    response.header('Access-Control-Allow-Origin', urlFront);
+    response.header('Access-Control-Allow-Credentials', true);
+    response.header('Access-Control-Allow-Methods', 'PUT, POST, OPTIONS, GET');
+    response.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
     next();
 });
 
