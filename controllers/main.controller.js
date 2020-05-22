@@ -678,7 +678,6 @@ function editUser(request, response) {
     const lastname = request.sanitize('lastname').escape();
     let birth_date = request.sanitize('birth_date').escape();
     const contact = request.sanitize('contact').escape();
-    const student_number = request.sanitize('student_number').escape();
 
     const date = new Date(birth_date);
     birth_date = `${(date.getDate() < 10)?'0' + date.getDate(): date.getDate()}/${(date.getMonth() + 1 < 10)?'0' + (date.getMonth() + 1): (date.getMonth() + 1)}/${date.getFullYear()}`;
@@ -697,9 +696,6 @@ function editUser(request, response) {
     }, {
         'property': 'phone',
         'value': contact
-    }, {
-        'property': 'no_mecanografico',
-        'value': student_number
     }];
 
     hubspotController.updateClient(user_id, updatedData, (res) => {
