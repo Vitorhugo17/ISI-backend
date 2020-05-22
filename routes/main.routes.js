@@ -43,12 +43,4 @@ router.get('/qrcodes/:qrcode_id', isLoggedIn, mainController.readQrcode);
 router.post('/qrcodes', isLoggedIn, mainController.generateQrcode);
 router.post('/qrcodes/use', isLoggedInCompany, mainController.useQrcode);
 
-const moloniController = require('./../controllers/moloni.controller');
-router.get('/',(request, response)=>{
-    moloniController.getPurchases(25483850,(res)=> {
-        response.status(res.statusCode).send(res.body)
-    })
-})
-
-
 module.exports = router;
