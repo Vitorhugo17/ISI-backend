@@ -17,9 +17,11 @@ function getPurchases(request, response) {
             moloniController.getPurchases(moloni_id, (res) => {
                 if (res.statusCode == 200) {
                     const purchasesMoloni = res.body;
+
                     jasminController.getPurchases(jasmin_id, (res) => {
                         if (res.statusCode == 200) {
                             const purchasesJasmin = res.body;
+
                             let purchases = [];
                             for (let i = 0; i < purchasesMoloni.length; i++) {
                                 purchases.push({
@@ -37,6 +39,9 @@ function getPurchases(request, response) {
                                     'idDocumento': purchasesJasmin[i].naturalKey
                                 })
                             }
+                            response.status(200).send({
+                                "purchases": purchases
+                            });
                         } else {
                             response.status(res.statusCode).send(res.body);
                         }
