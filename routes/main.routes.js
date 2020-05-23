@@ -34,7 +34,7 @@ router.get('/products', isLoggedIn, mainController.getProducts);
 
 router.get('/purchases', isLoggedIn, mainController.getPurchases);
 
-router.get('/download/:company/:document_id', isLoggedIn, mainController.downloadPDF);
+router.get('/download/:company/:document_id', mainController.downloadPDF);
 
 router.get('/profile', isLoggedIn, mainController.getInfoUser);
 router.put('/profile/edit', isLoggedIn, mainController.editUser);
