@@ -1,6 +1,44 @@
 const querystring = require('querystring');
 const req = require('request');
 
+function getPDFDocument(document_id, callback) {
+    const x = document_id.split(".");
+    const documentType = x[0];
+    const seriesNumber = x[1];
+    const documentNumber = x[2];
+    getToken((res) => {
+        if (res.access_token) {
+            const access_token = res.access_token;
+
+            let options = {
+                headers: {
+                    'Authorization': `Bearer ${access_token}`
+                },
+                encoding: null,
+                url: `${global.jasminUrl}billing/invoices/TRANSDEV/${documentType}/${seriesNumber}/${documentNumber}/print`
+            }
+            req.get(options, (err, res) => {
+                if (!err && res.statusCode == 200) {
+                    callback({
+                        'statusCode': res.statusCode,
+                        'body': res.body
+                    });
+                } else {
+                    callback({
+                        'statusCode': res.statusCode,
+                        'body': JSON.parse(res.body)
+                    });
+                }
+            })
+        } else {
+            callback({
+                'statusCode': res.statusCode,
+                'body': res.body
+            })
+        }
+    })
+}
+
 function getPurchases(customer_id, callback) {
     getToken((res) => {
         if (res.access_token) {
@@ -363,5 +401,6 @@ module.exports = {
     getProducts: getProducts,
     insertPurchase: insertPurchase,
     insertClient: insertClient,
-    getPurchases: getPurchases
+    getPurchases: getPurchases,
+    getPDFDocument: getPDFDocument
 };

@@ -8,6 +8,28 @@ const moloniController = require('./moloni.controller');
 const jasminController = require('./jasmin.controller');
 const qrcodeController = require('./qrcode.controller');
 
+function downloadPDF(request, response) {
+    const company = request.sanitize("company").escape();
+    const document_id = request.sanitize("document_id").escape();
+    if (company == "Transdev") {
+        jasminController.getPDFDocument(document_id, (res) => {
+            if (res.statusCode == 200) {
+                response.setHeader('content-type', 'application/pdf');
+                response.setHeader('content-disposition', `attachment; filename="${document_id}.pdf`);
+            }
+            response.status(res.statusCode).send(res.body);
+        })
+    } else if (company == "Barquense") {
+        moloniController.getPDFLink(document_id, (res) => {            
+            response.status(res.statusCode).send(res.body);
+        })
+    }else {
+        response.status(400).send({
+            'message': 'Document not found'
+        });
+    }  
+}
+
 function getPurchases(request, response) {
     const user_id = request.user.user_id;
     hubspotController.getClient(user_id, (res) => {
@@ -1107,6 +1129,6 @@ module.exports = {
     shareTicket: shareTicket,
     editUser: editUser,
     getUsedTickets: getUsedTickets,
-    getPurchases: getPurchases
-
+    getPurchases: getPurchases,
+    downloadPDF: downloadPDF
 }

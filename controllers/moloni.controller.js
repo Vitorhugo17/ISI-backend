@@ -1,6 +1,46 @@
 const querystring = require('querystring');
 const req = require('request');
 
+function getPDFLink(document_id, callback) {
+    getCompany((res) => {
+        if (res.company_id) {
+            const company_id = res.company_id;
+            const access_token = res.access_token;
+
+            let json = querystring.stringify({
+                company_id: company_id,
+                document_id: document_id
+            });
+            let options = {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                url: `https://api.moloni.pt/v1/documents/getPDFLink/?access_token=${access_token}`,
+                body: json
+            }
+            req.post(options, (err, res) => {
+                if (!err && res.statusCode == 200) {
+                    callback({
+                        'statusCode': res.statusCode,
+                        'body': res.body
+                    });
+                } else {
+                    callback({
+                        'statusCode': res.statusCode,
+                        'body': JSON.parse(res.body)
+                    });
+                }
+            })
+        } else {
+            callback({
+                'statusCode': res.statusCode,
+                'body': res.body
+            });
+
+        }
+    })
+}
+
 function insertClient(nif, nome, email, callback) {
     getNextNumber((res) => {
         if (res.company_id) {
@@ -495,5 +535,6 @@ module.exports = {
     getProducts: getProducts,
     getPurchases: getPurchases,
     insertPurchase: insertPurchase,
-    insertClient: insertClient
+    insertClient: insertClient,
+    getPDFLink: getPDFLink
 };
