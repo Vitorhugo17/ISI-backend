@@ -515,7 +515,7 @@ function getCompany(callback) {
 
 function getToken(callback) {
     let options = {
-        url: `https://api.moloni.pt/v1/grant/?grant_type=password&client_id=${process.env.MOLONI_CLIENTID}&client_secret=${process.env.MOLONI_SECRET}&username=${process.env.EMAIL_USERNAME}&password=${process.env.EMAIL_PASSWORD}`
+        url: `https://api.moloni.pt/v1/grant/?grant_type=password&client_id=${process.env.MOLONI_CLIENTID}&client_secret=${process.env.MOLONI_SECRET}&username=${process.env.EMAIL_USERNAME}&password=${process.env.MOLONI_PASSWORD}`
     }
     req.get(options, (err, res) => {
         if (!err && res.statusCode == 200) {
