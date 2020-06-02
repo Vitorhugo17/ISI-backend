@@ -3,16 +3,16 @@ const router = require('express').Router();
 const mainController = require('./../controllers/main.controller');
 const paymentsController = require('./../controllers/payments.controller');
 
-router.get("/authenticated", (request, response) => {
+router.get('/authenticated', (request, response) => {
     if (request.isAuthenticated()) {
         response.status(200).send({
-            "isAuthenticated": request.isAuthenticated(),
-            "isEmpresa": request.user.isEmpresa,
-            "user": request.user
+            'isAuthenticated': request.isAuthenticated(),
+            'isEmpresa': request.user.isEmpresa,
+            'user': request.user
         })
     } else{
         response.status(200).send({
-            "isAuthenticated": request.isAuthenticated()
+            'isAuthenticated': request.isAuthenticated()
         })
     }
     
@@ -24,13 +24,18 @@ router.post('/password/recover', mainController.recoverPass);
 router.put('/password/update', mainController.updatePass);
 
 //rotas com login
-router.get("/users", isLoggedIn, mainController.getUsers);
+router.get('/users', isLoggedIn, mainController.getUsers);
 
 router.get('/payment/:id/status', isLoggedIn, paymentsController.paymentStatus);
 router.get('/stripe-key', isLoggedIn, paymentsController.getStripeKey);
 router.post('/payment', isLoggedIn, paymentsController.paymentIntent);
 
 router.get('/products', isLoggedIn, mainController.getProducts);
+
+router.get('/purchases', isLoggedIn, mainController.getPurchases);
+router.get('/recommendation', isLoggedIn, mainController.getRecommendation);
+
+router.get('/download/:company/:document_id', mainController.downloadPDF);
 
 router.get('/profile', isLoggedIn, mainController.getInfoUser);
 router.put('/profile/edit', isLoggedIn, mainController.editUser);

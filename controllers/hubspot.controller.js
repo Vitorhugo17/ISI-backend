@@ -16,8 +16,8 @@ function getClients(callback) {
                 let usersF = [];
                 for (let i = 0; i < users.length; i++) {
                     usersF.push({
-                        "id": users[i].vid,
-                        "name": users[i].properties.firstname.value + " " + users[i].properties.lastname.value,
+                        'id': users[i].vid,
+                        'name': users[i].properties.firstname.value + ' ' + users[i].properties.lastname.value,
                     })
                 }
                 callback({
@@ -25,15 +25,15 @@ function getClients(callback) {
                 })
             } else {
                 callback({
-                    "statusCode": res.statusCode,
-                    "body": JSON.parse(res.body)
+                    'statusCode': res.statusCode,
+                    'body': JSON.parse(res.body)
                 })
             }
         } else {
             console.log(err);
             callback({
-                "statusCode": 400,
-                "body": "erro"
+                'statusCode': 400,
+                'body': 'erro'
             })
         }
     })
@@ -56,35 +56,35 @@ function getClient(user_id, callback) {
                 let data = user.properties;
 
                 const result = {
-                    "user_id": data.hs_object_id.value,
-                    "moloni_id": (data.moloni_id ? data.moloni_id.value : -1),
-                    "jasmin_id": (data.jasmin_id ? data.jasmin_id.value : -1),
-                    "nome": data.firstname.value,
-                    "apelido": data.lastname.value,
-                    "email": data.email.value,
-                    "data_nascimento": (data.date_of_birth ? data.date_of_birth.value : null),
-                    "numero_telefone": (data.phone ? data.phone.value : null),
-                    "numero_mecanografico": (data.no_mecanografico ? data.no_mecanografico.value : null),
-                    "bilhetes_disponiveis_barquense": data.bilhetes_disponiveis_barquense.value,
-                    "bilhetes_ida_e_volta_barquense": data.bilhetes_ida_e_volta_barquense.value,
-                    "bilhetes_disponiveis_transdev": data.bilhetes_disponiveis_transdev.value,
-                    "bilhetes_ida_e_volta_transdev": data.bilhetes_ida_e_volta_transdev.value,
-                    "nif": data.nif.value
+                    'user_id': data.hs_object_id.value,
+                    'moloni_id': (data.moloni_id ? data.moloni_id.value : -1),
+                    'jasmin_id': (data.jasmin_id ? data.jasmin_id.value : -1),
+                    'nome': data.firstname.value,
+                    'apelido': data.lastname.value,
+                    'email': data.email.value,
+                    'data_nascimento': (data.date_of_birth ? data.date_of_birth.value : null),
+                    'numero_telefone': (data.phone ? data.phone.value : null),
+                    'numero_mecanografico': (data.no_mecanografico ? data.no_mecanografico.value : null),
+                    'bilhetes_disponiveis_barquense': data.bilhetes_disponiveis_barquense.value,
+                    'bilhetes_ida_e_volta_barquense': data.bilhetes_ida_e_volta_barquense.value,
+                    'bilhetes_disponiveis_transdev': data.bilhetes_disponiveis_transdev.value,
+                    'bilhetes_ida_e_volta_transdev': data.bilhetes_ida_e_volta_transdev.value,
+                    'nif': data.nif.value
                 }
                 callback({
-                    "user": result
+                    'user': result
                 });
             } else {
                 callback({
-                    "statusCode": res.statusCode,
-                    "body": JSON.parse(res.body)
+                    'statusCode': res.statusCode,
+                    'body': JSON.parse(res.body)
                 })
             }
         } else {
             console.log(err);
             callback({
-                "statusCode": 400,
-                "body": "erro"
+                'statusCode': 400,
+                'body': 'erro'
             })
         }
     })
@@ -107,12 +107,12 @@ function existsClientNif(nif, callback) {
                 }
             }
             callback({
-                "exists": exists
+                'exists': exists
             })
         } else {
             callback({
-                "statusCode": res.statusCode,
-                "body": JSON.parse(res.body)
+                'statusCode': res.statusCode,
+                'body': JSON.parse(res.body)
             })
         }
     })
@@ -121,7 +121,7 @@ function existsClientNif(nif, callback) {
 /*Função que cria um novo cliente */
 function createClient(properties, callback) {
     let json = {
-        "properties": properties
+        'properties': properties
     };
 
     let options = {
@@ -135,15 +135,15 @@ function createClient(properties, callback) {
     req.post(options, (err, res) => {
         if (!err && res.statusCode == 200) {
             callback({
-                "statusCode": 200,
+                'statusCode': 200,
                 body: {
-                    "user_id": JSON.parse(res.body).vid
+                    'user_id': JSON.parse(res.body).vid
                 }
             })
         } else {
             callback({
-                "statusCode": res.statusCode,
-                "body": JSON.parse(res.body)
+                'statusCode': res.statusCode,
+                'body': JSON.parse(res.body)
             })
         }
     })
@@ -152,7 +152,7 @@ function createClient(properties, callback) {
 /*Função que atualiza os dados do cliente */
 function updateClient(user_id, properties, callback) {
     let json = {
-        "properties": properties
+        'properties': properties
     }
     let options = {
         headers: {
@@ -165,15 +165,15 @@ function updateClient(user_id, properties, callback) {
     req.post(options, (err, res) => {
         if (!err && res.statusCode == 204) {
             callback({
-                "statusCode": 200,
-                "body": {
-                    "message": "Updated with sucess"
+                'statusCode': 200,
+                'body': {
+                    'message': 'Updated with sucess'
                 }
             })
         } else {
             callback({
-                "statusCode": res.statusCode,
-                "body": JSON.parse(res.body)
+                'statusCode': res.statusCode,
+                'body': JSON.parse(res.body)
             })
         }
     })

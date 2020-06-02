@@ -3,11 +3,11 @@ module.exports = function (app, passport) {
         request.session.destroy(function (err) {
             if (err) {
                 response.status(400).send({
-                    "message": "You cannot logout!"
+                    'message': 'You cannot logout!'
                 });
             }
             response.status(200).send({
-                "message": "Logout with success"
+                'message': 'Logout with success'
             });
         });
     });
@@ -15,7 +15,7 @@ module.exports = function (app, passport) {
         passport.authenticate('local-signin', (err, user, info) => {
             if (err) {
                 return response.status(400).json({
-                    "message": err
+                    'message': err
                 })
             }
             if (user) {
@@ -32,7 +32,7 @@ module.exports = function (app, passport) {
         passport.authenticate('local-signup', (err, info) => {
             if (err) {
                 return response.status(400).json({
-                    "message": err
+                    'message': err
                 })
             }
             return response.status(info.statusCode).send(info.body);
