@@ -33,7 +33,7 @@ router.post('/payment', isLoggedIn, paymentsController.paymentIntent);
 router.get('/products', isLoggedIn, mainController.getProducts);
 
 router.get('/purchases', isLoggedIn, mainController.getPurchases);
-router.get('/machine/learning/purchases', mainController.getAllPurchases);
+router.get('/recommendation', isLoggedIn, mainController.getRecommendation);
 
 router.get('/download/:company/:document_id', mainController.downloadPDF);
 

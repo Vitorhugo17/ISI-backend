@@ -2,6 +2,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const bCrypt = require('bcryptjs');
 const connect = require('./../config/connectBD');
 const nodemailer = require('nodemailer');
+const req = require('request');
 
 const hubspotController = require('./hubspot.controller');
 const moloniController = require('./moloni.controller');
@@ -30,10 +31,28 @@ function downloadPDF(request, response) {
     }
 }
 
-function getAllPurchases(request, response) {
+function getRecommendation(request, response) {
+    const user_id = request.user.user_id;
+
     connect.query(`SELECT * FROM registo_produtos_comprados`, (err, rows) => {
         if (!err) {
-            return response.status(200).send(rows);
+            const options = {
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                url: `${global.urlPython}`,
+                body: JSON.stringify({
+                    'idUtilizador': user_id,
+                    'data': rows
+                })
+            }
+            req.post(options, (err, res) => {
+                if (!err) {
+                    response.status(res.statusCode).send(JSON.parse(res.body));
+                } else {
+                    response.status(err.statusCode).send(JSON.parse(err.body));
+                }
+            })
         } else {
             return response.status(400).json({
                 error: err.message
@@ -1143,5 +1162,5 @@ module.exports = {
     getUsedTickets: getUsedTickets,
     getPurchases: getPurchases,
     downloadPDF: downloadPDF,
-    getAllPurchases: getAllPurchases
+    getRecommendation: getRecommendation
 }
