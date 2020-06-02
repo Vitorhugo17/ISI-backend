@@ -16,6 +16,8 @@ global.urlBase = `https://test-api-isicampus.herokuapp.com`;
 global.jasminUrl = `https://my.jasminsoftware.com/api/233711/233711-0001/`;
 global.urlFront = `https://test-isicampus.herokuapp.com`
 
+global.urlPython = `https://isicampus-ml.herokuapp.com`;
+
 global.isLoggedIn = (request, response, next) => {
     if (request.isAuthenticated() && !request.user.isEmpresa) {
         next();
