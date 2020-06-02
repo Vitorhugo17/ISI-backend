@@ -109,9 +109,21 @@ async function webhook(request, response) {
                 if (!err) {
                     if (rows.length != 0) {
                         const purchase = rows[0];
-
-                        mainController.insertPurchase(purchase.idUtilizador, purchase.idProduto, purchase.quantidade, purchase.companhia, (res) => {
-                            return response.status(res.statusCode).send(res.body);
+                        const post = {
+                            idUtilizador: purchase.idUtilizador,
+                            idProduto: purchase.idProduto,
+                            quantidade: purchase.quantidade
+                        }
+                        connect.query('INSERT INTO registo_produtos_comprados SET ?', post, (err, rows) => {
+                            if (!err) {
+                                mainController.insertPurchase(purchase.idUtilizador, purchase.idProduto, purchase.quantidade, purchase.companhia, (res) => {
+                                    return response.status(res.statusCode).send(res.body);
+                                })
+                            } else {
+                                return response.status(400).json({
+                                    error: err.message
+                                });
+                            }
                         })
                     } else {
                         return response.status(400).json({

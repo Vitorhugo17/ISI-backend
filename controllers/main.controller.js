@@ -20,14 +20,26 @@ function downloadPDF(request, response) {
             response.status(res.statusCode).send(res.body);
         })
     } else if (company == "Barquense") {
-        moloniController.getPDFLink(document_id, (res) => {            
+        moloniController.getPDFLink(document_id, (res) => {
             response.status(res.statusCode).send(res.body);
         })
-    }else {
+    } else {
         response.status(400).send({
             'message': 'Document not found'
         });
-    }  
+    }
+}
+
+function getAllPurchases(request, response) {
+    connect.query(`SELECT * FROM registo_produtos_comprados`, (err, rows) => {
+        if (!err) {
+            return response.status(200).send(rows);
+        } else {
+            return response.status(400).json({
+                error: err.message
+            });
+        }
+    })
 }
 
 function getPurchases(request, response) {
@@ -1130,5 +1142,6 @@ module.exports = {
     editUser: editUser,
     getUsedTickets: getUsedTickets,
     getPurchases: getPurchases,
-    downloadPDF: downloadPDF
+    downloadPDF: downloadPDF,
+    getAllPurchases: getAllPurchases
 }
