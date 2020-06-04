@@ -92,7 +92,7 @@ passport.use('local-signup', new LocalStrategy({
                                 property: 'email',
                                 value: email
                             }, {
-                                property: "numero_mecanografico",
+                                property: "no_mecanografico",
                                 value: numero_mecanografico
                                     
                             }, {
