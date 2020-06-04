@@ -14,9 +14,9 @@ router.get('/authenticated', (request, response) => {
         response.status(200).send({
             'isAuthenticated': request.isAuthenticated()
         })
-    }
-    
+    } 
 })
+
 //rotas sem login
 router.post('/webhook', paymentsController.webhook);
 
