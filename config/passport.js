@@ -66,6 +66,7 @@ passport.use('local-signup', new LocalStrategy({
 }, async (request, email, password, done) => {
     const nome = request.sanitize('nome').escape();
     const apelido = request.sanitize('apelido').escape();
+    const numero_mecanografico = request.sanitize('numero_mecanografico').escape();
     const nif = request.sanitize('nif').escape();
     const pass = await bCrypt.hash(password, await bCrypt.genSalt(10));
     connect.query(`SELECT * FROM utilizador WHERE email='${email}'`, (err, rows, fields) => {
@@ -90,6 +91,10 @@ passport.use('local-signup', new LocalStrategy({
                             }, {
                                 property: 'email',
                                 value: email
+                            }, {
+                                property: "no_mecanografico",
+                                value: numero_mecanografico
+                                    
                             }, {
                                 property: 'bilhetes_disponiveis_barquense',
                                 value: 0
