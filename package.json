@@ -47,5 +47,9 @@
     "save": "^2.4.0",
     "stripe": "^8.38.0",
     "uuid": "^7.0.2"
+  },
+  "devDependencies": {
+    "jest": "^26.0.1",
+    "supertest": "^4.0.2"
   }
 }

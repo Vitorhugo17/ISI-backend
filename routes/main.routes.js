@@ -23,6 +23,8 @@ router.post('/webhook', paymentsController.webhook);
 router.post('/password/recover', mainController.recoverPass);
 router.put('/password/update', mainController.updatePass);
 
+router.get('/download/:company/:document_id', mainController.downloadPDF);
+
 //rotas com login
 router.get('/users', isLoggedIn, mainController.getUsers);
 
@@ -34,8 +36,6 @@ router.get('/products', isLoggedIn, mainController.getProducts);
 
 router.get('/purchases', isLoggedIn, mainController.getPurchases);
 router.get('/recommendation', isLoggedIn, mainController.getRecommendation);
-
-router.get('/download/:company/:document_id', mainController.downloadPDF);
 
 router.get('/profile', isLoggedIn, mainController.getInfoUser);
 router.put('/profile/edit', isLoggedIn, mainController.editUser);
