@@ -31,6 +31,9 @@ router.get('/users', isLoggedIn, mainController.getUsers);
 router.get('/profile', isLoggedIn, mainController.getInfoUser);
 router.put('/profile/edit', isLoggedIn, mainController.editUser);
 
+router.get('/profile', isLoggedIn, mainController.getInfoUser);
+router.put('/profile/edit', isLoggedIn, mainController.editUser);
+
 router.get('/payment/:id/status', isLoggedIn, paymentsController.paymentStatus);
 router.get('/stripe-key', isLoggedIn, paymentsController.getStripeKey);
 router.post('/payment', isLoggedIn, paymentsController.paymentIntent);
@@ -40,9 +43,6 @@ router.get('/products', isLoggedIn, mainController.getProducts);
 router.get('/purchases', isLoggedIn, mainController.getPurchases);
 
 router.get('/recommendation', isLoggedIn, mainController.getRecommendation);
-
-router.get('/profile', isLoggedIn, mainController.getInfoUser);
-router.put('/profile/edit', isLoggedIn, mainController.editUser);
 
 router.get('/tickets/unused', isLoggedIn, mainController.getUnusedTickets);
 router.get('/tickets/used', isLoggedIn, mainController.getUsedTickets);
