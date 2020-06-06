@@ -233,7 +233,7 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
                         'taxes': parseFloat(product.taxes[0].value)
                     });
                 }
-
+                
                 if (productsF.length != 0) {
                     let amount = 0;
                     for (let i = 0; i < productsF.length; i++) {
@@ -296,7 +296,7 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
                         'unitPrice': parseFloat(product.priceListLines[0].priceAmount.amount)
                     });
                 }
-
+                   
                 if (productsF.length != 0) {
                     let amount = 0;
                     for (let i = 0; i < productsF.length; i++) {

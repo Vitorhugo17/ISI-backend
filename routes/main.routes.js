@@ -21,36 +21,33 @@ router.get('/authenticated', (request, response) => {
 router.post('/webhook', paymentsController.webhook);
 
 router.post('/password/recover', mainController.recoverPass);
-router.put('/password/update', mainController.updatePass);
+router.put('/password/update',mainController.updatePass);
 
 router.get('/download/:company/:document_id', mainController.downloadPDF);
 
 //rotas com login
-router.get('/users', isLoggedIn, mainController.getUsers);
+router.get('/users', isLoggedIn, mainController.getUsers);  
 
-router.get('/profile', isLoggedIn, mainController.getInfoUser);
-router.put('/profile/edit', isLoggedIn, mainController.editUser);
+router.get('/profile', isLoggedIn, mainController.getInfoUser);   
+router.put('/profile/edit', isLoggedIn, mainController.editUser); 
 
-router.get('/payment/:id/status', isLoggedIn, paymentsController.paymentStatus);
-router.get('/stripe-key', isLoggedIn, paymentsController.getStripeKey);
-router.post('/payment', isLoggedIn, paymentsController.paymentIntent);
+router.get('/payment/:id/status', isLoggedIn, paymentsController.paymentStatus); 
+router.get('/stripe-key', isLoggedIn, paymentsController.getStripeKey);  
+router.post('/payment', isLoggedIn, paymentsController.paymentIntent);  
 
-router.get('/products', isLoggedIn, mainController.getProducts);
+router.get('/products', isLoggedIn, mainController.getProducts);  
 
-router.get('/purchases', isLoggedIn, mainController.getPurchases);
+router.get('/purchases', isLoggedIn, mainController.getPurchases); 
 
-router.get('/recommendation', isLoggedIn, mainController.getRecommendation);
+router.get('/recommendation', isLoggedIn, mainController.getRecommendation); 
 
-router.get('/profile', isLoggedIn, mainController.getInfoUser);
-router.put('/profile/edit', isLoggedIn, mainController.editUser);
+router.get('/tickets/unused', isLoggedIn, mainController.getUnusedTickets); 
+router.get('/tickets/used', isLoggedIn, mainController.getUsedTickets); 
+router.post('/tickets/share', isLoggedIn, mainController.shareTicket); 
 
-router.get('/tickets/unused', isLoggedIn, mainController.getUnusedTickets);
-router.get('/tickets/used', isLoggedIn, mainController.getUsedTickets);
-router.post('/tickets/share', isLoggedIn, mainController.shareTicket);
-
-router.get('/qrcodes/:qrcode_id', isLoggedIn, mainController.readQrcode);
-router.post('/qrcodes', isLoggedIn, mainController.generateQrcode);
-router.post('/qrcodes/use', isLoggedInCompany, mainController.useQrcode);
+router.get('/qrcodes/:qrcode_id', isLoggedIn, mainController.readQrcode); 
+router.post('/qrcodes', isLoggedIn, mainController.generateQrcode); 
+router.post('/qrcodes/use', isLoggedInCompany, mainController.useQrcode); 
 
 
 module.exports = router;
