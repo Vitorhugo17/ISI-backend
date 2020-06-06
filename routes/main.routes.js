@@ -43,11 +43,11 @@ router.get('/recommendation', isLoggedIn, mainController.getRecommendation);
 
 router.get('/tickets/unused', isLoggedIn, mainController.getUnusedTickets); 
 router.get('/tickets/used', isLoggedIn, mainController.getUsedTickets); 
-router.post('/tickets/share', isLoggedIn, mainController.shareTicket); 
+router.post('/tickets/share', isLoggedIn, mainController.shareTicket);
 
-router.get('/qrcodes/:qrcode_id', isLoggedIn, mainController.readQrcode); 
-router.post('/qrcodes', isLoggedIn, mainController.generateQrcode); 
-router.post('/qrcodes/use', isLoggedInCompany, mainController.useQrcode); 
+router.get('/qrcodes/:qrcode_id', isLoggedIn, mainController.readQrcode);
+router.post('/qrcodes', isLoggedIn, mainController.generateQrcode);
+router.post('/qrcodes/use', isLoggedInCompany, mainController.useQrcode);
 
 
 module.exports = router;
