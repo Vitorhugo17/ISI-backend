@@ -817,7 +817,7 @@ describe('Post Endpoints', () => {
         company: 'Barquense'
       })
       .set("Cookie", [cookie])
-    expect(res.statusCode).toEqual(400)
+    expect(res.statusCode).toEqual(404)
 
     const res1 = await request(app)
     .post('/payment')
@@ -827,7 +827,7 @@ describe('Post Endpoints', () => {
       company: 'Transdev'
     })
     .set("Cookie", [cookie])
-  expect(res1.statusCode).toEqual(400)
+  expect(res1.statusCode).toEqual(404)
 
   const res2 = await request(app)
   .post('/payment')
