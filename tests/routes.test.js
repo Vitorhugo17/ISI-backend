@@ -817,7 +817,7 @@ describe('Post Endpoints', () => {
         company: 'Barquense'
       })
       .set("Cookie", [cookie])
-    expect(res.statusCode).toEqual(404)
+    expect(res.statusCode).toEqual(400)
 
     const res1 = await request(app)
     .post('/payment')
@@ -828,6 +828,26 @@ describe('Post Endpoints', () => {
     })
     .set("Cookie", [cookie])
   expect(res1.statusCode).toEqual(400)
+
+  const res2 = await request(app)
+  .post('/payment')
+  .send({
+    quantity: '2',
+    product_id: '49245902',
+    company: 'Barquense1'
+  })
+  .set("Cookie", [cookie])
+expect(res2.statusCode).toEqual(404)
+
+const res3 = await request(app)
+.post('/payment')
+.send({
+  quantity: '2.3',
+  product_id: '1234354',
+  company: 'Barquense'
+})
+.set("Cookie", [cookie])
+expect(res3.statusCode).toEqual(400)
     })
   })
 
