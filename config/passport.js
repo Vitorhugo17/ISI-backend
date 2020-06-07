@@ -96,6 +96,14 @@ passport.use('local-signup', new LocalStrategy({
             const apelido = request.sanitize('apelido').escape();
             const numero_mecanografico = request.sanitize('numero_mecanografico').escape();
             const nif = request.sanitize('nif').escape();
+            if (nif.length != 9) {
+                return done(null, {
+                    'statusCode': 400,
+                    'body': {
+                        'error': 'NIF not valid'
+                    }
+                })
+            }
             const pass = await bCrypt.hash(password, await bCrypt.genSalt(10));
             connect.query(`SELECT * FROM utilizador WHERE email='${email}'`, (err, rows, fields) => {
                 if (!err) {
