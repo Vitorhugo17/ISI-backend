@@ -764,6 +764,11 @@ function editUser(request, response) {
     let birth_date = request.sanitize('birth_date').escape();
     const contact = request.sanitize('contact').escape();
 
+    if (contact != null && (contact.length != 9 || !contact.match(/^[0-9]+$/))) {
+        return response.status(400).send({
+            "message": "Contact not valid"
+        })
+    }
     const date = new Date(birth_date);
     birth_date = `${(date.getDate() < 10)?'0' + date.getDate(): date.getDate()}/${(date.getMonth() + 1 < 10)?'0' + (date.getMonth() + 1): (date.getMonth() + 1)}/${date.getFullYear()}`;
 
