@@ -616,9 +616,33 @@ describe('Post Endpoints', () => {
       })
     expect(res.statusCode).toEqual(403)
     expect(res.body).toHaveProperty('message')
+
+    const res1 = await request(app)
+      .put('/profile/edit')
+      .send({
+        name: "Filipe",
+        lastname: 'Quintas',
+        birth_date: '23/12/1999',
+        contact: '918470'
+      })
+      .set("Cookie", [cookie])
+    expect(res1.statusCode).toEqual(400)
+    expect(res1.body).toHaveProperty('message')
+
+    const res2 = await request(app)
+      .put('/profile/edit')
+      .send({
+        name: "Filipe",
+        lastname: 'Quintas',
+        birth_date: '23/12/1999',
+        contact: 'asdf12jkl'
+      })
+      .set("Cookie", [cookie])
+    expect(res2.statusCode).toEqual(400)
+    expect(res2.body).toHaveProperty('message')
   })
 })
-
+/*
 
 
 describe('Get Endpoints', () => {
@@ -723,7 +747,17 @@ describe('Post Endpoints', () => {
         password:'DiogoTeste1'
       })
     expect(res.statusCode).toEqual(400)
-    expect(res.body).toHaveProperty('message')
+    expect(res.body.message).toBe("Can't update password")
+
+    const res3 = await request(app)
+      .put('/password/update')
+      .send({
+        type: 'recover',
+        user_id: "1751",
+        password:'DIOGOTESTE1'
+      })
+    expect(res3.statusCode).toEqual(400)
+    expect(res3.body.message).toBe('Password not valid')
 
     const res1 = await request(app)
       .put('/password/update')
@@ -745,7 +779,7 @@ describe('Post Endpoints', () => {
     expect(res2.body).toHaveProperty('message')
   })
 })
-*/
+
 /*
 describe('Post Endpoints', () => {
   it('should create a payment request, show payment status and show stripe key', async () => {
@@ -772,7 +806,7 @@ describe('Post Endpoints', () => {
     
   })
 })
-
+*/
 describe('Post Endpoints', () => {
   it('should not create a payment request', async () => {
     const res = await request(app)
@@ -783,7 +817,7 @@ describe('Post Endpoints', () => {
         company: 'Barquense'
       })
       .set("Cookie", [cookie])
-    expect(res.statusCode).toEqual(400)
+    expect(res.statusCode).toEqual(404)
 
     const res1 = await request(app)
     .post('/payment')
@@ -796,7 +830,7 @@ describe('Post Endpoints', () => {
   expect(res1.statusCode).toEqual(400)
     })
   })
-  */
+
 /*
 describe('Get Endpoints', () => {
   it('should logout from user and company', async () => {
