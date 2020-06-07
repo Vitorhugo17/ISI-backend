@@ -685,21 +685,21 @@ describe('Get Endpoints', () => {
     })
   })
 
-
+*/
 describe('Post Endpoints', () => {
   it('should update the password', async () => {
     const res = await request(app)
       .put('/password/update')
       .send({
         type: 'update',
-        password: "DiogoRTest1",
+        password: "DiogoTeste1",
       })
       .set("Cookie", [cookie])
     expect(res.statusCode).toEqual(200)
     expect(res.body).toHaveProperty('message')
   })
 })
-*/
+
 /*
 describe('Post Endpoints', () => {
   it('should not update the password', async () => {
