@@ -23,6 +23,11 @@ async function paymentStatus(request, response) {
 
 function paymentIntent(request, response) {
     const quantity = request.sanitize('quantity').escape();
+    if (!quantity.match(/^[0-9]+$/)) {
+        return response.status(400).json({
+            "message": "Quantity not valid"
+        });
+    }
     const product_id = request.sanitize('product_id').escape();
     const company = request.sanitize('company').escape();
     const user_id = request.user.user_id;
@@ -320,6 +325,12 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
                 });
             }
         })
+    }
+    else {
+        callback({
+            'statusCode': 404,
+            'body': "Company not found"
+        });        
     }
 }
 
