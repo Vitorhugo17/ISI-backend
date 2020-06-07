@@ -23,7 +23,7 @@ router.post('/webhook', paymentsController.webhook);
 router.post('/password/recover', mainController.recoverPass);
 router.put('/password/update',mainController.updatePass);
 
-router.get('/download/:company/:document_id', mainController.downloadPDF);
+router.get('/download/:company/:document_id', mainController.downloadPDF); /* testar com um document_id e company errado */
 
 //rotas com login
 router.get('/users', isLoggedIn, mainController.getUsers);  
