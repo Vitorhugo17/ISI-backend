@@ -206,23 +206,31 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
                     }
                 }
 
-                if (product.name.toLowerCase().includes('único')) {
-                    if (quantity >= 5) {
-                        if (quantity % 5 != 0) {
+                if (product) {
+                    if (product.name.toLowerCase().includes('único')) {
+                        if (quantity >= 5) {
+                            if (quantity % 5 != 0) {
+                                productsF.push({
+                                    'qty': (quantity % 5),
+                                    'price': parseFloat(product.price),
+                                    'taxes': parseFloat(product.taxes[0].value)
+                                });
+                            }
+                            for (let i = 0; i < products.length; i++) {
+                                if (products[i].name.toLowerCase().includes('pack')) {
+                                    productsF.push({
+                                        'qty': Math.floor(quantity / 5),
+                                        'price': parseFloat(products[i].price),
+                                        'taxes': parseFloat(products[i].taxes[0].value)
+                                    });
+                                }
+                            }
+                        } else {
                             productsF.push({
-                                'qty': (quantity % 5),
+                                'qty': quantity,
                                 'price': parseFloat(product.price),
                                 'taxes': parseFloat(product.taxes[0].value)
                             });
-                        }
-                        for (let i = 0; i < products.length; i++) {
-                            if (products[i].name.toLowerCase().includes('pack')) {
-                                productsF.push({
-                                    'qty': Math.floor(quantity / 5),
-                                    'price': parseFloat(products[i].price),
-                                    'taxes': parseFloat(products[i].taxes[0].value)
-                                });
-                            }
                         }
                     } else {
                         productsF.push({
@@ -231,14 +239,7 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
                             'taxes': parseFloat(product.taxes[0].value)
                         });
                     }
-                } else {
-                    productsF.push({
-                        'qty': quantity,
-                        'price': parseFloat(product.price),
-                        'taxes': parseFloat(product.taxes[0].value)
-                    });
                 }
-                
                 if (productsF.length != 0) {
                     let amount = 0;
                     for (let i = 0; i < productsF.length; i++) {
@@ -273,21 +274,28 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
                         product = products[i];
                     }
                 }
-                if (product.description.toLowerCase().includes('único')) {
-                    if (quantity >= 10) {
-                        if (quantity % 10 != 0) {
-                            productsF.push({
-                                'quantity': (quantity % 10),
-                                'unitPrice': parseFloat(product.priceListLines[0].priceAmount.amount)
-                            });
-                        }
-                        for (let i = 0; i < products.length; i++) {
-                            if (products[i].description.toLowerCase().includes('pack')) {
+                if (product) {
+                    if (product.description.toLowerCase().includes('único')) {
+                        if (quantity >= 10) {
+                            if (quantity % 10 != 0) {
                                 productsF.push({
-                                    'quantity': Math.floor(quantity / 10),
-                                    'unitPrice': parseFloat(products[i].priceListLines[0].priceAmount.amount)
+                                    'quantity': (quantity % 10),
+                                    'unitPrice': parseFloat(product.priceListLines[0].priceAmount.amount)
                                 });
                             }
+                            for (let i = 0; i < products.length; i++) {
+                                if (products[i].description.toLowerCase().includes('pack')) {
+                                    productsF.push({
+                                        'quantity': Math.floor(quantity / 10),
+                                        'unitPrice': parseFloat(products[i].priceListLines[0].priceAmount.amount)
+                                    });
+                                }
+                            }
+                        } else {
+                            productsF.push({
+                                'quantity': quantity,
+                                'unitPrice': parseFloat(product.priceListLines[0].priceAmount.amount)
+                            });
                         }
                     } else {
                         productsF.push({
@@ -295,13 +303,8 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
                             'unitPrice': parseFloat(product.priceListLines[0].priceAmount.amount)
                         });
                     }
-                } else {
-                    productsF.push({
-                        'quantity': quantity,
-                        'unitPrice': parseFloat(product.priceListLines[0].priceAmount.amount)
-                    });
                 }
-                   
+                
                 if (productsF.length != 0) {
                     let amount = 0;
                     for (let i = 0; i < productsF.length; i++) {
@@ -325,12 +328,11 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
                 });
             }
         })
-    }
-    else {
+    } else {
         callback({
             'statusCode': 404,
             'body': "Company not found"
-        });        
+        });
     }
 }
 
