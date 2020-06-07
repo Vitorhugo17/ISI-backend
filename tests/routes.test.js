@@ -6,17 +6,17 @@ jest.setTimeout(20000);
 let cookie = "";
 let cookieempresa = "";
 
-/*
-describe('Register', () => {
+
+describe('Authentication', () => {
   it('should register a user', async () => {
     const res = await request(app)
       .post('/register')
       .send({
-        email: "novaconta@gmail.com",
+        email: "novaconta2@gmail.com",
         nome: 'Nova',
         apelido: 'Conta',
-        numero_mecanografico: 'A00000',
-        nif: '500844321',
+        numero_mecanografico: 'A89676',
+        nif: '502011378',
         password: 'TesteConta0'
       })
     expect(res.statusCode).toEqual(200)
@@ -24,9 +24,9 @@ describe('Register', () => {
 
   })
 })
-*/
-/*
-describe('Register', () => {
+
+
+describe('Authentication', () => {
   it('should not register a user', async () => {
     const res = await request(app)
       .post('/register')
@@ -74,7 +74,7 @@ expect(res2.body).toHaveProperty('message')
     nome: 'Nova',
     apelido: 'Conta',
     numero_mecanografico: 'A99999',
-    nif: '500844321',
+    nif: '501559094',
     password: 'TesteConta0'
   })
 expect(res3.statusCode).toEqual(409)
@@ -83,10 +83,10 @@ expect(res3.body).toHaveProperty('error')
 const res4 = await request(app)
 .post('/register')
 .send({
-  email: "contateste1@gmail.com",
+  email: "diogofilipe.qr@gmail.com",
   nome: 'Nova',
   apelido: 'Conta',
-  numero_mecanografico: 'A00000',
+  numero_mecanografico: 'A99999',
   nif: '500844321',
   password: 'TesteConta0'
 })
@@ -238,8 +238,8 @@ expect(res15.body).toHaveProperty('message')
   })
 })
 
-*/
-describe('Login', () => {
+
+describe('Authentication', () => {
   it('should login in user and company', async () => {
     const res = await request(app)
       .post('/login')
@@ -247,7 +247,9 @@ describe('Login', () => {
         email: "diogofilipe.qr@gmail.com",
         password: 'DiogoTeste1'
       })
-     if(res.statusCode == 200){ cookie = res.headers["set-cookie"][0];}
+    if (res.statusCode == 200) {
+      cookie = res.headers["set-cookie"][0];
+    }
     expect(res.statusCode).toEqual(200)
     expect(res.body).toHaveProperty('user_id')
 
@@ -257,14 +259,16 @@ describe('Login', () => {
         email: "barquense@barquense.com",
         password: '12345'
       })
-      if(res1.statusCode == 200){ cookieempresa = res1.headers["set-cookie"][0];}
+    if (res1.statusCode == 200) {
+      cookieempresa = res1.headers["set-cookie"][0];
+    }
     expect(res1.statusCode).toEqual(200)
     expect(res1.body).toHaveProperty('user_id')
   })
 })
 
-/*
-describe('Login', () => {
+
+describe('Authentication', () => {
   it('should not login', async () => {
     const res = await request(app)
       .post('/login')
@@ -288,7 +292,7 @@ describe('Login', () => {
 })
 
 
-describe('Get Endpoints', () => {
+describe('Authentication', () => {
   it('should show user and company are authenticated', async () => {
     const res = await request(app)
       .get('/authenticated')
@@ -305,9 +309,7 @@ describe('Get Endpoints', () => {
   })
 })
 
-
-
-describe('Get Endpoints', () => {
+describe('Tickets', () => {
   it('should show unused tickets', async () => {
     const res = await request(app)
       .get('/tickets/unused')
@@ -315,7 +317,7 @@ describe('Get Endpoints', () => {
     expect(res.statusCode).toEqual(200);   
   })
 })
-describe('Get Endpoints', () => {
+describe('Tickets', () => {
   it('should not show unused tickets', async () => {
     const res = await request(app)
       .get('/tickets/unused')
@@ -323,7 +325,7 @@ describe('Get Endpoints', () => {
   })
 })
 
-describe('Get Endpoints', () => {
+describe('QR Code', () => {
   it('should create/read/use QR Code', async () => {
     const res = await request(app)
     .post('/qrcodes')
@@ -341,7 +343,7 @@ describe('Get Endpoints', () => {
     const res2 = await request(app)
     .post('/qrcodes/use')
     .send({
-      qrcode_id: '6xmk4N1znnxjjPG49JlqYur2tzZY1BfzIeMqDvPHm7THRQknmy2ET9RkVtdTr8fT132N0wdif0qaBOyx2JYa73ZYhmXz4m11Sysk',
+      qrcode_id: 'SsLJhKu4a4a26pzHXiwiKu2lkPI8JdNK22WgtopuVtaY7sHegW3qXccJRCgEuBiWVzlWKgUmDq91UFw5WicZldgaLfabTDVHJJQx',
        })
        .set("Cookie", [cookieempresa])
       expect(res2.statusCode).toEqual(200);
@@ -349,7 +351,7 @@ describe('Get Endpoints', () => {
   })
 })
 
-describe('Get Endpoints', () => {
+describe('QR Code', () => {
   it('should not create QR Code', async () => {
 
       const res = await request(app)
@@ -370,7 +372,7 @@ describe('Get Endpoints', () => {
   })
 })
 
-describe('Get Endpoints', () => {
+describe('QR Code', () => {
   it('should not read QR Code', async () => {
 
     const res1 = await request(app)
@@ -393,7 +395,7 @@ const res2 = await request(app)
   })
 })
 
-describe('Get Endpoints', () => {
+describe('QR Code', () => {
   it('should not use QR Code', async () => {
 const res = await request(app)
     .post('/qrcodes/use')
@@ -413,7 +415,7 @@ const res = await request(app)
 })
 
 
-describe('Post Endpoints', () => {
+describe('Tickets', () => {
   it('should share a ticket', async () => {
     const res = await request(app)
       .post('/tickets/share')
@@ -429,7 +431,7 @@ describe('Post Endpoints', () => {
 })
 
 
-describe('Post Endpoints', () => {
+describe('Tickets', () => {
   it('should not share a ticket', async () => {
     const res = await request(app)
       .post('/tickets/share')
@@ -478,7 +480,7 @@ describe('Post Endpoints', () => {
 
 
 
-describe('Get Endpoints', () => {
+describe('Tickets', () => {
   it('should show used tickets', async () => {
     const res = await request(app)
       .get('/tickets/used')
@@ -488,7 +490,7 @@ describe('Get Endpoints', () => {
   })
 })
 
-describe('Get Endpoints', () => {
+describe('Tickets', () => {
   it('should not show used tickets', async () => {
     const res = await request(app)
       .get('/tickets/used')
@@ -498,7 +500,7 @@ describe('Get Endpoints', () => {
 })
 
 
-describe('Get Endpoints', () => {
+describe('Products', () => {
   it('should show the products', async () => {
     const res = await request(app)
       .get('/products')
@@ -508,7 +510,7 @@ describe('Get Endpoints', () => {
   })
 })
 
-describe('Get Endpoints', () => {
+describe('Products', () => {
   it('should not show the products', async () => {
     const res = await request(app)
       .get('/products')
@@ -517,7 +519,7 @@ describe('Get Endpoints', () => {
   })
 })
 
-describe('Get Endpoints', () => {
+describe('Purchases', () => {
   it('should show the purchases', async () => {
     const res = await request(app)
       .get('/purchases')
@@ -527,7 +529,7 @@ describe('Get Endpoints', () => {
   })
 })
 
-describe('Get Endpoints', () => {
+describe('Purchases', () => {
   it('should not show the purchases', async () => {
     const res = await request(app)
       .get('/purchases')
@@ -536,7 +538,7 @@ describe('Get Endpoints', () => {
   })
 })
 
-describe('Get Endpoints', () => {
+describe('Purchases', () => {
   it('should show the recommendation', async () => {
     const res = await request(app)
       .get('/recommendation')
@@ -546,7 +548,7 @@ describe('Get Endpoints', () => {
   })
 })
 
-describe('Get Endpoints', () => {
+describe('Purchases', () => {
   it('should not show the recommendation', async () => {
     const res = await request(app)
       .get('/recommendation')
@@ -555,7 +557,7 @@ describe('Get Endpoints', () => {
   })
 })
 
-describe('Get Endpoints', () => {
+describe('Users', () => {
   it('should show the profile', async () => {
     const res = await request(app)
       .get('/profile')
@@ -566,7 +568,7 @@ describe('Get Endpoints', () => {
 })
 
 
-describe('Get Endpoints', () => {
+describe('Users', () => {
   it('should not show the profile', async () => {
     const res = await request(app)
       .get('/profile')
@@ -576,7 +578,7 @@ describe('Get Endpoints', () => {
 })
 
 
-describe('Post Endpoints', () => {
+describe('Users', () => {
   it('should edit profile', async () => {
     const res = await request(app)
       .put('/profile/edit')
@@ -604,7 +606,7 @@ describe('Post Endpoints', () => {
   })
 })
 
-describe('Post Endpoints', () => {
+describe('Users', () => {
   it('should not edit profile', async () => {
     const res = await request(app)
       .put('/profile/edit')
@@ -642,10 +644,10 @@ describe('Post Endpoints', () => {
     expect(res2.body).toHaveProperty('message')
   })
 })
-/*
 
 
-describe('Get Endpoints', () => {
+
+describe('Users', () => {
   it('should show the clients', async () => {
     const res = await request(app)
       .get('/users')
@@ -655,7 +657,7 @@ describe('Get Endpoints', () => {
   })
 })
 
-describe('Get Endpoints', () => {
+describe('Users', () => {
   it('should not show the clients', async () => {
     const res = await request(app)
       .get('/users')
@@ -666,7 +668,7 @@ describe('Get Endpoints', () => {
 
 
 
-describe('Post Endpoints', () => {
+describe('Password', () => {
   it('should send email to recover the password', async () => {
     const res = await request(app)
       .post('/password/recover')
@@ -678,7 +680,7 @@ describe('Post Endpoints', () => {
   })
 })
 
-describe('Post Endpoints', () => {
+describe('Password', () => {
   it('should not send email to recover the password', async () => {
     const res = await request(app)
       .post('/password/recover')
@@ -691,7 +693,7 @@ describe('Post Endpoints', () => {
 })
 
 
-describe('Get Endpoints', () => {
+describe('Purchases', () => {
     it('should download PDF (Trandev)', async () => {
       const res = await request(app)
         .get('/download/Transdev/FR.2020.21')
@@ -699,7 +701,7 @@ describe('Get Endpoints', () => {
     })
   })
 
-  describe('Get Endpoints', () => {
+  describe('Purchases', () => {
     it('should download PDF (Barquense)', async () => {
       const res = await request(app)
         .get('/download/Barquense/319563639')
@@ -708,7 +710,7 @@ describe('Get Endpoints', () => {
     })
   })
 
-  describe('Get Endpoints', () => {
+  describe('Purchases', () => {
     it('should not download PDF', async () => {
       const res = await request(app)
         .get('/download/Transdev/FR.1999.21')
@@ -722,7 +724,7 @@ describe('Get Endpoints', () => {
   })
 
 
-describe('Post Endpoints', () => {
+describe('Password', () => {
   it('should update the password', async () => {
     const res = await request(app)
       .put('/password/update')
@@ -737,7 +739,7 @@ describe('Post Endpoints', () => {
 })
 
 
-describe('Post Endpoints', () => {
+describe('Password', () => {
   it('should not update the password', async () => {
     const res = await request(app)
       .put('/password/update')
@@ -780,8 +782,8 @@ describe('Post Endpoints', () => {
   })
 })
 
-/*
-describe('Post Endpoints', () => {
+
+describe('Payment', () => {
   it('should create a payment request, show payment status and show stripe key', async () => {
     const res = await request(app)
       .post('/payment')
@@ -806,8 +808,8 @@ describe('Post Endpoints', () => {
     
   })
 })
-*/
-describe('Post Endpoints', () => {
+
+describe('Payment', () => {
   it('should not create a payment request', async () => {
     const res = await request(app)
       .post('/payment')
@@ -848,11 +850,48 @@ const res3 = await request(app)
 })
 .set("Cookie", [cookie])
 expect(res3.statusCode).toEqual(400)
+
+const res4 = await request(app)
+.post('/payment')
+.send({
+  quantity: '2',
+  product_id: '49245902',
+  company: 'Barquense'
+})
+expect(res4.statusCode).toEqual(403)
+expect(res4.body).toHaveProperty('message')
     })
   })
 
-/*
-describe('Get Endpoints', () => {
+describe('Payment', () => {
+  it('should not show payment status', async () => {
+    const res = await request(app)
+      .post('/payment')
+      .send({
+        quantity: '2',
+        product_id: '49245902',
+        company: 'Barquense'
+      })
+      .set("Cookie", [cookie])
+    expect(res.statusCode).toEqual(200)
+    expect(res.body).toHaveProperty('paymentIntent')
+
+    const res1 = await request(app)
+    .get(`/payment/${res.body.paymentIntent.id}/status`)
+  expect(res1.statusCode).toEqual(403);
+  })
+})
+
+describe('Payment', () => {
+  it('should not show stripe key', async () => {
+    const res = await request(app)
+      .get('/stripe-key')
+    expect(res.statusCode).toEqual(403);
+
+  })
+})
+
+describe('Authentication', () => {
   it('should logout from user and company', async () => {
     const res = await request(app)
       .get('/logout')
@@ -867,7 +906,8 @@ describe('Get Endpoints', () => {
   })
 })
 
-describe('Get Endpoints', () => {
+
+describe('Authentication', () => {
   it('should show user and company not authenticated', async () => {
     const res = await request(app)
       .get('/authenticated')
@@ -883,4 +923,3 @@ describe('Get Endpoints', () => {
     
   })
 })
-*/
