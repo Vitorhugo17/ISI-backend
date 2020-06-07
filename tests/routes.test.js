@@ -237,15 +237,15 @@ expect(res15.statusCode).toEqual(400)
 expect(res15.body).toHaveProperty('message')
   })
 })
-*/
 
+*/
 describe('Login', () => {
   it('should login in user and company', async () => {
     const res = await request(app)
       .post('/login')
       .send({
         email: "diogofilipe.qr@gmail.com",
-        password: 'diogoteste1'
+        password: 'DiogoTeste1'
       })
      if(res.statusCode == 200){ cookie = res.headers["set-cookie"][0];}
     expect(res.statusCode).toEqual(200)
@@ -584,11 +584,23 @@ describe('Post Endpoints', () => {
         name: "Filipe",
         lastname: 'Quintas',
         birth_date: '23/12/1999',
-        contact: '918470958'
+        contact: null
       })
       .set("Cookie", [cookie])
     expect(res.statusCode).toEqual(200)
     expect(res.body).toHaveProperty('message')
+
+    const res1 = await request(app)
+      .put('/profile/edit')
+      .send({
+        name: "Filipe",
+        lastname: 'Quintas',
+        birth_date: '23/12/1999',
+        contact: '918470958'
+      })
+      .set("Cookie", [cookie])
+    expect(res1.statusCode).toEqual(200)
+    expect(res1.body).toHaveProperty('message')
   })
 })
 
@@ -685,7 +697,7 @@ describe('Get Endpoints', () => {
     })
   })
 
-*/
+
 describe('Post Endpoints', () => {
   it('should update the password', async () => {
     const res = await request(app)
@@ -700,7 +712,7 @@ describe('Post Endpoints', () => {
   })
 })
 
-/*
+
 describe('Post Endpoints', () => {
   it('should not update the password', async () => {
     const res = await request(app)
@@ -708,10 +720,9 @@ describe('Post Endpoints', () => {
       .send({
         type: 'recover',
         user_id: "1751",
-        password:'DiogoRTest1'
+        password:'DiogoTeste1'
       })
-      .set("Cookie", [cookie])
-    expect(res.statusCode).toEqual(200)
+    expect(res.statusCode).toEqual(400)
     expect(res.body).toHaveProperty('message')
 
     const res1 = await request(app)
@@ -728,13 +739,13 @@ describe('Post Endpoints', () => {
       .put('/password/update')
       .send({
         type: 'update',
-        password: "DiogoRTest1",
+        password: "DiogoTeste1",
       })
     expect(res2.statusCode).toEqual(403)
     expect(res2.body).toHaveProperty('message')
   })
 })
-
+*/
 /*
 describe('Post Endpoints', () => {
   it('should create a payment request, show payment status and show stripe key', async () => {
