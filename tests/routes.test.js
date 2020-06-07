@@ -31,7 +31,7 @@ describe('Register', () => {
     const res = await request(app)
       .post('/register')
       .send({
-        email: "contatestegmail.com",
+        email: "contateste1gmail.com",
         nome: 'Conta',
         apelido: 'Teste',
         numero_mecanografico: 'A99999',
@@ -44,7 +44,7 @@ describe('Register', () => {
     const res1 = await request(app)
     .post('/register')
     .send({
-      email: "contateste@gmailcom",
+      email: "contateste1@gmailcom",
       nome: 'Nova',
       apelido: 'Conta',
       numero_mecanografico: 'A99999',
@@ -70,7 +70,7 @@ expect(res2.body).toHaveProperty('message')
   const res3 = await request(app)
   .post('/register')
   .send({
-    email: "contateste@gmail.com",
+    email: "contateste1@gmail.com",
     nome: 'Nova',
     apelido: 'Conta',
     numero_mecanografico: 'A99999',
@@ -83,7 +83,7 @@ expect(res3.body).toHaveProperty('error')
 const res4 = await request(app)
 .post('/register')
 .send({
-  email: "novaconta@gmail.com",
+  email: "contateste1@gmail.com",
   nome: 'Nova',
   apelido: 'Conta',
   numero_mecanografico: 'A00000',
@@ -96,7 +96,7 @@ expect(res4.body).toHaveProperty('error')
 const res5 = await request(app)
 .post('/register')
 .send({
-  email: "@gmail.com",
+  email: "contateste1@gmail.com",
   nome: 'Nova',
   apelido: 'Conta',
   numero_mecanografico: 'A99999',
@@ -109,7 +109,7 @@ expect(res5.body).toHaveProperty('message')
 const res6 = await request(app)
 .post('/register')
 .send({
-  email: "@gmail.com",
+  email: "contateste1@gmail.com",
   nome: 'Nova',
   apelido: 'Conta',
   numero_mecanografico: 'A99999',
@@ -122,7 +122,7 @@ expect(res6.body).toHaveProperty('message')
 const res7 = await request(app)
 .post('/register')
 .send({
-  email: "@gmail.com",
+  email: "contateste1@gmail.com",
   nome: 'Nova',
   apelido: 'Conta',
   numero_mecanografico: 'A99999',
@@ -135,7 +135,7 @@ expect(res7.body).toHaveProperty('message')
 const res8 = await request(app)
 .post('/register')
 .send({
-  email: "@gmail.com",
+  email: "contateste1@gmail.com",
   nome: 'Nova',
   apelido: 'Conta',
   numero_mecanografico: 'A99999',
@@ -148,7 +148,7 @@ expect(res8.body).toHaveProperty('message')
 const res9 = await request(app)
 .post('/register')
 .send({
-  email: "@gmail.com",
+  email: "contateste1@gmail.com",
   nome: 'Nova',
   apelido: 'Conta',
   numero_mecanografico: 'A99999',
@@ -161,7 +161,7 @@ expect(res9.body).toHaveProperty('message')
 const res10 = await request(app)
 .post('/register')
 .send({
-  email: "@gmail.com",
+  email: "contateste1@gmail.com",
   nome: 'Nova',
   apelido: 'Conta',
   numero_mecanografico: 'A99999',
@@ -174,7 +174,7 @@ expect(res10.body).toHaveProperty('message')
 const res11 = await request(app)
 .post('/register')
 .send({
-  email: "@gmail.com",
+  email: "contateste1@gmail.com",
   nome: 'Nova',
   apelido: 'Conta',
   numero_mecanografico: 'A99999',
@@ -187,7 +187,7 @@ expect(res11.body).toHaveProperty('message')
 const res12 = await request(app)
 .post('/register')
 .send({
-  email: "@gmail.com",
+  email: "contateste1@gmail.com",
   nome: 'Nova',
   apelido: 'Conta',
   numero_mecanografico: 'A99999',
@@ -200,7 +200,7 @@ expect(res12.body).toHaveProperty('message')
 const res13 = await request(app)
 .post('/register')
 .send({
-  email: "@gmail.com",
+  email: "contateste1@gmail.com",
   nome: 'Nova',
   apelido: 'Conta',
   numero_mecanografico: 'A99999',
@@ -213,7 +213,7 @@ expect(res13.body).toHaveProperty('message')
 const res14 = await request(app)
 .post('/register')
 .send({
-  email: "@gmail.com",
+  email: "contateste1@gmail.com",
   nome: 'Nova',
   apelido: 'Conta',
   numero_mecanografico: 'A99999',
@@ -226,7 +226,7 @@ expect(res14.body).toHaveProperty('message')
 const res15 = await request(app)
 .post('/register')
 .send({
-  email: "@gmail.com",
+  email: "contateste1@gmail.com",
   nome: 'Nova',
   apelido: 'Conta',
   numero_mecanografico: 'A99999',
@@ -237,17 +237,17 @@ expect(res15.statusCode).toEqual(400)
 expect(res15.body).toHaveProperty('message')
   })
 })
-
 */
+
 describe('Login', () => {
   it('should login in user and company', async () => {
     const res = await request(app)
       .post('/login')
       .send({
         email: "diogofilipe.qr@gmail.com",
-        password: 'DiogoRTest1'
+        password: 'diogoteste1'
       })
-      cookie = res.headers["set-cookie"][0];
+     if(res.statusCode == 200){ cookie = res.headers["set-cookie"][0];}
     expect(res.statusCode).toEqual(200)
     expect(res.body).toHaveProperty('user_id')
 
@@ -257,11 +257,12 @@ describe('Login', () => {
         email: "barquense@barquense.com",
         password: '12345'
       })
-      cookieempresa = res1.headers["set-cookie"][0];
+      if(res1.statusCode == 200){ cookieempresa = res1.headers["set-cookie"][0];}
     expect(res1.statusCode).toEqual(200)
     expect(res1.body).toHaveProperty('user_id')
   })
 })
+
 /*
 describe('Login', () => {
   it('should not login', async () => {
@@ -652,7 +653,7 @@ describe('Post Endpoints', () => {
     expect(res.body).toHaveProperty('message')
   })
 })
-*/
+
 
 describe('Get Endpoints', () => {
     it('should download PDF (Trandev)', async () => {
@@ -679,12 +680,12 @@ describe('Get Endpoints', () => {
 
       const res1 = await request(app)
       .get('/download/Transdev/319563639')
-      expect(res.statusCode).toEqual(400);
+      expect(res1.statusCode).toEqual(400);
       
     })
   })
 
-/*  
+
 describe('Post Endpoints', () => {
   it('should update the password', async () => {
     const res = await request(app)
@@ -693,12 +694,48 @@ describe('Post Endpoints', () => {
         type: 'update',
         password: "DiogoRTest1",
       })
+      .set("Cookie", [cookie])
     expect(res.statusCode).toEqual(200)
     expect(res.body).toHaveProperty('message')
   })
 })
+*/
+/*
+describe('Post Endpoints', () => {
+  it('should not update the password', async () => {
+    const res = await request(app)
+      .put('/password/update')
+      .send({
+        type: 'recover',
+        user_id: "1751",
+        password:'DiogoRTest1'
+      })
+      .set("Cookie", [cookie])
+    expect(res.statusCode).toEqual(200)
+    expect(res.body).toHaveProperty('message')
 
+    const res1 = await request(app)
+      .put('/password/update')
+      .send({
+        type: 'update',
+        password: "diogoteste1",
+      })
+      .set("Cookie", [cookie])
+    expect(res1.statusCode).toEqual(400)
+    expect(res1.body).toHaveProperty('message')
 
+    const res2 = await request(app)
+      .put('/password/update')
+      .send({
+        type: 'update',
+        password: "DiogoRTest1",
+      })
+    expect(res2.statusCode).toEqual(403)
+    expect(res2.body).toHaveProperty('message')
+  })
+})
+
+/*
 describe('Post Endpoints', () => {
   it('should create a payment request, show payment status and show stripe key', async () => {
     const res = await request(app)
@@ -725,7 +762,31 @@ describe('Post Endpoints', () => {
   })
 })
 
+describe('Post Endpoints', () => {
+  it('should not create a payment request', async () => {
+    const res = await request(app)
+      .post('/payment')
+      .send({
+        quantity: '2',
+        product_id: '0000000',
+        company: 'Barquense'
+      })
+      .set("Cookie", [cookie])
+    expect(res.statusCode).toEqual(400)
 
+    const res1 = await request(app)
+    .post('/payment')
+    .send({
+      quantity: '2',
+      product_id: '49245902',
+      company: 'Transdev'
+    })
+    .set("Cookie", [cookie])
+  expect(res1.statusCode).toEqual(400)
+    })
+  })
+  */
+/*
 describe('Get Endpoints', () => {
   it('should logout from user and company', async () => {
     const res = await request(app)
