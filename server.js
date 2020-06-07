@@ -19,6 +19,7 @@ global.urlFront = `https://isicampus.herokuapp.com`
 global.urlPython = `https://isicampus-ml.herokuapp.com`;
 
 global.isLoggedIn = (request, response, next) => {
+  
     if (request.isAuthenticated() && !request.user.isEmpresa) {
         next();
     } else {
@@ -29,6 +30,7 @@ global.isLoggedIn = (request, response, next) => {
 }
 
 global.isLoggedInCompany = (request, response, next) => {
+    
     if (request.isAuthenticated() && request.user.isEmpresa) {
         next();
     } else {
@@ -83,7 +85,7 @@ app.use('/', function (request, response, next) {
     next();
 });
 
-require('./routes/auth.route')(app, passport);
+require('./routes/auth.routes')(app, passport);
 app.use('/', require('./routes/main.routes'));
 
 const server = app.listen(process.env.PORT, function () {
@@ -91,3 +93,5 @@ const server = app.listen(process.env.PORT, function () {
 });
 
 server.timeout = 100000;
+
+module.exports = app;

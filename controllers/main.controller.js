@@ -317,28 +317,60 @@ function getUnusedTickets(request, response) {
 
 async function updatePass(request, response) {
     const type = request.sanitize('type').escape();
-    const password = await bCrypt.hash(request.sanitize('password').escape(), await bCrypt.genSalt(10));
-    if (type == 'recover') {
-        let now = new Date();
-        now = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
-        const link = request.sanitize('user_id').escape();
-        connect.query(`SELECT * FROM link_rec_passe WHERE validade>'${now}' AND link='${link}'`, (err, rows, fields) => {
-            if (!err && rows.length != 0) {
-                let user_id = rows[0].idUtilizador;
-                const update = [password, user_id];
-                connect.query('UPDATE utilizador SET password=? WHERE idUtilizador=?', update, (err, rows, fields) => {
-                    if (!err) {
-                        const post = [user_id, link];
-                        connect.query('DELETE FROM link_rec_passe WHERE idUtilizador=? AND link=?', post, (err, rows, fields) => {
+    const pass = request.sanitize('password').escape();
+    if (pass.length >= 9) {
+        let validator = {
+            maiuscula: 0,
+            minuscula: 0,
+            numero: 0,
+            especial: 0
+        }
+
+        for (let i = 0; i < pass.length; i++) {
+            if ("0123456789".includes(pass.charAt(i))) {
+                validator.numero = 1;
+            } else if ("[`!@#$%^&*()_+-=[]{};':\"\\|,.<>/?~]".includes(pass.charAt(i))) {
+                validator.especial = 1;
+            } else if (pass.charAt(i) === pass.charAt(i).toLowerCase()) {
+                validator.minuscula = 1;
+            } else if (pass.charAt(i) === pass.charAt(i).toUpperCase()) {
+                validator.maiuscula = 1;
+            }
+        }
+
+        if (validator.maiuscula + validator.minuscula + validator.especial + validator.numero < 3) {
+            response.status(400).send({
+                'message': "Password not valid"
+            })
+        } else {
+            const password = await bCrypt.hash(pass, await bCrypt.genSalt(10));
+            if (type == 'recover') {
+                let now = new Date();
+                now = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+                const link = request.sanitize('user_id').escape();
+                connect.query(`SELECT * FROM link_rec_passe WHERE validade>'${now}' AND link='${link}'`, (err, rows, fields) => {
+                    if (!err && rows.length != 0) {
+                        let user_id = rows[0].idUtilizador;
+                        const update = [password, user_id];
+                        connect.query('UPDATE utilizador SET password=? WHERE idUtilizador=?', update, (err, rows, fields) => {
                             if (!err) {
-                                response.status(200).send({
-                                    'message': 'Password updated with success'
+                                const post = [user_id, link];
+                                connect.query('DELETE FROM link_rec_passe WHERE idUtilizador=? AND link=?', post, (err, rows, fields) => {
+                                    if (!err) {
+                                        response.status(200).send({
+                                            'message': 'Password updated with success'
+                                        })
+                                    } else {
+                                        response.status(200).send({
+                                            'message': 'Password updated with success'
+                                        })
+
+                                    }
                                 })
                             } else {
-                                response.status(200).send({
-                                    'message': 'Password updated with success'
+                                response.status(400).send({
+                                    'message': "Can't update password"
                                 })
-
                             }
                         })
                     } else {
@@ -347,28 +379,28 @@ async function updatePass(request, response) {
                         })
                     }
                 })
+            } else if (request.isAuthenticated()) {
+                const update = [password, request.user.user_id];
+                connect.query('UPDATE utilizador SET password=? WHERE idUtilizador=?', update, (err, rows, fields) => {
+                    if (!err) {
+                        response.status(200).send({
+                            'message': 'Password updated with success'
+                        })
+                    } else {
+                        response.status(400).send({
+                            'message': "Can't update password"
+                        })
+                    }
+                })
             } else {
-                response.status(400).send({
-                    'message': "Can't update password"
+                response.status(403).send({
+                    'message': 'Não está autorizado a aceder a este conteudo'
                 })
             }
-        })
-    } else if (request.isAuthenticated()) {
-        const update = [password, request.user.user_id];
-        connect.query('UPDATE utilizador SET password=? WHERE idUtilizador=?', update, (err, rows, fields) => {
-            if (!err) {
-                response.status(200).send({
-                    'message': 'Password updated with success'
-                })
-            } else {
-                response.status(400).send({
-                    'message': "Can't update password"
-                })
-            }
-        })
+        }
     } else {
-        response.status(403).send({
-            'message': 'Não está autorizado a aceder a este conteudo'
+        response.status(400).send({
+            'message': "Password not valid"
         })
     }
 }
@@ -732,6 +764,11 @@ function editUser(request, response) {
     let birth_date = request.sanitize('birth_date').escape();
     const contact = request.sanitize('contact').escape();
 
+    if (contact != null && (contact.length != 9 || !contact.match(/^[0-9]+$/))) {
+        return response.status(400).send({
+            "message": "Contact not valid"
+        })
+    }
     const date = new Date(birth_date);
     birth_date = `${(date.getDate() < 10)?'0' + date.getDate(): date.getDate()}/${(date.getMonth() + 1 < 10)?'0' + (date.getMonth() + 1): (date.getMonth() + 1)}/${date.getFullYear()}`;
 
