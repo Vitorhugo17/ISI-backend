@@ -65,9 +65,7 @@ function paymentIntent(request, response) {
                 });
             }
         } else {
-            return response.status(400).json({
-                error: 'erro'
-            });
+            return response.status(res.statusCode).json(res.body);
         }
     });
 }
@@ -304,7 +302,7 @@ function calculatePaymentAmount(quantity, product_id, company, callback) {
                         });
                     }
                 }
-                
+
                 if (productsF.length != 0) {
                     let amount = 0;
                     for (let i = 0; i < productsF.length; i++) {
