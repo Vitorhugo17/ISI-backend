@@ -283,7 +283,7 @@ describe('Authentication', () => {
       .post('/login')
       .send({
         email: "email.errado@gmail.com",
-        password: 'DiogoRTest1'
+        password: 'DiogoTeste1'
       })
     expect(res2.statusCode).toEqual(400)
     expect(res2.body).toHaveProperty('message')
