@@ -9,6 +9,11 @@ const moloniController = require('./moloni.controller');
 const jasminController = require('./jasmin.controller');
 const qrcodeController = require('./qrcode.controller');
 
+/* 
+Função que permite obter um link para download da fatura (barquense) ou o documento pdf com a fatura (transdev)
+Necessita da companhia e do id da fatura
+Retorna um link para download (barquense) ou o documento pdf (transdev)
+*/
 function downloadPDF(request, response) {
     const company = request.sanitize("company").escape();
     const document_id = request.sanitize("document_id").escape();
@@ -31,6 +36,11 @@ function downloadPDF(request, response) {
     }
 }
 
+/* 
+Função que permite obter uma recomendação de um tipo de bilhete
+Necessita que o utilizador esteja autenticado
+Retorna o id do bilhete recomendado
+*/
 function getRecommendation(request, response) {
     const user_id = request.user.user_id;
 
@@ -61,6 +71,11 @@ function getRecommendation(request, response) {
     })
 }
 
+/* 
+Função que permite obter o histórico de compras realizadas
+Necessita que o utilizador esteja autenticado
+Retorna uma lista com as compras realizadas anteriormente
+*/
 function getPurchases(request, response) {
     const user_id = request.user.user_id;
     hubspotController.getClient(user_id, (res) => {
@@ -110,6 +125,11 @@ function getPurchases(request, response) {
     })
 }
 
+/* 
+Função que permite obter todos os utilizadores registados
+Necessita que o utilizador esteja autenticado
+Retorna uma lista com os utilizadores
+*/
 function getUsers(request, response) {
     const user_id = request.user.user_id;
 
@@ -132,7 +152,11 @@ function getUsers(request, response) {
     })
 }
 
-//Função que devolve o histórico de bilhetes utilizados
+/* 
+Função que permite obter o histórico de bilhetes utilizados
+Necessita que o utilizador esteja autenticado
+Retorna uma lista com os dados dos bilhetes utilizados
+*/
 function getUsedTickets(request, response) {
     const user_id = request.user.user_id;
     connect.query(`SELECT * FROM qrcode WHERE idUtilizador = ${user_id} AND (dataUtilizacaoIda IS NOT NULL OR dataUtilizacaoVolta IS NOT NULL)`, (err, rows) => {
@@ -181,6 +205,11 @@ function getUsedTickets(request, response) {
 
 }
 
+/* 
+Função que permite gerar um QRCode
+Necessita do tipo de bilhete, a companhia à qual pertence e que o utilizador esteja autenticado
+Retorna uma mensagem de sucesso ou insucesso
+*/
 function generateQrcode(request, response) {
     const user_id = request.user.user_id;
     const company = request.sanitize('company').escape();
@@ -252,6 +281,11 @@ function generateQrcode(request, response) {
     }
 }
 
+/* 
+Função que permite ler a imagem de um QRCode
+Necessita do id do QRCode e que o utilizador esteja autenticado
+Retorna uma mensagem de sucesso ou insucesso
+*/
 function readQrcode(request, response) {
     const user_id = request.user.user_id;
     const qrcode_id = request.sanitize('qrcode_id').escape();
@@ -261,6 +295,11 @@ function readQrcode(request, response) {
     })
 }
 
+/* 
+Função que permite registar a utilização de um QRCode
+Necessita da hash que corresponde ao id do utilizador e que a companhia esteja autenticada
+Retorna uma mensagem de sucesso ou insucesso
+*/
 function useQrcode(request, response) {
     const hash = request.sanitize('qrcode_id').escape();
     const company = request.user.nome;
@@ -270,6 +309,11 @@ function useQrcode(request, response) {
     })
 }
 
+/* 
+Função que permite obter os dados pessoais do utilizador
+Necessita que o utilizador esteja autenticado
+Retorna uma lista com os dados do utilizador
+*/
 function getInfoUser(request, response) {
     const user_id = request.user.user_id;
     hubspotController.getClient(user_id, (res) => {
@@ -294,6 +338,11 @@ function getInfoUser(request, response) {
     })
 }
 
+/* 
+Função que permite obter uma com a quantidade de bilhetes não utilizados 
+Necessita que o utilizador esteja autenticado
+Retorna uma lista com as quantidades de bilhetes não utilizados
+*/
 function getUnusedTickets(request, response) {
     const user_id = request.user.user_id;
     hubspotController.getClient(user_id, (res) => {
@@ -315,6 +364,12 @@ function getUnusedTickets(request, response) {
     })
 }
 
+/* 
+Função que permite atualizar a password do utilizador
+Necessita do tipo de alteração (recover se for utilizando o link enviado para o email), da hash (caso seja do tipo recover)
+e necessita que o utilizador esteja autenticado (caso seja uma atualização normal da password)
+Retorna uma mensagem de sucesso ou insucesso
+*/
 async function updatePass(request, response) {
     const type = request.sanitize('type').escape();
     const pass = request.sanitize('password').escape();
@@ -405,6 +460,11 @@ async function updatePass(request, response) {
     }
 }
 
+/* 
+Função que permite enviar um email para o utilizador conseguir recuperar o acesso à sua conta
+Necessita do email do utilizador
+Retorna uma mensagem de sucesso (e envia o respetivo email) ou insucesso
+*/
 function recoverPass(request, response) {
     const email = request.sanitize('email').escape();
     connect.query(`SELECT * FROM utilizador WHERE email='${email}'`, (err, rows, fields) => {
@@ -496,6 +556,12 @@ function recoverPass(request, response) {
 
 }
 
+/* 
+Função que permite partilhar um bilhete com outro utilizador
+Necessita do id do utilizador com quem quer partilhar, o tipo de bilhete e a companhia a quem pertence o bilhete
+e que o utilizador esteja autenticado
+Retorna uma mensagem de sucesso ou insucesso
+*/
 function shareTicket(request, response) {
     const shared_with_id = request.sanitize('shared_with_id').escape();
     const company = request.sanitize('company').escape();
@@ -758,6 +824,11 @@ function shareTicket(request, response) {
     })
 }
 
+/* 
+Função que permite alterar os dados pessoais do utilizador
+Necessita do nome, apelido, data nascimento e contacto do utilizador e que o utilizador esteja autenticado
+Retorna uma mensagem de sucesso ou insucesso
+*/
 function editUser(request, response) {
     const name = request.sanitize('name').escape();
     const lastname = request.sanitize('lastname').escape();
@@ -799,6 +870,11 @@ function editUser(request, response) {
     })
 }
 
+/* 
+Função que permite registar a compra de um bilhete
+Necessita do id de utilizador, id do produto, a quantidade comprada e a companhia a quem o bilhete pertence
+Retorna uma mensagem de sucesso ou insucesso
+*/
 function insertPurchase(user_id, product_id, quantity, company, callback) {
     hubspotController.getClient(user_id, (res) => {
         if (res.user) {
@@ -1052,6 +1128,10 @@ function getProducts(request, response) {
     })
 }
 
+/* 
+Função que permite obter uma lista de produtos (todos com o mesmo formato) da barquense e transdev
+Retorna a lista de produtos
+*/
 function getProductsOrganized(callback) {
     moloniController.getProducts((resMoloni) => {
         jasminController.getProducts((resJasmin) => {
@@ -1105,73 +1185,10 @@ function getProductsOrganized(callback) {
     })
 }
 
-function pay(request, response) {
-    const paymentMethodId = request.sanitize('paymentMethodId').escape();
-    const paymentIntentId = request.sanitize('paymentIntentId').escape();
-    const quantity = request.sanitize('quantity').escape();
-    const product_id = request.sanitize('product_id').escape();
-    const company = request.sanitize('company').escape();
-    const useStripeSdk = request.sanitize('useStripeSdk').escape();
-
-    calculateOrderAmount(parseInt(quantity), product_id, company, async (res) => {
-        if (res.orderAmount) {
-            const orderAmount = res.orderAmount.toFixed(2);
-
-            try {
-                let intent;
-                if (paymentMethodId) {
-                    intent = await stripe.paymentIntents.create({
-                        amount: parseInt(orderAmount * 100),
-                        currency: 'eur',
-                        payment_method: paymentMethodId,
-                        confirmation_method: 'manual',
-                        confirm: true,
-                        use_stripe_sdk: useStripeSdk
-                    });
-                    // After create, if the PaymentIntent's status is succeeded, fulfill the order.
-                } else if (paymentIntentId) {
-                    // Confirm the PaymentIntent to finalize payment after handling a required action
-                    // on the client.
-                    intent = await stripe.paymentIntents.confirm(paymentIntentId);
-                    // After confirm, if the PaymentIntent's status is succeeded, fulfill the order.
-                }
-
-                let status;
-                switch (intent.status) {
-                    case 'requires_action':
-                    case 'requires_source_action':
-                        // Card requires authentication
-                        status = {
-                            requiresAction: true,
-                            clientSecret: intent.client_secret
-                        };
-                    case 'requires_payment_method':
-                    case 'requires_source':
-                        // Card was not properly authenticated, suggest a new payment method
-                        status = {
-                            error: 'Your card was denied, please provide a new payment method'
-                        };
-                    case 'succeeded':
-                        status = {
-                            clientSecret: intent.client_secret
-                        };
-                }
-                if (status.error) {
-                    response.status(400).send(status);
-                } else {
-                    response.status(200).send(status);
-                }
-            } catch (e) {
-                response.status(400).send({
-                    error: e.message
-                });
-            }
-        } else {
-            response.status(res.statusCode).send(res.body);
-        }
-    })
-}
-
+/* 
+Função que permite gerar uma hash para recuperar a password
+Retorna a hash
+*/
 function generateLink() {
     const caracteres = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const length = 25;
@@ -1189,7 +1206,6 @@ module.exports = {
     useQrcode: useQrcode,
     getProducts: getProducts,
     insertPurchase: insertPurchase,
-    pay: pay,
     recoverPass: recoverPass,
     updatePass: updatePass,
     getInfoUser: getInfoUser,

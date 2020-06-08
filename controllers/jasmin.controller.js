@@ -1,6 +1,11 @@
 const querystring = require('querystring');
 const req = require('request');
 
+/* 
+Função que permite obter um link para fazer download de uma fatura
+Necessita do id da fatura
+Retorna a fatura em pdf
+*/
 function getPDFDocument(document_id, callback) {
     const x = document_id.split(".");
     const documentType = x[0];
@@ -39,6 +44,11 @@ function getPDFDocument(document_id, callback) {
     })
 }
 
+/* 
+Função que permite obter o historico de compras de bilhetes da transdev
+Necessita do id do cliente (jasmin)
+Retorna uma lista com as compras de bilhetes efetuadas
+*/
 function getPurchases(customer_id, callback) {
     getToken((res) => {
         if (res.access_token) {
@@ -80,6 +90,11 @@ function getPurchases(customer_id, callback) {
     })
 }
 
+/* 
+Função que permite registar um cliente no jasmin
+Necessita do nome do cliente
+Retorna o id do cliente registado
+*/
 function insertClient(nome, callback) {
     getToken((res) => {
         if (res.access_token) {
@@ -142,7 +157,11 @@ function insertClient(nome, callback) {
     })
 }
 
-
+/* 
+Função que permite registar a compra de um bilhete da transdev
+Necessita do id do cliente (jasmin), nome do cliente, NIF do cliente, id do produto e a quantidade comprada
+Retorna uma mensagem de sucesso ou insucesso
+*/
 function insertPurchase(customer_id, customer_name, customer_nif, product_id, quantity, callback) {
     getInvoiceType((res) => {
         if (res.invoiceType) {
@@ -298,7 +317,10 @@ function insertPurchase(customer_id, customer_name, customer_nif, product_id, qu
     })
 }
 
-
+/* 
+Função que permite obter o tipo de fatura a registar
+Retorna o token de acesso e o tipo de fatura
+*/
 function getInvoiceType(callback) {
     getToken((res) => {
         if (res.access_token) {
@@ -334,6 +356,10 @@ function getInvoiceType(callback) {
     })
 }
 
+/* 
+Função que permite obter a lista de todos os produtos da transdev
+Retorna a lista de produtos
+*/
 function getProducts(callback) {
     getToken((res) => {
         if (res.access_token) {
@@ -367,6 +393,10 @@ function getProducts(callback) {
     })
 }
 
+/* 
+Função que perrmite obter um token de acesso à api do Jasmin
+Retorna o token de acesso
+*/
 function getToken(callback) {
     let json = querystring.stringify({
         client_id: process.env.JASMIN_CLIENTID,

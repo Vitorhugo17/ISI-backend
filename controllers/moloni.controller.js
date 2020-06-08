@@ -49,7 +49,7 @@ function getPDFLink(document_id, callback) {
 /* 
 Função que permite registar um cliente no moloni
 Necessita do NIF, nome e email do cliente
-Retorna uma mensagem de sucesso ou insucesso
+Retorna o id do cliente registado
 */
 function insertClient(nif, nome, email, callback) {
     getNextNumber((res) => {

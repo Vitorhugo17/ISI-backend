@@ -90,9 +90,7 @@ Função que permite ao stripe efetivar o pagamento e efetivar a compra se o pag
 async function webhook(request, response) {
     let data;
     let eventType;
-    // Check if webhook signing is configured.
     if (config.stripe.webhookSecret) {
-        // Retrieve the event by verifying the signature using the raw body and secret.
         let event;
         let signature = request.headers['stripe-signature'];
         try {
@@ -107,18 +105,14 @@ async function webhook(request, response) {
                 'error': 'Webhook signature verification failed.'
             });
         }
-        // Extract the object from the event.
         data = event.data;
         eventType = event.type;
     } else {
-        // Webhook signing is recommended, but if the secret is not configured in `config.js`,
-        // retrieve the event data directly from the request body.
         data = request.body.data;
         eventType = request.body.type;
     }
     const object = data.object;
 
-    // Monitor payment_intent.succeeded & payment_intent.payment_failed events.
     if (object.object === 'payment_intent') {
         const paymentIntent = object;
         if (eventType === 'payment_intent.succeeded') {
@@ -165,12 +159,9 @@ async function webhook(request, response) {
                 `🔔  Webhook received! Payment on ${paymentSourceOrMethod.object} ${paymentSourceOrMethod.id} of type ${paymentSourceOrMethod.type} for PaymentIntent ${paymentIntent.id} failed.`
             );
             return response.status(400).send('Payment Failed');
-            // Note: you can use the existing PaymentIntent to prompt your customer to try again by attaching a newly created source:
-            // https://stripe.com/docs/payments/payment-intents/usage#lifecycle
         }
     }
 
-    // Monitor `source.chargeable` events.
     if (
         object.object === 'source' &&
         object.status === 'chargeable' &&
@@ -178,31 +169,26 @@ async function webhook(request, response) {
     ) {
         const source = object;
         console.log(`🔔  Webhook received! The source ${source.id} is chargeable.`);
-        // Find the corresponding PaymentIntent this source is for by looking in its metadata.
         const paymentIntent = await stripe.paymentIntents.retrieve(
             source.metadata.paymentIntent
         );
-        // Check whether this PaymentIntent requires a source.
         if (paymentIntent.status != 'requires_payment_method') {
             return response.status(403).send({
                 'error': 'requires_payment_method'
             });
         }
-        // Confirm the PaymentIntent with the chargeable source.
         await stripe.paymentIntents.confirm(paymentIntent.id, {
             source: source.id
         });
         return response.status(200).send('OK');
     }
 
-    // Monitor `source.failed` and `source.canceled` events.
     if (
         object.object === 'source' && ['failed', 'canceled'].includes(object.status) &&
         object.metadata.paymentIntent
     ) {
         const source = object;
         console.log(`🔔  The source ${source.id} failed or timed out.`);
-        // Cancel the PaymentIntent.
         await stripe.paymentIntents.cancel(source.metadata.paymentIntent);
         return response.status(400).send('Payment Cancel');
     }

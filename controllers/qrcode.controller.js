@@ -268,7 +268,10 @@ function generateQrcode(user_id, company, utilization, callback) {
     })
 }
 
-
+/* 
+Função que permite gerar uma hash para mascarar o id do qrcode
+Retorna a hash
+*/
 function generateHash() {
     const caracteres = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     const length = 100;
