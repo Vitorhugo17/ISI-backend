@@ -1,6 +1,11 @@
 const querystring = require('querystring');
 const req = require('request');
 
+/* 
+Função que permite obter um link para fazer download de uma fatura
+Necessita do id da fatura
+Retorna o link para download
+*/
 function getPDFLink(document_id, callback) {
     getCompany((res) => {
         if (res.company_id) {
@@ -41,6 +46,11 @@ function getPDFLink(document_id, callback) {
     })
 }
 
+/* 
+Função que permite registar um cliente no moloni
+Necessita do NIF, nome e email do cliente
+Retorna uma mensagem de sucesso ou insucesso
+*/
 function insertClient(nif, nome, email, callback) {
     getNextNumber((res) => {
         if (res.company_id) {
@@ -109,6 +119,11 @@ function insertClient(nif, nome, email, callback) {
     })
 }
 
+/* 
+Função que permite obter o historico de compras de bilhetes da barquense
+Necessita do id do cliente (moloni)
+Retorna uma lista com as compras de bilhetes efetuadas
+*/
 function getPurchases(customer_id, callback) {
     getCompany((res) => {
         if (res.company_id) {
@@ -169,6 +184,11 @@ function getPurchases(customer_id, callback) {
     })
 }
 
+/* 
+Função que permite registar a compra de um bilhete da barquense
+Necessita do id de cliente (moloni), id do produto, a quantidade comprada e o estado da compra
+Retorna uma mensagem de sucesso ou insucesso
+*/
 function insertPurchase(customer_id, product_id, quantity, status, callback) {
     getProducts((res) => {
         if (res.products) {
@@ -339,7 +359,10 @@ function insertPurchase(customer_id, product_id, quantity, status, callback) {
     })
 }
 
-
+/* 
+Função que permite obter a lista de todos os produtos da barquense
+Retorna o token de acesso, o id da companhia e a lista de produtos
+*/
 function getProducts(callback) {
     getCategory((res) => {
         if (res.category_id) {
@@ -385,6 +408,10 @@ function getProducts(callback) {
     })
 }
 
+/* 
+Função que permite obter o id da categoria de produtos para obter os produtos
+Retorna o token de acesso, o id da companhia e o id da categoria
+*/
 function getCategory(callback) {
     getCompany((res) => {
         if (res.company_id) {
@@ -432,6 +459,10 @@ function getCategory(callback) {
     })
 }
 
+/* 
+Função que permite obter o id da próxima fatura a ser registada
+Retorna o token de acesso, o id da companhia e o id da proxima fatura
+*/
 function getNextNumber(callback) {
     getCompany((res) => {
         if (res.company_id) {
@@ -468,6 +499,10 @@ function getNextNumber(callback) {
     })
 }
 
+/* 
+Função que permite obter o id da companhia
+Retorna o token e o id da companhia
+*/
 function getCompany(callback) {
     getToken((res) => {
         if (res.access_token) {
@@ -513,6 +548,10 @@ function getCompany(callback) {
     })
 }
 
+/* 
+Função que perrmite obter um token de acesso à api do Moloni
+Retorna o token de acesso
+*/
 function getToken(callback) {
     let options = {
         url: `https://api.moloni.pt/v1/grant/?grant_type=password&client_id=${process.env.MOLONI_CLIENTID}&client_secret=${process.env.MOLONI_SECRET}&username=${process.env.EMAIL_USERNAME}&password=${process.env.MOLONI_PASSWORD}`

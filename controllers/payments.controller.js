@@ -31,7 +31,6 @@ async function paymentStatus(request, response) {
     });
 };
 
-
 /* 
 Função que cria uma "intenção" de pagamento e que armazena os dados da compra numa tabela temporaria
 Necessita da companhia, da quantidade comprada, do id do bilhete e que o utilizador esteja autenticado
