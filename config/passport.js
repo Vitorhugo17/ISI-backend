@@ -4,6 +4,11 @@ const LocalStrategy = require('passport-local').Strategy;
 const bCrypt = require('bcryptjs');
 const hubspotController = require('./../controllers/hubspot.controller');
 
+/* 
+Função que permite autenticar um utilizador 
+Necessita do email e da password
+Retorna os dados do utilizador se tudo correr bem ou uma mensagem de erro caso contrario
+*/
 passport.use('local-signin', new LocalStrategy({
     usernameField: 'email'
 }, (email, password, done) => {
@@ -60,6 +65,11 @@ passport.use('local-signin', new LocalStrategy({
     })
 }))
 
+/* 
+Função que permite registar um utilizador
+Necessita do email, password, nome, apelido, numero mecanigrafico e o nif do utilizador
+Retorna uma mensagem de sucesso ou insucesso
+*/
 passport.use('local-signup', new LocalStrategy({
     usernameField: 'email',
     passReqToCallback: true
@@ -219,10 +229,19 @@ passport.use('local-signup', new LocalStrategy({
     }
 }))
 
+/* 
+Função que permite recuperar o id de um utilizador
+Retorna o id do utilizador
+*/
 passport.serializeUser((user, done) => {
     done(null, user.user_id);
 })
 
+/* 
+Função que atraves do id do utilizador retorna os dados desse utilizador
+Necessita do id do utilizador
+Retorna os dados do utilizador
+*/
 passport.deserializeUser((id, done) => {
     connect.query(`SELECT * FROM utilizador WHERE idUtilizador=${id}`, (err, rows, fields) => {
         if (!err) {
@@ -272,6 +291,9 @@ passport.deserializeUser((id, done) => {
 
 });
 
+/* 
+Função que verifica se a password é válida
+*/
 const isValidPassword = async function (userpass, password) {
     return await bCrypt.compare(password, userpass);
 }

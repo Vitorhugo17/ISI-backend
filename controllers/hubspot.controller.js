@@ -2,7 +2,7 @@ const req = require('request');
 
 /*
 Função que permite ir buscar os dados de todos os clientes
-Retoma: o id, nome e apelido do cliente no hubspot
+Retorna o id, nome e apelido do cliente no hubspot
 */
 function getClients(callback) {
     let options = {
@@ -42,7 +42,7 @@ function getClients(callback) {
 /* 
 Função que permite ir buscar os dados do cliente 
 Necessita do id do cliente (no hubspot)
-Retoma: o id do cliente no hubspot, moloni e jasmin, nome e apelido, email, nº mecanográfico e bilhetes disponíveis
+Retorna o id do cliente no hubspot, moloni e jasmin, nome e apelido, email, nº mecanográfico e bilhetes disponíveis
 */
 
 function getClient(user_id, callback) {

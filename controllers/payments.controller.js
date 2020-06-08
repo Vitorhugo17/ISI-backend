@@ -6,12 +6,22 @@ const moloniController = require('./moloni.controller');
 const jasminController = require('./jasmin.controller');
 const mainController = require('./main.controller');
 
+
+/* 
+Função que permite recolher a publishable key do stripe
+Retorna publishable key do stripe
+*/
 function getStripeKey(request, response) {
     response.status(200).send({
         'publishableKey': process.env.STRIPE_PUBLISHABLE_KEY
     })
 }
 
+/* 
+Função que verifica o estado do pagamento
+Necessita do id do paymentIntent
+Retorna o estado do pagamento
+*/
 async function paymentStatus(request, response) {
     const paymentIntent = await stripe.paymentIntents.retrieve(request.sanitize('id').escape());
     response.status(200).send({
@@ -21,6 +31,12 @@ async function paymentStatus(request, response) {
     });
 };
 
+
+/* 
+Função que cria uma "intenção" de pagamento e que armazena os dados da compra numa tabela temporaria
+Necessita da companhia, da quantidade comprada, do id do bilhete e que o utilizador esteja autenticado
+Retorna o paymentIntent
+*/
 function paymentIntent(request, response) {
     const quantity = request.sanitize('quantity').escape();
     if (!quantity.match(/^[0-9]+$/)) {
@@ -69,6 +85,9 @@ function paymentIntent(request, response) {
     });
 }
 
+/* 
+Função que permite ao stripe efetivar o pagamento e efetivar a compra se o pagamento for bem sucedido
+*/
 async function webhook(request, response) {
     let data;
     let eventType;
@@ -190,6 +209,10 @@ async function webhook(request, response) {
     }
 };
 
+/* 
+Função que permite calcular o valor a pagar
+Necessita da companhia, da quantidade comprada e do id do bilhete
+*/
 function calculatePaymentAmount(quantity, product_id, company, callback) {
     if (company == 'Barquense') {
         moloniController.getProducts((res) => {

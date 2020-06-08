@@ -5,6 +5,10 @@ const fs = require('fs');
 
 const hubspotController = require('./hubspot.controller');
 
+/* 
+Função que regista a utilização de um QRCode 
+Necessita da companhia que valida o bilhete e uma hash de verificação utilizador
+*/
 function useQrcode(hash, company, callback) {
     const post = [new Date(), hash, company];
     connect.query('SELECT * FROM qrcode WHERE dataValidade > ? AND (dataUtilizacaoIda IS NULL OR dataUtilizacaoVolta IS NULL) AND utilizacao > 0 AND hash = ? AND empresa = ?', post, (err, rows) => {
@@ -135,6 +139,11 @@ function useQrcode(hash, company, callback) {
     })
 }
 
+/* 
+Função que permite ler a imagem do QRCode 
+Necessita da id do utilizador e do id do QRCode
+Retorna a imagem do QRCode
+*/
 function readQrcode(user_id, qrcode_id, callback) {
     const post = [new Date(), qrcode_id, user_id];
     connect.query('SELECT * FROM qrcode WHERE dataValidade > ? AND (dataUtilizacaoIda IS NULL OR dataUtilizacaoVolta IS NULL) AND utilizacao > 0 AND idQRCode=? AND idUtilizador = ?', post, (err, rows) => {
@@ -177,6 +186,12 @@ function readQrcode(user_id, qrcode_id, callback) {
     })
 }
 
+/* 
+Função que gera um QRCode 
+Necessita da companhia a que pertence o bilhete, a quantidade de vezes que pode ser utilizado o bilhete e
+o id do utilizador
+Retorna o id do QRCode
+*/
 function generateQrcode(user_id, company, utilization, callback) {
     let creation_date = new Date();
     let validation_date = new Date();
