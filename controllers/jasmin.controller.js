@@ -154,7 +154,7 @@ function insertPurchase(customer_id, customer_name, customer_nif, product_id, qu
 
                     let product;
                     for (let i = 0; i < products.length; i++) {
-                        if (products[i].product_id == product_id) {
+                        if (products[i].itemKey == product_id) {
                             product = products[i];
                             break;
                         }
