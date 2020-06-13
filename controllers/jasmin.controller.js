@@ -193,7 +193,7 @@ function insertPurchase(customer_id, customer_name, customer_nif, product_id, qu
                                 productsF.push({
                                     'salesItem': product.itemKey,
                                     'description': product.description,
-                                    'quantity': (quantity % 10),
+                                    'quantity': quantity,
                                     'unitPrice': product.priceListLines[0].priceAmount,
                                     'unit': product.priceListLines[0].unit,
                                     'itemTaxSchema': product.itemTaxSchema,
@@ -204,13 +204,12 @@ function insertPurchase(customer_id, customer_name, customer_nif, product_id, qu
                             productsF.push({
                                 'salesItem': product.itemKey,
                                 'description': product.description,
-                                'quantity': (quantity % 10),
+                                'quantity': quantity,
                                 'unitPrice': product.priceListLines[0].priceAmount,
                                 'unit': product.priceListLines[0].unit,
                                 'itemTaxSchema': product.itemTaxSchema,
                                 'deliveryDate': new Date().toISOString()
                             });
-                            break;
                         }
                     }
                     if (productsF.length != 0) {
