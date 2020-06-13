@@ -1,11 +1,6 @@
 const querystring = require('querystring');
 const req = require('request');
 
-/* 
-Função que permite obter um link para fazer download de uma fatura
-Necessita do id da fatura
-Retorna o link para download
-*/
 function getPDFLink(document_id, callback) {
     getCompany((res) => {
         if (res.company_id) {
@@ -46,11 +41,6 @@ function getPDFLink(document_id, callback) {
     })
 }
 
-/* 
-Função que permite registar um cliente no moloni
-Necessita do NIF, nome e email do cliente
-Retorna o id do cliente registado
-*/
 function insertClient(nif, nome, email, callback) {
     getNextNumber((res) => {
         if (res.company_id) {
@@ -119,11 +109,6 @@ function insertClient(nif, nome, email, callback) {
     })
 }
 
-/* 
-Função que permite obter o historico de compras de bilhetes da barquense
-Necessita do id do cliente (moloni)
-Retorna uma lista com as compras de bilhetes efetuadas
-*/
 function getPurchases(customer_id, callback) {
     getCompany((res) => {
         if (res.company_id) {
@@ -184,29 +169,51 @@ function getPurchases(customer_id, callback) {
     })
 }
 
-/* 
-Função que permite registar a compra de um bilhete da barquense
-Necessita do id de cliente (moloni), id do produto, a quantidade comprada e o estado da compra
-Retorna uma mensagem de sucesso ou insucesso
-*/
 function insertPurchase(customer_id, product_id, quantity, status, callback) {
     getProducts((res) => {
         if (res.products) {
             const products = res.products;
             const company_id = res.company_id;
             const access_token = res.access_token;
+            
+            let product;
+            for (let i = 0; i < products.length; i++) {
+                if (products[i].product_id == product_id) {
+                    product = products[i];
+                    break;
+                }
+            }
 
             let productsF = [];
-            for (let i = 0; i < products.length; i++) {
-                if (products[i].name.toLowerCase().includes('único')) {
+            if (product) {
+                if (product.name.toLowerCase().includes('único')) {
                     if (quantity >= 5) {
                         if (quantity % 5 != 0) {
-                            if (products[i].product_id == product_id) {
+                            productsF.push({
+                                'product_id': product.product_id,
+                                'name': product.name,
+                                'summary': product.summary,
+                                'qty': (quantity % 5),
+                                'price': product.price,
+                                'discount': 0,
+                                'deduction_id': 0,
+                                'order': 0,
+                                'exemption_reason': '',
+                                'taxes': [{
+                                    'tax_id': product.taxes[0].tax_id,
+                                    'value': product.taxes[0].value,
+                                    'order': product.taxes[0].order,
+                                    'cumulative': product.taxes[0].cumulative
+                                }]
+                            });
+                        }
+                        for (let i = 0; i < products.length; i++) {
+                            if (products[i].name.toLowerCase().includes('pack')) {
                                 productsF.push({
                                     'product_id': products[i].product_id,
                                     'name': products[i].name,
                                     'summary': products[i].summary,
-                                    'qty': (quantity % 5),
+                                    'qty': Math.floor(quantity / 5),
                                     'price': products[i].price,
                                     'discount': 0,
                                     'deduction_id': 0,
@@ -219,70 +226,46 @@ function insertPurchase(customer_id, product_id, quantity, status, callback) {
                                         'cumulative': products[i].taxes[0].cumulative
                                     }]
                                 });
+                                break;
                             }
                         }
-                        if (products[i].name.toLowerCase().includes('pack')) {
-                            productsF.push({
-                                'product_id': products[i].product_id,
-                                'name': products[i].name,
-                                'summary': products[i].summary,
-                                'qty': Math.floor(quantity / 5),
-                                'price': products[i].price,
-                                'discount': 0,
-                                'deduction_id': 0,
-                                'order': 0,
-                                'exemption_reason': '',
-                                'taxes': [{
-                                    'tax_id': products[i].taxes[0].tax_id,
-                                    'value': products[i].taxes[0].value,
-                                    'order': products[i].taxes[0].order,
-                                    'cumulative': products[i].taxes[0].cumulative
-                                }]
-                            });
-                        }
                     } else {
-                        if (products[i].product_id == product_id) {
-                            productsF.push({
-                                'product_id': products[i].product_id,
-                                'name': products[i].name,
-                                'summary': products[i].summary,
-                                'qty': quantity,
-                                'price': products[i].price,
-                                'discount': 0,
-                                'deduction_id': 0,
-                                'order': 0,
-                                'exemption_reason': '',
-                                'taxes': [{
-                                    'tax_id': products[i].taxes[0].tax_id,
-                                    'value': products[i].taxes[0].value,
-                                    'order': products[i].taxes[0].order,
-                                    'cumulative': products[i].taxes[0].cumulative
-                                }]
-                            });
-                            break;
-                        }
-                    }
-                } else {
-                    if (products[i].product_id == product_id) {
                         productsF.push({
-                            'product_id': products[i].product_id,
-                            'name': products[i].name,
-                            'summary': products[i].summary,
-                            'qty': quantity,
-                            'price': products[i].price,
+                            'product_id': product.product_id,
+                            'name': product.name,
+                            'summary': product.summary,
+                            'qty': (quantity % 5),
+                            'price': product.price,
                             'discount': 0,
                             'deduction_id': 0,
                             'order': 0,
                             'exemption_reason': '',
                             'taxes': [{
-                                'tax_id': products[i].taxes[0].tax_id,
-                                'value': products[i].taxes[0].value,
-                                'order': products[i].taxes[0].order,
-                                'cumulative': products[i].taxes[0].cumulative
+                                'tax_id': product.taxes[0].tax_id,
+                                'value': product.taxes[0].value,
+                                'order': product.taxes[0].order,
+                                'cumulative': product.taxes[0].cumulative
                             }]
                         });
-                        break;
                     }
+                } else {
+                    productsF.push({
+                        'product_id': product.product_id,
+                        'name': product.name,
+                        'summary': product.summary,
+                        'qty': (quantity % 5),
+                        'price': product.price,
+                        'discount': 0,
+                        'deduction_id': 0,
+                        'order': 0,
+                        'exemption_reason': '',
+                        'taxes': [{
+                            'tax_id': product.taxes[0].tax_id,
+                            'value': product.taxes[0].value,
+                            'order': product.taxes[0].order,
+                            'cumulative': product.taxes[0].cumulative
+                        }]
+                    });
                 }
             }
             if (productsF.length != 0) {
@@ -359,10 +342,7 @@ function insertPurchase(customer_id, product_id, quantity, status, callback) {
     })
 }
 
-/* 
-Função que permite obter a lista de todos os produtos da barquense
-Retorna o token de acesso, o id da companhia e a lista de produtos
-*/
+
 function getProducts(callback) {
     getCategory((res) => {
         if (res.category_id) {
@@ -408,10 +388,6 @@ function getProducts(callback) {
     })
 }
 
-/* 
-Função que permite obter o id da categoria de produtos para obter os produtos
-Retorna o token de acesso, o id da companhia e o id da categoria
-*/
 function getCategory(callback) {
     getCompany((res) => {
         if (res.company_id) {
@@ -459,10 +435,6 @@ function getCategory(callback) {
     })
 }
 
-/* 
-Função que permite obter o id da próxima fatura a ser registada
-Retorna o token de acesso, o id da companhia e o id da proxima fatura
-*/
 function getNextNumber(callback) {
     getCompany((res) => {
         if (res.company_id) {
@@ -499,10 +471,6 @@ function getNextNumber(callback) {
     })
 }
 
-/* 
-Função que permite obter o id da companhia
-Retorna o token e o id da companhia
-*/
 function getCompany(callback) {
     getToken((res) => {
         if (res.access_token) {
@@ -548,10 +516,6 @@ function getCompany(callback) {
     })
 }
 
-/* 
-Função que perrmite obter um token de acesso à api do Moloni
-Retorna o token de acesso
-*/
 function getToken(callback) {
     let options = {
         url: `https://api.moloni.pt/v1/grant/?grant_type=password&client_id=${process.env.MOLONI_CLIENTID}&client_secret=${process.env.MOLONI_SECRET}&username=${process.env.EMAIL_USERNAME}&password=${process.env.MOLONI_PASSWORD}`
