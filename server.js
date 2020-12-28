@@ -12,7 +12,7 @@ const uuid = require('uuid/v4');
 const RedisStore = require('connect-redis')(session);
 const passport = require('./config/passport');
 
-global.urlBase = `https://isicampus-api.herokuapp.com`;
+global.urlBase = `https://isicampus-api.herokuapp.co`;
 global.jasminUrl = `https://my.jasminsoftware.com/api/233711/233711-0001/`;
 global.urlFront = `https://isicampus.herokuapp.com`
 
